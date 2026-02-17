@@ -1,0 +1,18 @@
+Analyzing clientnest...                                         
+
+   info - The type parameter name 'Type' matches a visible type name - lib\core\usecases\usecase.dart:5:24 - avoid_types_as_parameter_names
+warning - Unused import: '../../../../core/error/failures.dart' - lib\features\tasks\data\datasources\task_local_data_source.dart:3:8 - unused_import
+   info - Field overrides a field inherited from 'Task' - lib\features\tasks\data\models\task_model.dart:9:16 - overridden_fields
+   info - The member 'id' overrides an inherited member but isn't annotated with '@override' - lib\features\tasks\data\models\task_model.dart:9:16 - annotate_overrides
+   info - Field overrides a field inherited from 'Task' - lib\features\tasks\data\models\task_model.dart:11:16 - overridden_fields
+   info - The member 'title' overrides an inherited member but isn't annotated with '@override' - lib\features\tasks\data\models\task_model.dart:11:16 - annotate_overrides
+   info - Field overrides a field inherited from 'Task' - lib\features\tasks\data\models\task_model.dart:13:16 - overridden_fields
+   info - The member 'description' overrides an inherited member but isn't annotated with '@override' - lib\features\tasks\data\models\task_model.dart:13:16 - annotate_overrides
+   info - Field overrides a field inherited from 'Task' - lib\features\tasks\data\models\task_model.dart:15:18 - overridden_fields
+   info - The member 'dueDate' overrides an inherited member but isn't annotated with '@override' - lib\features\tasks\data\models\task_model.dart:15:18 - annotate_overrides
+   info - Field overrides a field inherited from 'Task' - lib\features\tasks\data\models\task_model.dart:17:14 - overridden_fields
+   info - The member 'isCompleted' overrides an inherited member but isn't annotated with '@override' - lib\features\tasks\data\models\task_model.dart:17:14 - annotate_overrides
+   info - The imported package 'bloc' isn't a dependency of the importing package - lib\features\tasks\presentation\bloc\task_bloc.dart:1:8 - depend_on_referenced_packages
+warning - Unused import: 'package:go_router/go_router.dart' - lib\features\tasks\presentation\pages\tasks_page.dart:3:8 - unused_import
+  error - The name 'MyApp' isn't a class - test\widget_test.dart:16:35 - creation_with_non_type
+
