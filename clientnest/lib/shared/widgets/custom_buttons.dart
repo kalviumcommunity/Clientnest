@@ -3,7 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 class CustomButton extends StatelessWidget {
   final String text;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final bool isLoading;
   final bool isOutline;
   final IconData? icon;
@@ -11,7 +11,7 @@ class CustomButton extends StatelessWidget {
   const CustomButton({
     super.key,
     required this.text,
-    required this.onPressed,
+    this.onPressed,
     this.isLoading = false,
     this.isOutline = false,
     this.icon,
@@ -110,13 +110,13 @@ class CustomButton extends StatelessWidget {
 class SocialButton extends StatelessWidget {
   final String text;
   final String iconPath;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   const SocialButton({
     super.key,
     required this.text,
     required this.iconPath,
-    required this.onPressed,
+    this.onPressed,
   });
 
   @override
