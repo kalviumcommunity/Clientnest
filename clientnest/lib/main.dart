@@ -15,7 +15,7 @@ import 'features/auth/screens/landing_page.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/auth/screens/signup_screen.dart';
 import 'screens/home_screen.dart';
-
+import 'screens/main_screen_wrapper.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -44,7 +44,7 @@ final GoRouter _router = GoRouter(
     ),
     GoRoute(
       path: '/home',
-      builder: (context, state) => const HomeScreen(),
+      builder: (context, state) => const MainScreenWrapper(),
     ),
   ],
 );
@@ -91,7 +91,7 @@ class AuthWrapper extends StatelessWidget {
           if (user == null) {
             return const LandingPage();
           }
-          return const HomeScreen();
+          return const MainScreenWrapper();
         }
         
         return const Scaffold(

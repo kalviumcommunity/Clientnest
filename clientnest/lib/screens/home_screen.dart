@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/auth_service.dart';
+import '../services/firestore_service.dart';
 import '../core/theme/theme_provider.dart';
+import '../services/firestore_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -10,8 +14,8 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AuthService authService = AuthService();
+    final firestoreService = FirestoreService();
     final user = authService.currentUser;
-    final isDark = Provider.of<ThemeProvider>(context).isDarkMode;
 
     return Scaffold(
       appBar: AppBar(
@@ -26,26 +30,6 @@ class HomeScreen extends StatelessWidget {
                  : null,
           ),
         ),
-        actions: [
-          // Theme Toggle
-          IconButton(
-            icon: Icon(
-              isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-              color: Theme.of(context).iconTheme.color,
-            ),
-            onPressed: () {
-              Provider.of<ThemeProvider>(context, listen: false).toggleTheme(!isDark);
-            },
-            tooltip: 'Toggle Theme',
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout_rounded),
-            onPressed: () async {
-              await authService.signOut();
-            },
-            tooltip: 'Logout',
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -73,28 +57,56 @@ class HomeScreen extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 clipBehavior: Clip.none,
                 children: [
-                  _SummaryCard(
-                    title: 'Active Tasks',
-                    count: '12',
-                    icon: Icons.assignment_rounded,
-                    color: Colors.blueAccent,
-                    onTap: () => context.push('/tasks'), // Assuming route exists or will be added
+                  StreamBuilder<List<Map<String, dynamic>>>(
+                    stream: firestoreService.getProjectsStream(),
+                    builder: (context, snapshot) {
+                      int activeCount = 0;
+                      if (snapshot.hasData) {
+                        activeCount = snapshot.data!.where((p) => p['status'] != 'completed').length;
+                      }
+                      return _SummaryCard(
+                        title: 'Active Tasks',
+                        count: snapshot.connectionState == ConnectionState.waiting ? '...' : activeCount.toString(),
+                        icon: Icons.assignment_rounded,
+                        color: Colors.blueAccent,
+                        onTap: () => context.push('/tasks'), // Assuming route exists or will be added
+                      );
+                    },
                   ),
                   const SizedBox(width: 16),
-                  _SummaryCard(
-                    title: 'Pending',
-                    count: '\$1,250',
-                    icon: Icons.payments_rounded,
-                    color: Colors.orangeAccent,
-                    onTap: () {},
+                  StreamBuilder<List<Map<String, dynamic>>>(
+                    stream: firestoreService.getPaymentsStream(),
+                    builder: (context, snapshot) {
+                      double pendingAmount = 0;
+                      if (snapshot.hasData) {
+                        for (var p in snapshot.data!) {
+                          if (p['status'] == 'pending') {
+                            pendingAmount += (p['amount'] ?? 0).toDouble();
+                          }
+                        }
+                      }
+                      return _SummaryCard(
+                        title: 'Pending',
+                        count: snapshot.connectionState == ConnectionState.waiting ? '...' : '\$${pendingAmount.toStringAsFixed(0)}',
+                        icon: Icons.payments_rounded,
+                        color: Colors.orangeAccent,
+                        onTap: () {},
+                      );
+                    },
                   ),
                   const SizedBox(width: 16),
-                  _SummaryCard(
-                    title: 'Clients',
-                    count: '8',
-                    icon: Icons.people_rounded,
-                    color: Colors.purpleAccent,
-                    onTap: () {},
+                  StreamBuilder<List<Map<String, dynamic>>>(
+                    stream: firestoreService.getClientsStream(),
+                    builder: (context, snapshot) {
+                      int clientsCount = snapshot.hasData ? snapshot.data!.length : 0;
+                      return _SummaryCard(
+                        title: 'Clients',
+                        count: snapshot.connectionState == ConnectionState.waiting ? '...' : clientsCount.toString(),
+                        icon: Icons.people_rounded,
+                        color: Colors.purpleAccent,
+                        onTap: () {},
+                      );
+                    },
                   ),
                 ],
               ),
@@ -106,26 +118,66 @@ class HomeScreen extends StatelessWidget {
             _SectionHeader(title: 'Upcoming Deadlines', icon: Icons.timer_outlined),
             const SizedBox(height: 16),
             
-            _TaskTile(
-              title: 'Website Redesign',
-              client: 'Acme Corp',
-              date: 'Tomorrow, 5:00 PM',
-              priority: 'High',
-              color: Colors.redAccent,
-            ),
-            _TaskTile(
-              title: 'Mobile App Icon',
-              client: 'StartupX',
-              date: 'Wed, 12 Feb',
-              priority: 'Medium',
-              color: Colors.orange,
-            ),
-            _TaskTile(
-              title: 'Backend API Fixes',
-              client: 'Techy Inc',
-              date: 'Fri, 14 Feb',
-              priority: 'Low',
-              color: Colors.green,
+            StreamBuilder<List<Map<String, dynamic>>>(
+              stream: firestoreService.getProjectsStream(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                   return const Center(child: Text('No upcoming deadlines.'));
+                }
+
+                // Filter for upcoming tasks only
+                final now = DateTime.now();
+                final upcomingTasks = snapshot.data!.where((p) {
+                   if (p['status'] == 'completed') return false;
+                   if (p['deadline'] == null) return false;
+                   return true;
+                }).toList();
+
+                // Sort by nearest deadline
+                upcomingTasks.sort((a, b) {
+                  final dateA = (a['deadline'] as Timestamp).toDate();
+                  final dateB = (b['deadline'] as Timestamp).toDate();
+                  return dateA.compareTo(dateB);
+                });
+
+                if (upcomingTasks.isEmpty) {
+                   return const Center(child: Text('No upcoming deadlines.'));
+                }
+
+                // Show top 3
+                return Column(
+                  children: upcomingTasks.take(3).map((project) {
+                     final deadline = (project['deadline'] as Timestamp).toDate();
+                     final diff = deadline.difference(now).inDays;
+                     
+                     String priority = 'Medium';
+                     Color priorityColor = Colors.orange;
+                     if (diff < 0) {
+                        priority = 'Overdue';
+                        priorityColor = Colors.red;
+                     } else if (diff <= 2) {
+                        priority = 'High';
+                        priorityColor = Colors.redAccent;
+                     } else if (diff > 7) {
+                        priority = 'Low';
+                        priorityColor = Colors.green;
+                     }
+
+                     String formattedDate = '${deadline.day}/${deadline.month}/${deadline.year}';
+
+                     return _TaskTile(
+                        title: project['title'] ?? 'Untitled',
+                        client: project['clientId'] ?? 'Unknown Client',
+                        date: formattedDate,
+                        priority: priority,
+                        color: priorityColor,
+                     );
+                  }).toList(),
+                );
+              },
             ),
 
             const SizedBox(height: 32),
