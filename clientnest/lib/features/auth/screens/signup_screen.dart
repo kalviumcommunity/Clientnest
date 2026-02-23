@@ -32,6 +32,9 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Future<void> _handleSignup() async {
+    // Hide keyboard
+    FocusScope.of(context).unfocus();
+
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
       try {
@@ -41,11 +44,20 @@ class _SignupScreenState extends State<SignupScreen> {
           _passwordController.text.trim(),
           _nameController.text.trim(),
         );
-        if (mounted) context.go('/home');
+        
+        // Navigation is handled by AuthWrapper in main.dart, 
+        // but we can also navigate directly if we want to be sure.
+        if (mounted) {
+          context.go('/home');
+        }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(e.toString()), backgroundColor: Colors.redAccent),
+            SnackBar(
+              content: Text(e.toString()),
+              backgroundColor: Colors.redAccent,
+              behavior: SnackBarBehavior.floating,
+            ),
           );
         }
       } finally {
@@ -65,7 +77,11 @@ class _SignupScreenState extends State<SignupScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString()), backgroundColor: Colors.redAccent),
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     } finally {
@@ -84,9 +100,13 @@ class _SignupScreenState extends State<SignupScreen> {
           onPressed: () => context.pop(),
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
         ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
+          // Prevent keyboard overflow issues
+          physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Form(
             key: _formKey,
@@ -118,6 +138,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   controller: _nameController,
                   validator: (value) {
                     if (value == null || value.isEmpty) return 'Please enter your name';
+                    if (value.length < 2) return 'Name is too short';
                     return null;
                   },
                 ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
@@ -132,7 +153,8 @@ class _SignupScreenState extends State<SignupScreen> {
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.isEmpty) return 'Please enter your email';
-                    if (!value.contains('@')) return 'Please enter a valid email';
+                    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                    if (!emailRegex.hasMatch(value)) return 'Please enter a valid email';
                     return null;
                   },
                 ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1),
@@ -172,7 +194,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 CustomButton(
                   text: 'Sign Up',
                   isLoading: _isLoading,
-                  onPressed: _handleSignup,
+                  onPressed: _isLoading || _isGoogleLoading ? null : () => _handleSignup(),
                 ).animate().fadeIn(delay: 600.ms).scale(),
                 
                 const SizedBox(height: 32),
@@ -199,7 +221,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 SocialButton(
                   text: 'Continue with Google',
                   iconPath: '',
-                  onPressed: _isGoogleLoading ? () {} : _handleGoogleSignIn,
+                  onPressed: _isLoading || _isGoogleLoading ? null : () => _handleGoogleSignIn(),
                 ).animate().fadeIn(delay: 800.ms).slideY(begin: 0.1),
                 
                 const SizedBox(height: 32),
@@ -212,7 +234,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
                     ),
                     TextButton(
-                      onPressed: () => context.pop(),
+                      onPressed: _isLoading ? null : () => context.pop(),
                       child: Text(
                         'Login',
                         style: TextStyle(

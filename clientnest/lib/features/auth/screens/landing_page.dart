@@ -16,6 +16,28 @@ class LandingPage extends StatefulWidget {
 class _LandingPageState extends State<LandingPage> {
   bool _isSigningIn = false;
 
+  Future<void> _handleGoogleSignIn() async {
+    setState(() => _isSigningIn = true);
+    try {
+      final authService = Provider.of<AuthService>(context, listen: false);
+      final user = await authService.signInWithGoogle();
+      if (user != null && mounted) {
+        context.go('/home');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSigningIn = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -118,23 +140,7 @@ class _LandingPageState extends State<LandingPage> {
                       SocialButton(
                         text: 'Continue with Google',
                         iconPath: '', // Handled in widget
-                        onPressed: _isSigningIn ? () {} : () async {
-                          setState(() => _isSigningIn = true);
-                          try {
-                            final user = await authService.signInWithGoogle();
-                            if (user != null && mounted) {
-                              context.go('/home');
-                            }
-                          } catch (e) {
-                            if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(e.toString())),
-                              );
-                            }
-                          } finally {
-                            if (mounted) setState(() => _isSigningIn = false);
-                          }
-                        },
+                        onPressed: _isSigningIn ? null : () => _handleGoogleSignIn(),
                       ),
                       const SizedBox(height: 16),
                       CustomButton(

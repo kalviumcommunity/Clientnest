@@ -31,8 +31,12 @@ final GoRouter _router = GoRouter(
       builder: (context, state) => const SplashScreen(),
     ),
     GoRoute(
-      path: '/landing',
+      path: '/auth-wrapper',
       builder: (context, state) => const AuthWrapper(),
+    ),
+    GoRoute(
+      path: '/landing',
+      builder: (context, state) => const LandingPage(),
     ),
     GoRoute(
       path: '/login',
@@ -80,20 +84,22 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get AuthService from Provider
     final authService = Provider.of<AuthService>(context, listen: false);
 
     return StreamBuilder<User?>(
       stream: authService.authStateChanges,
       builder: (context, snapshot) {
+        // If the snapshot has data, it means the user is logged in
         if (snapshot.connectionState == ConnectionState.active) {
           final User? user = snapshot.data;
+          
           if (user == null) {
             return const LandingPage();
           }
           return const HomeScreen();
         }
         
+        // While checking auth state, show a loading indicator
         return const Scaffold(
           body: Center(
             child: CircularProgressIndicator(),

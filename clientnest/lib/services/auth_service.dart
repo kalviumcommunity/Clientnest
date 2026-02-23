@@ -16,47 +16,42 @@ class AuthService {
   /// Sign in with Google.
   Future<UserCredential?> signInWithGoogle() async {
     try {
-      // Trigger the authentication flow
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       
-      if (googleUser == null) {
-        // The user canceled the sign-in
-        return null;
-      }
+      if (googleUser == null) return null;
 
-      // Obtain the auth details from the request
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
-      // Create a new credential
       final OAuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      // Once signed in, return the UserCredential
       final UserCredential userCredential = await _auth.signInWithCredential(credential);
 
-      // Save user to Firestore
       if (userCredential.user != null) {
         await _firestoreService.saveUser(userCredential.user!);
       }
 
       return userCredential;
+    } on FirebaseAuthException catch (e) {
+      throw _handleFirebaseAuthException(e);
     } catch (e) {
-      throw Exception('Google Sign-In failed: $e');
+      throw 'An unexpected error occurred during Google Sign-In.';
     }
   }
 
   /// Sign in with email and password.
   Future<UserCredential> signInWithEmailAndPassword(String email, String password) async {
     try {
-      final UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+      return await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      throw _handleFirebaseAuthException(e);
     } catch (e) {
-      throw Exception('Login failed: ${e.toString()}');
+      throw 'Login failed. Please check your connection and try again.';
     }
   }
 
@@ -74,8 +69,10 @@ class AuthService {
       }
       
       return userCredential;
+    } on FirebaseAuthException catch (e) {
+      throw _handleFirebaseAuthException(e);
     } catch (e) {
-      throw Exception('Signup failed: ${e.toString()}');
+      throw 'Signup failed. Please try again later.';
     }
   }
 
@@ -83,14 +80,43 @@ class AuthService {
   Future<void> sendPasswordResetEmail(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      throw _handleFirebaseAuthException(e);
     } catch (e) {
-      throw Exception('Password reset failed: ${e.toString()}');
+      throw 'Failed to send password reset email.';
     }
   }
 
   /// Sign out.
   Future<void> signOut() async {
-    await _googleSignIn.signOut();
-    await _auth.signOut();
+    try {
+      await _googleSignIn.signOut();
+      await _auth.signOut();
+    } catch (e) {
+      throw 'Failed to sign out.';
+    }
+  }
+
+  String _handleFirebaseAuthException(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'user-not-found':
+        return 'No user found with this email.';
+      case 'wrong-password':
+        return 'Incorrect password. Please try again.';
+      case 'email-already-in-use':
+        return 'This email is already registered.';
+      case 'invalid-email':
+        return 'The email address is invalid.';
+      case 'weak-password':
+        return 'The password is too weak.';
+      case 'user-disabled':
+        return 'This user account has been disabled.';
+      case 'operation-not-allowed':
+        return 'Email/password sign-in is not enabled.';
+      case 'too-many-requests':
+        return 'Too many login attempts. Please try again later.';
+      default:
+        return e.message ?? 'Authentication failed.';
+    }
   }
 }
