@@ -1,6 +1,5 @@
 import 'package:hive/hive.dart';
 import '../models/task_model.dart';
-import '../../../../core/error/failures.dart';
 
 abstract class TaskLocalDataSource {
   Future<List<TaskModel>> getTasks();

@@ -47,6 +47,47 @@ class AuthService {
     }
   }
 
+  /// Sign in with email and password.
+  Future<UserCredential> signInWithEmailAndPassword(String email, String password) async {
+    try {
+      final UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      return userCredential;
+    } catch (e) {
+      throw Exception('Login failed: ${e.toString()}');
+    }
+  }
+
+  /// Sign up with email and password.
+  Future<UserCredential> signUpWithEmailAndPassword(String email, String password, String name) async {
+    try {
+      final UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      
+      if (userCredential.user != null) {
+        await userCredential.user!.updateDisplayName(name);
+        await _firestoreService.saveUser(userCredential.user!);
+      }
+      
+      return userCredential;
+    } catch (e) {
+      throw Exception('Signup failed: ${e.toString()}');
+    }
+  }
+
+  /// Send password reset email.
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } catch (e) {
+      throw Exception('Password reset failed: ${e.toString()}');
+    }
+  }
+
   /// Sign out.
   Future<void> signOut() async {
     await _googleSignIn.signOut();

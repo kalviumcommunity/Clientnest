@@ -2,13 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+
 import 'core/theme/app_theme.dart';
+import 'core/theme/theme_provider.dart';
 import 'injection_container.dart' as di;
 import 'services/auth_service.dart';
-import 'package:provider/provider.dart';
-import 'core/theme/theme_provider.dart';
-import 'screens/login_screen.dart';
-import 'screens/signup_screen.dart';
+
+// New Screens
+import 'features/auth/screens/splash_screen.dart';
+import 'features/auth/screens/landing_page.dart';
+import 'features/auth/screens/login_screen.dart';
+import 'features/auth/screens/signup_screen.dart';
 import 'screens/home_screen.dart';
 
 void main() async {
@@ -23,11 +28,23 @@ final GoRouter _router = GoRouter(
   routes: [
     GoRoute(
       path: '/',
+      builder: (context, state) => const SplashScreen(),
+    ),
+    GoRoute(
+      path: '/landing',
       builder: (context, state) => const AuthWrapper(),
+    ),
+    GoRoute(
+      path: '/login',
+      builder: (context, state) => const LoginScreen(),
     ),
     GoRoute(
       path: '/signup',
       builder: (context, state) => const SignupScreen(),
+    ),
+    GoRoute(
+      path: '/home',
+      builder: (context, state) => const HomeScreen(),
     ),
   ],
 );
@@ -37,8 +54,11 @@ class ClientNestApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => ThemeProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        Provider(create: (_) => AuthService()),
+      ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
           return MaterialApp.router(
@@ -60,7 +80,8 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AuthService authService = AuthService();
+    // Get AuthService from Provider
+    final authService = Provider.of<AuthService>(context, listen: false);
 
     return StreamBuilder<User?>(
       stream: authService.authStateChanges,
@@ -68,12 +89,11 @@ class AuthWrapper extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.active) {
           final User? user = snapshot.data;
           if (user == null) {
-            return const LoginScreen();
+            return const LandingPage();
           }
           return const HomeScreen();
         }
         
-        // Show loading indicator while waiting for auth state
         return const Scaffold(
           body: Center(
             child: CircularProgressIndicator(),
