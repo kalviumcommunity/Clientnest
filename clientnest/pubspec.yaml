@@ -41,6 +41,11 @@ dependencies:
   lottie: ^3.1.0
   flutter_animate: ^4.5.0
   timeago: ^3.7.1
+  fl_chart: ^0.66.0
+  pdf: ^3.10.8
+  printing: ^5.11.1
+  table_calendar: ^3.0.9
+  flutter_svg: ^2.0.9
 
 dev_dependencies:
   flutter_test:
@@ -51,3 +56,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/logo/

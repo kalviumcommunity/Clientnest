@@ -2,32 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import '../../../services/auth_service.dart';
-import '../../../shared/widgets/custom_buttons.dart';
-import '../../../shared/widgets/custom_text_field.dart';
+import '../../services/auth_service.dart';
+import '../../shared/widgets/custom_buttons.dart';
+import '../../shared/widgets/custom_text_field.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class SignupScreen extends StatefulWidget {
+  const SignupScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
   bool _isGoogleLoading = false;
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  Future<void> _handleLogin() async {
+  Future<void> _handleSignup() async {
     // Hide keyboard
     FocusScope.of(context).unfocus();
 
@@ -35,9 +39,10 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() => _isLoading = true);
       try {
         final authService = Provider.of<AuthService>(context, listen: false);
-        await authService.signInWithEmailAndPassword(
+        await authService.signUpWithEmailAndPassword(
           _emailController.text.trim(),
           _passwordController.text.trim(),
+          _nameController.text.trim(),
         );
         
         // Navigation is handled by AuthWrapper in main.dart, 
@@ -110,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 const SizedBox(height: 20),
                 Text(
-                  'Welcome Back!',
+                  'Create Account',
                   style: theme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: theme.primaryColor,
@@ -118,13 +123,27 @@ class _LoginScreenState extends State<LoginScreen> {
                 ).animate().fadeIn().slideX(begin: -0.1),
                 const SizedBox(height: 8),
                 Text(
-                  'Login to continue your freelance journey.',
+                  'Join ClientNest and master your workflow.',
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: isDark ? Colors.white70 : Colors.black54,
                   ),
                 ).animate().fadeIn(delay: 100.ms).slideX(begin: -0.1),
                 
-                const SizedBox(height: 48),
+                const SizedBox(height: 40),
+                
+                CustomTextField(
+                  label: 'Full Name',
+                  hint: 'enter your name',
+                  icon: Icons.person_outline_rounded,
+                  controller: _nameController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) return 'Please enter your name';
+                    if (value.length < 2) return 'Name is too short';
+                    return null;
+                  },
+                ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
+                
+                const SizedBox(height: 20),
                 
                 CustomTextField(
                   label: 'Email Address',
@@ -138,9 +157,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     if (!emailRegex.hasMatch(value)) return 'Please enter a valid email';
                     return null;
                   },
-                ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
+                ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1),
                 
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
                 
                 CustomTextField(
                   label: 'Password',
@@ -153,28 +172,30 @@ class _LoginScreenState extends State<LoginScreen> {
                     if (value.length < 6) return 'Password must be at least 6 characters';
                     return null;
                   },
-                ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1),
+                ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1),
                 
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: _isLoading ? null : () {
-                      // Handle forgot password
-                    },
-                    child: Text(
-                      'Forgot Password?',
-                      style: TextStyle(color: theme.primaryColor),
-                    ),
-                  ),
-                ).animate().fadeIn(delay: 400.ms),
+                const SizedBox(height: 20),
+                
+                CustomTextField(
+                  label: 'Confirm Password',
+                  hint: 're-enter your password',
+                  icon: Icons.lock_outline_rounded,
+                  isPassword: true,
+                  controller: _confirmPasswordController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) return 'Please confirm your password';
+                    if (value != _passwordController.text) return 'Passwords do not match';
+                    return null;
+                  },
+                ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.1),
                 
                 const SizedBox(height: 32),
                 
                 CustomButton(
-                  text: 'Login',
+                  text: 'Sign Up',
                   isLoading: _isLoading,
-                  onPressed: _isLoading || _isGoogleLoading ? null : () => _handleLogin(),
-                ).animate().fadeIn(delay: 500.ms).scale(),
+                  onPressed: _isLoading || _isGoogleLoading ? null : () => _handleSignup(),
+                ).animate().fadeIn(delay: 600.ms).scale(),
                 
                 const SizedBox(height: 32),
                 
@@ -193,7 +214,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     Expanded(child: Divider(color: Colors.grey.withOpacity(0.2))),
                   ],
-                ).animate().fadeIn(delay: 600.ms),
+                ).animate().fadeIn(delay: 700.ms),
                 
                 const SizedBox(height: 32),
                 
@@ -201,7 +222,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   text: 'Continue with Google',
                   iconPath: '',
                   onPressed: _isLoading || _isGoogleLoading ? null : () => _handleGoogleSignIn(),
-                ).animate().fadeIn(delay: 700.ms).slideY(begin: 0.1),
+                ).animate().fadeIn(delay: 800.ms).slideY(begin: 0.1),
                 
                 const SizedBox(height: 32),
                 
@@ -209,13 +230,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Don't have an account?",
+                      "Already have an account?",
                       style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
                     ),
                     TextButton(
-                      onPressed: _isLoading ? null : () => context.push('/signup'),
+                      onPressed: _isLoading ? null : () => context.pop(),
                       child: Text(
-                        'Sign Up',
+                        'Login',
                         style: TextStyle(
                           color: theme.primaryColor,
                           fontWeight: FontWeight.bold,
@@ -223,7 +244,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ],
-                ).animate().fadeIn(delay: 800.ms),
+                ).animate().fadeIn(delay: 900.ms),
                 
                 const SizedBox(height: 24),
               ],

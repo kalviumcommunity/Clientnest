@@ -6,20 +6,22 @@ import 'package:provider/provider.dart';
 
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
-import 'injection_container.dart' as di;
 import 'services/auth_service.dart';
+import 'providers/client_provider.dart';
+import 'providers/project_provider.dart';
+import 'providers/invoice_provider.dart';
+import 'providers/time_tracker_provider.dart';
 
-// New Screens
-import 'features/auth/screens/splash_screen.dart';
-import 'features/auth/screens/landing_page.dart';
-import 'features/auth/screens/login_screen.dart';
-import 'features/auth/screens/signup_screen.dart';
-import 'screens/home_screen.dart';
+// Features
+import 'features/auth/splash_screen.dart';
+import 'features/auth/landing_page.dart';
+import 'features/auth/login_screen.dart';
+import 'features/auth/signup_screen.dart';
 import 'screens/main_screen_wrapper.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  await di.init();
   runApp(const ClientNestApp());
 }
 
@@ -62,6 +64,10 @@ class ClientNestApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         Provider(create: (_) => AuthService()),
+        ChangeNotifierProvider(create: (_) => ClientProvider()),
+        ChangeNotifierProvider(create: (_) => ProjectProvider()),
+        ChangeNotifierProvider(create: (_) => InvoiceProvider()),
+        ChangeNotifierProvider(create: (_) => TimeTrackerProvider()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
@@ -84,22 +90,60 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('AuthWrapper: Building...');
     final authService = Provider.of<AuthService>(context, listen: false);
 
     return StreamBuilder<User?>(
       stream: authService.authStateChanges,
       builder: (context, snapshot) {
-        // If the snapshot has data, it means the user is logged in
+        debugPrint('AuthWrapper Stream: State=${snapshot.connectionState}, HasData=${snapshot.hasData}, HasError=${snapshot.hasError}');
+        
+        if (snapshot.hasError) {
+          return Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.red, size: 60),
+                  const SizedBox(height: 16),
+                  Text('Authentication Error', style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 8),
+                  Text(snapshot.error.toString(), textAlign: TextAlign.center),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: () => context.go('/auth-wrapper'),
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Verifying session...'),
+                ],
+              ),
+            ),
+          );
+        }
+
         if (snapshot.connectionState == ConnectionState.active) {
           final User? user = snapshot.data;
-          
+          debugPrint('AuthWrapper: User is ${user?.uid ?? "null"}');
           if (user == null) {
             return const LandingPage();
           }
           return const MainScreenWrapper();
         }
         
-        // While checking auth state, show a loading indicator
         return const Scaffold(
           body: Center(
             child: CircularProgressIndicator(),
