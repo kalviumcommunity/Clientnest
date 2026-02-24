@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
+import '../features/dashboard/dashboard_screen.dart';
 import 'projects_screen.dart';
 import 'clients_screen.dart';
 import 'payments_screen.dart';
-import 'settings_screen.dart';
+import 'calendar_screen.dart';
+
+import 'package:provider/provider.dart';
+import '../providers/client_provider.dart';
+import '../providers/project_provider.dart';
+import '../providers/invoice_provider.dart';
+import '../providers/time_tracker_provider.dart';
 
 class MainScreenWrapper extends StatefulWidget {
   const MainScreenWrapper({super.key});
@@ -13,76 +19,115 @@ class MainScreenWrapper extends StatefulWidget {
 }
 
 class _MainScreenWrapperState extends State<MainScreenWrapper> {
-  int _currentIndex = 0;
+  int _currentIndex = 2; // Default to Dashboard (Home)
+  late PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: _currentIndex);
+    
+    // Trigger initial data fetch when main wrapper is built (user is authenticated)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      debugPrint('MainScreenWrapper: Fetching data for all providers...');
+      context.read<ClientProvider>().fetchClients();
+      context.read<ProjectProvider>().fetchProjects();
+      context.read<InvoiceProvider>().fetchInvoices();
+      context.read<TimeTrackerProvider>().init();
+    });
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   final List<Widget> _screens = const [
     ClientsScreen(),
     ProjectsScreen(),
-    HomeScreen(),
+    DashboardScreen(),
     PaymentsScreen(),
-    SettingsScreen(),
+    CalendarScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        physics: const BouncingScrollPhysics(),
         children: _screens,
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
+          color: colorScheme.surface,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 20,
               offset: const Offset(0, -5),
             ),
           ],
         ),
-        child: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          currentIndex: _currentIndex,
-          selectedItemColor: Theme.of(context).primaryColor,
-          unselectedItemColor: Theme.of(context).iconTheme.color?.withOpacity(0.5) ?? Colors.grey,
-          elevation: 0,
-          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal, fontSize: 12),
-          onTap: (index) {
-             setState(() {
-                _currentIndex = index;
-             });
-          },
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.people_outline),
-              activeIcon: Icon(Icons.people),
-              label: 'Clients',
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              backgroundColor: Colors.transparent,
+              currentIndex: _currentIndex,
+              selectedItemColor: colorScheme.primary,
+              unselectedItemColor: colorScheme.onSurface.withOpacity(0.4),
+              elevation: 0,
+              selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+              unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 11),
+              onTap: (index) {
+                _pageController.animateToPage(
+                  index,
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.easeInOutCubicEmphasized,
+                );
+              },
+              items: [
+                _buildNavItem(Icons.people_outlined, Icons.people, 'CRM'),
+                _buildNavItem(Icons.assignment_outlined, Icons.assignment, 'Nests'),
+                _buildNavItem(Icons.grid_view_outlined, Icons.grid_view_rounded, 'Home'),
+                _buildNavItem(Icons.account_balance_wallet_outlined, Icons.account_balance_wallet, 'Finance'),
+                _buildNavItem(Icons.calendar_month_outlined, Icons.calendar_month, 'Planner'),
+              ],
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.assignment_outlined),
-              activeIcon: Icon(Icons.assignment),
-              label: 'Projects',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard_outlined),
-              activeIcon: Icon(Icons.dashboard),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.account_balance_wallet_outlined),
-              activeIcon: Icon(Icons.account_balance_wallet),
-              label: 'Payments',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.settings_outlined),
-              activeIcon: Icon(Icons.settings),
-              label: 'Settings',
-            ),
-          ],
+          ),
         ),
       ),
+    );
+  }
+
+  BottomNavigationBarItem _buildNavItem(IconData icon, IconData activeIcon, String label) {
+    return BottomNavigationBarItem(
+      icon: Padding(
+        padding: const EdgeInsets.only(bottom: 4),
+        child: Icon(icon, size: 24),
+      ),
+      activeIcon: Padding(
+        padding: const EdgeInsets.only(bottom: 4),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(activeIcon, size: 24),
+        ),
+      ),
+      label: label,
     );
   }
 }

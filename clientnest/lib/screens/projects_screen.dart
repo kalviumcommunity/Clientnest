@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../services/firestore_service.dart';
+import 'package:provider/provider.dart';
+import '../providers/project_provider.dart';
+import '../providers/time_tracker_provider.dart';
+import '../models/project_model.dart';
+import 'package:intl/intl.dart';
+import '../shared/widgets/dashboard_widgets.dart';
 
 class ProjectsScreen extends StatefulWidget {
   const ProjectsScreen({super.key});
@@ -11,7 +15,6 @@ class ProjectsScreen extends StatefulWidget {
 
 class _ProjectsScreenState extends State<ProjectsScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final FirestoreService _firestoreService = FirestoreService();
 
   @override
   void initState() {
@@ -21,136 +24,175 @@ class _ProjectsScreenState extends State<ProjectsScreen> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Nests'),
+        title: const Text('Nexus Manager'),
         bottom: TabBar(
           controller: _tabController,
-          labelColor: Theme.of(context).primaryColor,
-          unselectedLabelColor: Colors.grey,
-          indicatorColor: Theme.of(context).primaryColor,
+          indicatorSize: TabBarIndicatorSize.label,
+          labelStyle: const TextStyle(fontWeight: FontWeight.bold),
           tabs: const [
-            Tab(text: 'In Progress'),
-            Tab(text: 'Under Review'),
+            Tab(text: 'Leads'),
+            Tab(text: 'Active'),
             Tab(text: 'Completed'),
           ],
         ),
       ),
-      body: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: _firestoreService.getProjectsStream(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (!snapshot.hasData) {
-            return const Center(child: Text('No projects found.'));
+      body: Consumer<ProjectProvider>(
+        builder: (context, provider, child) {
+          if (provider.error != null) {
+            return ErrorStateWidget(
+              error: provider.error!,
+              onRetry: () => provider.fetchProjects(),
+            );
           }
 
-          final projects = snapshot.data!;
-          final inProgress = projects.where((p) => p['status'] == 'in_progress' || p['status'] == null).toList();
-          final underReview = projects.where((p) => p['status'] == 'under_review').toList();
-          final completed = projects.where((p) => p['status'] == 'completed').toList();
+          if (provider.isLoading && provider.projects.isEmpty) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final leads = provider.projects.where((p) => p.status == ProjectStatus.lead).toList();
+          final active = provider.projects.where((p) => p.status == ProjectStatus.active).toList();
+          final completed = provider.projects.where((p) => p.status == ProjectStatus.completed).toList();
 
           return TabBarView(
             controller: _tabController,
             children: [
-              _buildProjectList(inProgress),
-              _buildProjectList(underReview),
-              _buildProjectList(completed),
+              _ProjectListView(projects: leads, emptyMsg: 'No leads found.', icon: Icons.local_fire_department_rounded),
+              _ProjectListView(projects: active, emptyMsg: 'No active projects.', icon: Icons.rocket_launch_rounded),
+              _ProjectListView(projects: completed, emptyMsg: 'No completed projects yet.', icon: Icons.task_alt_rounded),
             ],
           );
         },
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {}, // Add logic for new project
+        label: const Text('Add Nest'),
+        icon: const Icon(Icons.add),
+      ),
     );
   }
+}
 
-  Widget _buildProjectList(List<Map<String, dynamic>> projects) {
+class _ProjectListView extends StatelessWidget {
+  final List<Project> projects;
+  final String emptyMsg;
+  final IconData icon;
+
+  const _ProjectListView({required this.projects, required this.emptyMsg, required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
     if (projects.isEmpty) {
-      return const Center(child: Text('No projects found.'));
+      return EmptyStateWidget(
+        title: 'Empty Category',
+        message: emptyMsg,
+        icon: icon,
+      );
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       itemCount: projects.length,
-      itemBuilder: (context, index) {
-        final p = projects[index];
-        final double progress = (p['progress'] ?? 0).toDouble();
-        
-        // Deadline badge logic
-        Color badgeColor = Colors.green;
-        String badgeText = "On Track";
-        if (p['deadline'] != null && p['status'] != 'completed') {
-           final deadline = (p['deadline'] as Timestamp).toDate();
-           final now = DateTime.now();
-           final diff = deadline.difference(now).inDays;
-           if (diff < 0) {
-             badgeColor = Colors.red;
-             badgeText = "Overdue";
-           } else if (diff == 0) {
-             badgeColor = Colors.orange;
-             badgeText = "Due Today";
-           } else if (diff <= 3) {
-             badgeColor = Colors.orangeAccent;
-             badgeText = "Due Soon";
-           }
-        }
+      itemBuilder: (context, index) => _ProjectCard(project: projects[index]),
+    );
+  }
+}
 
-        return Card(
-          margin: const EdgeInsets.only(bottom: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+class _ProjectCard extends StatelessWidget {
+  final Project project;
+
+  const _ProjectCard({required this.project});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final deadlineStr = DateFormat('MMM dd, yyyy').format(project.deadline);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.5)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Text(
-                        p['title'] ?? 'Untitled Project',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: badgeColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        badgeText,
-                        style: TextStyle(color: badgeColor, fontSize: 12, fontWeight: FontWeight.bold),
-                      ),
-                    )
+                    Text(project.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                    Text(project.clientName, style: TextStyle(fontSize: 12, color: colorScheme.primary)),
                   ],
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Client: ${p['clientId'] ?? 'Unknown'}',
-                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
+              ),
+              IconButton(
+                onPressed: () => Provider.of<TimeTrackerProvider>(context, listen: false)
+                    .startTracking(project.id, project.title),
+                icon: Icon(Icons.play_circle_fill, color: colorScheme.primary, size: 32),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildProgressStepper(context, project.status),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Icon(Icons.calendar_today_outlined, size: 14, color: colorScheme.onSurface.withOpacity(0.6)),
+              const SizedBox(width: 8),
+              Text(deadlineStr, style: TextStyle(fontSize: 12, color: colorScheme.onSurface.withOpacity(0.6))),
+              const Spacer(),
+              Text('\$${project.budget.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProgressStepper(BuildContext context, ProjectStatus status) {
+    final colorScheme = Theme.of(context).colorScheme;
+    int currentStep = 0;
+    if (status == ProjectStatus.active) currentStep = 1;
+    if (status == ProjectStatus.completed) currentStep = 2;
+
+    return Row(
+      children: List.generate(3, (index) {
+        return Expanded(
+          child: Row(
+            children: [
+              Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: index <= currentStep ? colorScheme.primary : colorScheme.surfaceVariant,
+                  shape: BoxShape.circle,
                 ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Progress', style: TextStyle(fontSize: 12)),
-                    Text('${(progress * 100).toInt()}%', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                  ],
+                child: Icon(
+                  index < currentStep ? Icons.check : Icons.circle,
+                  size: 14,
+                  color: index <= currentStep ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
                 ),
-                const SizedBox(height: 8),
-                LinearProgressIndicator(
-                  value: progress,
-                  backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
-                  color: Theme.of(context).primaryColor,
-                  borderRadius: BorderRadius.circular(8),
-                  minHeight: 8,
+              ),
+              if (index < 2)
+                Expanded(
+                  child: Container(
+                    height: 2,
+                    color: index < currentStep ? colorScheme.primary : colorScheme.surfaceVariant,
+                  ),
                 ),
-              ],
-            ),
+            ],
           ),
         );
-      },
+      }),
     );
   }
 }
