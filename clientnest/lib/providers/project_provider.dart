@@ -49,11 +49,19 @@ class ProjectProvider extends ChangeNotifier {
     await _firestoreService.updateProject(project);
   }
 
+  Future<void> deleteProject(String projectId) async {
+    await _firestoreService.deleteProject(projectId);
+  }
+
   Future<void> addTask(Task task) async {
     await _firestoreService.addTask(task);
   }
 
   Future<void> toggleTask(String taskId, bool isCompleted) async {
     await _firestoreService.toggleTask(taskId, isCompleted);
+  }
+
+  Future<void> deleteTask(String taskId) async {
+    await _firestoreService.deleteTask(taskId);
   }
 }

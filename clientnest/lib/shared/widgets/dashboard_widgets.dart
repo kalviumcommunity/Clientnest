@@ -295,7 +295,11 @@ class ErrorStateWidget extends StatelessWidget {
             const SizedBox(height: 24),
             const Text('Something went wrong', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            Text(error, textAlign: TextAlign.center, style: const TextStyle(color: Colors.grey)),
+            const Text(
+              'Data is being prepared. Please try again shortly.', 
+              textAlign: TextAlign.center, 
+              style: TextStyle(color: Colors.grey)
+            ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: onRetry,

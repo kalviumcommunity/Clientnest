@@ -5,6 +5,8 @@ import '../providers/time_tracker_provider.dart';
 import '../models/project_model.dart';
 import 'package:intl/intl.dart';
 import '../shared/widgets/dashboard_widgets.dart';
+import 'projects/create_project_screen.dart';
+import 'projects/project_detail_screen.dart';
 
 class ProjectsScreen extends StatefulWidget {
   const ProjectsScreen({super.key});
@@ -24,11 +26,9 @@ class _ProjectsScreenState extends State<ProjectsScreen> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Nexus Manager'),
+        title: const Text('Project Nest'),
         bottom: TabBar(
           controller: _tabController,
           indicatorSize: TabBarIndicatorSize.label,
@@ -68,7 +68,11 @@ class _ProjectsScreenState extends State<ProjectsScreen> with SingleTickerProvid
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {}, // Add logic for new project
+        heroTag: 'projects_screen_fab',
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const CreateProjectScreen()),
+        ),
         label: const Text('Add Nest'),
         icon: const Icon(Icons.add),
       ),
@@ -111,49 +115,57 @@ class _ProjectCard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final deadlineStr = DateFormat('MMM dd, yyyy').format(project.deadline);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.5)),
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ProjectDetailScreen(project: project),
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(project.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                    Text(project.clientName, style: TextStyle(fontSize: 12, color: colorScheme.primary)),
-                  ],
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.5)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(project.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                      Text(project.clientName, style: TextStyle(fontSize: 12, color: colorScheme.primary)),
+                    ],
+                  ),
                 ),
-              ),
-              IconButton(
-                onPressed: () => Provider.of<TimeTrackerProvider>(context, listen: false)
-                    .startTracking(project.id, project.title),
-                icon: Icon(Icons.play_circle_fill, color: colorScheme.primary, size: 32),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          _buildProgressStepper(context, project.status),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Icon(Icons.calendar_today_outlined, size: 14, color: colorScheme.onSurface.withOpacity(0.6)),
-              const SizedBox(width: 8),
-              Text(deadlineStr, style: TextStyle(fontSize: 12, color: colorScheme.onSurface.withOpacity(0.6))),
-              const Spacer(),
-              Text('\$${project.budget.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold)),
-            ],
-          ),
-        ],
+                IconButton(
+                  onPressed: () => Provider.of<TimeTrackerProvider>(context, listen: false)
+                      .startTracking(project.id, project.title),
+                  icon: Icon(Icons.play_circle_fill, color: colorScheme.primary, size: 32),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _buildProgressStepper(context, project.status),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Icon(Icons.calendar_today_outlined, size: 14, color: colorScheme.onSurface.withOpacity(0.6)),
+                const SizedBox(width: 8),
+                Text(deadlineStr, style: TextStyle(fontSize: 12, color: colorScheme.onSurface.withOpacity(0.6))),
+                const Spacer(),
+                Text('\$${project.budget.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold)),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
 import '../features/dashboard/dashboard_screen.dart';
 import 'projects_screen.dart';
 import 'clients_screen.dart';
@@ -56,6 +57,7 @@ class _MainScreenWrapperState extends State<MainScreenWrapper> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
+      extendBody: true,
       body: PageView(
         controller: _pageController,
         onPageChanged: (index) {
@@ -66,43 +68,54 @@ class _MainScreenWrapperState extends State<MainScreenWrapper> {
         physics: const BouncingScrollPhysics(),
         children: _screens,
       ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 20,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: BottomNavigationBar(
-              type: BottomNavigationBarType.fixed,
-              backgroundColor: Colors.transparent,
-              currentIndex: _currentIndex,
-              selectedItemColor: colorScheme.primary,
-              unselectedItemColor: colorScheme.onSurface.withOpacity(0.4),
-              elevation: 0,
-              selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
-              unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 11),
-              onTap: (index) {
-                _pageController.animateToPage(
-                  index,
-                  duration: const Duration(milliseconds: 500),
-                  curve: Curves.easeInOutCubicEmphasized,
-                );
-              },
-              items: [
-                _buildNavItem(Icons.people_outlined, Icons.people, 'CRM'),
-                _buildNavItem(Icons.assignment_outlined, Icons.assignment, 'Nests'),
-                _buildNavItem(Icons.grid_view_outlined, Icons.grid_view_rounded, 'Home'),
-                _buildNavItem(Icons.account_balance_wallet_outlined, Icons.account_balance_wallet, 'Finance'),
-                _buildNavItem(Icons.calendar_month_outlined, Icons.calendar_month, 'Planner'),
+      bottomNavigationBar: ClipRRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+          child: Container(
+            decoration: BoxDecoration(
+              color: colorScheme.surface.withOpacity(0.7),
+              border: Border(
+                top: BorderSide(
+                  color: colorScheme.outlineVariant.withOpacity(0.2),
+                  width: 1,
+                ),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 20,
+                  offset: const Offset(0, -5),
+                ),
               ],
+            ),
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: BottomNavigationBar(
+                  type: BottomNavigationBarType.fixed,
+                  backgroundColor: Colors.transparent,
+                  currentIndex: _currentIndex,
+                  selectedItemColor: colorScheme.primary,
+                  unselectedItemColor: colorScheme.onSurface.withOpacity(0.4),
+                  elevation: 0,
+                  selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                  unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 11),
+                  onTap: (index) {
+                    _pageController.animateToPage(
+                      index,
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.easeInOutCubicEmphasized,
+                    );
+                  },
+                  items: [
+                    _buildNavItem(Icons.people_outlined, Icons.people, 'CRM'),
+                    _buildNavItem(Icons.assignment_outlined, Icons.assignment, 'Nests'),
+                    _buildNavItem(Icons.grid_view_outlined, Icons.grid_view_rounded, 'Home'),
+                    _buildNavItem(Icons.account_balance_wallet_outlined, Icons.account_balance_wallet, 'Finance'),
+                    _buildNavItem(Icons.calendar_month_outlined, Icons.calendar_month, 'Planner'),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
