@@ -73,6 +73,19 @@ class FirestoreService {
     await _db.collection('projects').doc(project.id).update(project.toMap());
   }
 
+  Future<void> deleteProject(String projectId) async {
+    // Delete sub-collection tasks first to avoid orphaned documents
+    final tasksSnap = await _db.collection('tasks')
+        .where('projectId', isEqualTo: projectId)
+        .get();
+    final batch = _db.batch();
+    for (final doc in tasksSnap.docs) {
+      batch.delete(doc.reference);
+    }
+    batch.delete(_db.collection('projects').doc(projectId));
+    await batch.commit();
+  }
+
   // --- Tasks ---
   Stream<List<Task>> getTasks(String projectId) {
     return _db.collection('tasks')
@@ -92,6 +105,10 @@ class FirestoreService {
 
   Future<void> toggleTask(String taskId, bool isCompleted) async {
     await _db.collection('tasks').doc(taskId).update({'isCompleted': isCompleted});
+  }
+
+  Future<void> deleteTask(String taskId) async {
+    await _db.collection('tasks').doc(taskId).delete();
   }
 
   // --- Invoices ---

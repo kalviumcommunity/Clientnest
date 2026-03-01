@@ -1,11 +1,7 @@
 <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Professional Geometric House/Nest Shape -->
-  <path d="M50 12L85 40V82C85 85.3 82.3 88 79 88H21C17.7 88 15 85.3 15 82V40L50 12Z" fill="currentColor" fill-opacity="0.1"/>
-  <path d="M50 12L85 40V82C85 85.3 82.3 88 79 88H21C17.7 88 15 85.3 15 82V40L50 12Z" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Professional 'C' arc -->
+  <path d="M 65 25 A 40 40 0 1 0 65 75" stroke="currentColor" stroke-width="10" stroke-linecap="round" />
   
-  <!-- "N" inside for Nest / Growth Lines -->
-  <path d="M35 70V45L50 55L65 45V70" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-  
-  <!-- Subtle roof detail -->
-  <path d="M30 28L50 12L70 28" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Professional 'N' shape -->
+  <path d="M 45 70 V 30 L 75 70 V 30" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

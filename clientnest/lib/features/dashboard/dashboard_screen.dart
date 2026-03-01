@@ -11,6 +11,9 @@ import '../../shared/widgets/time_tracker_widget.dart';
 import '../../shared/widgets/logo_widget.dart';
 import '../../providers/client_provider.dart';
 import '../../models/project_model.dart';
+import '../../screens/projects/create_project_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -123,36 +126,80 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<AuthService>(context).currentUser;
-    final colorScheme = Theme.of(context).colorScheme;
 
-    return Scaffold(
-      body: Stack(
-        children: [
-          CustomScrollView(
-            physics: const BouncingScrollPhysics(),
-            slivers: [
-              _buildAppBar(context, user),
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    _buildWelcomeSection(context, user),
-                    const SizedBox(height: 32),
-                    _buildDashboardContent(context),
-                    const SizedBox(height: 120),
-                  ]),
-                ),
+    if (user == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        }
+
+        if (snapshot.hasError) {
+          return const Scaffold(
+            body: Center(
+              child: Text("Something went wrong. Please try again."),
+            ),
+          );
+        }
+
+        if (snapshot.hasData && !snapshot.data!.exists) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+              'name': user.displayName ?? "",
+              'email': user.email ?? "",
+              'photoURL': user.photoURL ?? "",
+              'role': "freelancer",
+              'joinedAt': FieldValue.serverTimestamp(),
+              'themePreference': "system"
+            }, SetOptions(merge: true)).catchError((e) => debugPrint('Error creating user doc: $e'));
+          });
+        }
+
+        return Scaffold(
+          body: Stack(
+            children: [
+              CustomScrollView(
+                physics: const BouncingScrollPhysics(),
+                slivers: [
+                  _buildAppBar(context, user),
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                    sliver: SliverList(
+                      delegate: SliverChildListDelegate([
+                        _buildWelcomeSection(context, user),
+                        const SizedBox(height: 32),
+                        _buildDashboardContent(context),
+                        const SizedBox(height: 120),
+                      ]),
+                    ),
+                  ),
+                ],
+              ),
+              const Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: FloatingTimeTracker(),
               ),
             ],
           ),
-          const Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: FloatingTimeTracker(),
+          floatingActionButton: FloatingActionButton(
+            heroTag: 'dashboard_create_project_fab',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const CreateProjectScreen()),
+            ),
+            tooltip: 'New Project',
+            child: const Icon(Icons.add_rounded),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -261,6 +308,13 @@ class DashboardScreen extends StatelessWidget {
   }
 
   Widget _buildStatsGrid(BuildContext context, ProjectProvider projectProvider) {
+    final activeCount = projectProvider.projects
+        .where((p) => p.status == ProjectStatus.active)
+        .length;
+    final pendingTasksCount = projectProvider.projects
+        .where((p) => p.status != ProjectStatus.completed)
+        .length; // placeholder: count non-completed projects as proxy for pending work
+
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -272,15 +326,15 @@ class DashboardScreen extends StatelessWidget {
         _buildStatCard(
           context,
           'Active Nests',
-          projectProvider.projects.where((p) => p.status == ProjectStatus.active).length.toString(),
+          activeCount.toString(),
           Icons.rocket_launch_rounded,
           const Color(0xFF6366F1),
         ),
         _buildStatCard(
           context,
-          'Hot Leads',
-          projectProvider.projects.where((p) => p.status == ProjectStatus.lead).length.toString(),
-          Icons.local_fire_department_rounded,
+          'Pending Work',
+          pendingTasksCount.toString(),
+          Icons.pending_actions_rounded,
           const Color(0xFFF59E0B),
         ),
       ],

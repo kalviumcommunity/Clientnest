@@ -14,9 +14,9 @@ class LogoWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SvgPicture.asset(
-      'assets/logo/logo.svg',
-      height: size,
+      'assets/logo.svg',
       width: size,
+      height: size,
       colorFilter: ColorFilter.mode(
         color ?? Theme.of(context).colorScheme.primary,
         BlendMode.srcIn,
