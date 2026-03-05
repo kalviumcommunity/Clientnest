@@ -48,7 +48,11 @@ class FirestoreService {
   }
 
   Future<void> addClient(Client client) async {
-    await _db.collection('clients').add(client.toMap());
+    final uid = currentUserId;
+    if (uid == null) return;
+    final map = client.toMap();
+    map['userId'] = uid;
+    await _db.collection('clients').add(map);
   }
 
   Future<void> updateClient(Client client) async {
@@ -66,7 +70,11 @@ class FirestoreService {
   }
 
   Future<void> addProject(Project project) async {
-    await _db.collection('projects').add(project.toMap());
+    final uid = currentUserId;
+    if (uid == null) return;
+    final map = project.toMap();
+    map['userId'] = uid;
+    await _db.collection('projects').add(map);
   }
 
   Future<void> updateProject(Project project) async {
@@ -96,7 +104,11 @@ class FirestoreService {
   }
 
   Future<void> addTask(Task task) async {
-    await _db.collection('tasks').add(task.toMap());
+    final uid = currentUserId;
+    if (uid == null) return;
+    final map = task.toMap();
+    map['userId'] = uid;
+    await _db.collection('tasks').add(map);
     // Update last activity for project
     await _db.collection('projects').doc(task.projectId).update({
       'lastActivity': FieldValue.serverTimestamp(),
@@ -123,7 +135,11 @@ class FirestoreService {
   }
 
   Future<void> addInvoice(Invoice invoice) async {
-    await _db.collection('invoices').add(invoice.toMap());
+    final uid = currentUserId;
+    if (uid == null) return;
+    final map = invoice.toMap();
+    map['userId'] = uid;
+    await _db.collection('invoices').add(map);
   }
 
   // --- Time Tracker ---

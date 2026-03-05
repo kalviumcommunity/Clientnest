@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../providers/invoice_provider.dart';
 import '../services/pdf_service.dart';
@@ -17,7 +18,7 @@ class PaymentsScreen extends StatelessWidget {
         title: const Text('Financial Suite'),
         actions: [
           IconButton(
-            onPressed: () => _showExpenseScannerPlaceholder(context),
+            onPressed: () => _openExpenseScanner(context),
             icon: Icon(Icons.document_scanner_outlined, color: colorScheme.primary),
           ),
           const SizedBox(width: 8),
@@ -55,33 +56,24 @@ class PaymentsScreen extends StatelessWidget {
     );
   }
 
-  void _showExpenseScannerPlaceholder(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Expense Scanner'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              height: 200,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey[400]!),
-              ),
-              child: const Icon(Icons.camera_alt, size: 48, color: Colors.grey),
-            ),
-            const SizedBox(height: 16),
-            const Text('Camera interface will appear here to scan receipts automatically.'),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
-        ],
-      ),
-    );
+  Future<void> _openExpenseScanner(BuildContext context) async {
+    final ImagePicker picker = ImagePicker();
+    try {
+      final XFile? photo = await picker.pickImage(source: ImageSource.camera);
+      if (photo != null) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Receipt scanned successfully! (Demo)')),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to open camera: $e')),
+        );
+      }
+    }
   }
 }
 
