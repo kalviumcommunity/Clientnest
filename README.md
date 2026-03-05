@@ -14,6 +14,7 @@ Understanding this structure helps developers organize application code, manage 
 
 # ClientNest Project Folder Structure
 
+```
 clientnest/
 │
 ├── lib/
@@ -35,7 +36,7 @@ clientnest/
 ├── build/
 ├── .dart_tool/
 └── .idea/
-
+```
 ---
 
 # Folder Explanation
@@ -46,7 +47,7 @@ The **lib folder is the main source code directory** of the ClientNest applicati
 All Flutter UI, logic, and data models are written in Dart inside this folder.
 
 Example structure used in ClientNest:
-
+```
 lib/
 ├── main.dart
 ├── screens/
@@ -69,7 +70,7 @@ lib/
 ├── booking_service.dart
 ├── auth_service.dart
 └── payment_service.dart
-
+```
 ### main.dart
 
 The **entry point of the ClientNest application**.
@@ -133,7 +134,7 @@ The assets folder stores **static resources used in ClientNest**, such as:
 * Fonts
 
 Example structure:
-
+```
 assets/
 ├── images/
 │   ├── logo.png
@@ -142,7 +143,7 @@ assets/
 │
 └── fonts/
 └── custom_font.ttf
-
+```
 Assets must be declared in **pubspec.yaml** before they can be used.
 
 Example:
@@ -279,3 +280,42 @@ ClientNest follows the standard Flutter project architecture.
 - **pubspec.yaml** – Manages dependencies, assets, and environment configurations.
 
 Detailed documentation about the folder structure can be found in **PROJECT_STRUCTURE.md**.
+```
+MaterialApp
+ ┗ DashboardScreen
+    ┗ Scaffold
+       ┣ AppBar
+       ┗ Body
+          ┗ Center
+             ┗ Column
+                ┣ Text (Active Bookings)
+                ┣ SizedBox
+                ┣ Text (Total Earnings)
+                ┣ SizedBox
+                ┗ ElevatedButton (Add Booking)
+```
+
+### Flutter Reactive UI Model
+
+Flutter follows a reactive UI model. This means the user interface automatically updates when the application state changes.
+
+In this demo app, the booking count and earnings are stored as state variables.
+
+When the **Add Booking button** is pressed, the function `addBooking()` is called which updates the state using `setState()`.
+
+Example:
+
+setState(() {
+  bookings++;
+  earnings += 1500;
+});
+
+## Reflection
+
+- The widget tree helps Flutter organize UI components in a hierarchical structure where each widget manages its child widgets.
+
+- Flutter’s reactive model improves performance because the framework only rebuilds widgets affected by state changes instead of redrawing the entire screen.
+
+- This approach makes Flutter applications faster, easier to maintain, and ideal for building dynamic user interfaces.
+
+Once the state changes, Flutter rebuilds only the affected widgets instead of redrawing the entire screen. This makes Flutter apps highly efficient and fast.
