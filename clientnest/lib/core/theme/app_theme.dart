@@ -4,6 +4,13 @@ import 'package:google_fonts/google_fonts.dart';
 class AppTheme {
   static const Color primarySeed = Color(0xFF6366F1); // Modern Indigo
 
+  /// Gradient used in legacy screens; keep in sync with primarySeed.
+  static const LinearGradient primaryGradient = LinearGradient(
+    colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+  );
+
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(

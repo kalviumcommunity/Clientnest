@@ -178,4 +178,40 @@ class FirestoreService {
       'durationInMinutes': duration,
     });
   }
+
+  // --- User Profile ---
+
+  /// Generic upsert for user document (used after sign-up if extra data is needed).
+  Future<void> addUserData(String uid, Map<String, dynamic> data) async {
+    try {
+      await _db.collection('users').doc(uid).set(data, SetOptions(merge: true));
+    } catch (e) {
+      throw Exception('Failed to write user data: $e');
+    }
+  }
+
+  /// Real-time stream of the current user's Firestore document.
+  Stream<DocumentSnapshot> getUserStream() {
+    final uid = currentUserId;
+    if (uid == null) {
+      return const Stream.empty();
+    }
+    return _db.collection('users').doc(uid).snapshots();
+  }
+
+  /// Update the "open for work" availability flag on the user's Firestore doc.
+  Future<void> updateAvailability(bool isAvailable) async {
+    final uid = currentUserId;
+    if (uid == null) return;
+    try {
+      await _db.collection('users').doc(uid).update({'isAvailable': isAvailable});
+    } catch (e) {
+      throw Exception('Failed to update availability: $e');
+    }
+  }
+
+  // --- Clients (delete) ---
+  Future<void> deleteClient(String clientId) async {
+    await _db.collection('clients').doc(clientId).delete();
+  }
 }

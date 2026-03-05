@@ -42,4 +42,9 @@ class ClientProvider extends ChangeNotifier {
   Future<void> updateClient(Client client) async {
     await _firestoreService.updateClient(client);
   }
+
+  Future<void> deleteClient(String clientId) async {
+    await _firestoreService.deleteClient(clientId);
+  }
 }
+

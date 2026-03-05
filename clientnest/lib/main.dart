@@ -15,8 +15,8 @@ import 'providers/time_tracker_provider.dart';
 // Features
 import 'features/auth/splash_screen.dart';
 import 'features/auth/landing_page.dart';
-import 'features/auth/login_screen.dart';
-import 'features/auth/signup_screen.dart';
+import 'features/auth/login_screen.dart'    as feature_login;
+import 'features/auth/signup_screen.dart'   as feature_signup;
 import 'screens/main_screen_wrapper.dart';
 
 void main() async {
@@ -42,11 +42,11 @@ final GoRouter _router = GoRouter(
     ),
     GoRoute(
       path: '/login',
-      builder: (context, state) => const LoginScreen(),
+      builder: (context, state) => const feature_login.LoginScreen(),
     ),
     GoRoute(
       path: '/signup',
-      builder: (context, state) => const SignupScreen(),
+      builder: (context, state) => const feature_signup.SignupScreen(),
     ),
     GoRoute(
       path: '/home',
