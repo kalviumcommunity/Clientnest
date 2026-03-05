@@ -13,7 +13,6 @@ import '../../providers/client_provider.dart';
 import '../../models/project_model.dart';
 import '../../screens/projects/create_project_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});

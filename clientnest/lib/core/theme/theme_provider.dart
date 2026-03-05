@@ -7,6 +7,9 @@ class ThemeProvider extends ChangeNotifier {
 
   ThemeMode get themeMode => _themeMode;
 
+  /// Convenience getter used by SettingsScreen.
+  bool get isDarkMode => _themeMode == ThemeMode.dark;
+
   ThemeProvider() {
     _loadTheme();
   }
@@ -27,8 +30,14 @@ class ThemeProvider extends ChangeNotifier {
     await prefs.setInt(_themeKey, mode.index);
   }
 
-  void toggleTheme() {
-    if (_themeMode == ThemeMode.light) {
+  /// Accepts an optional bool so both call sites work:
+  ///   - DashboardScreen: toggleTheme()          (no-arg flip)
+  ///   - SettingsScreen:  toggleTheme(boolValue) (explicit set)
+  // ignore: avoid_positional_boolean_parameters
+  void toggleTheme([bool? isDark]) {
+    if (isDark != null) {
+      setThemeMode(isDark ? ThemeMode.dark : ThemeMode.light);
+    } else if (_themeMode == ThemeMode.light) {
       setThemeMode(ThemeMode.dark);
     } else {
       setThemeMode(ThemeMode.light);
