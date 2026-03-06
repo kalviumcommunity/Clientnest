@@ -13,15 +13,32 @@ class TimeTrackerProvider extends ChangeNotifier {
   int get currentDuration => _currentDuration;
 
   void init() {
-    _firestoreService.getActiveTimeLog().listen((log) {
-      _activeLog = log;
-      if (_activeLog != null && _activeLog!.isRunning) {
-        _startLocalTimer();
-      } else {
-        _stopLocalTimer();
-      }
-      notifyListeners();
-    });
+    try {
+      _firestoreService.getActiveTimeLog().listen(
+        (log) {
+          _activeLog = log;
+          if (_activeLog != null && _activeLog!.isRunning) {
+            _startLocalTimer();
+          } else {
+            _stopLocalTimer();
+          }
+          notifyListeners();
+        },
+        onError: (Object e) {
+          debugPrint('TimeTrackerProvider stream error: $e');
+          _activeLog = null;
+          _stopLocalTimer();
+        },
+        onDone: () {
+          debugPrint('TimeTrackerProvider stream closed.');
+        },
+        cancelOnError: false, // keep listening after transient errors
+      );
+    } catch (e) {
+      debugPrint('TimeTrackerProvider stream exception: $e');
+      _activeLog = null;
+      _stopLocalTimer();
+    }
   }
 
   void _startLocalTimer() {

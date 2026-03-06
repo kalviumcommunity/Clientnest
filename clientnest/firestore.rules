@@ -1,53 +1,39 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Helper function
-    function isSignedIn() {
-      return request.auth != null;
+
+    match /timelogs/{docId} {
+      // For read (both single doc and list queries where userId == currentUserId)
+      allow read: if request.auth != null && request.auth.uid == resource.data.userId;
+      // For creating a new log, we check request.resource instead of resource
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      // For update/delete, we check the existing resource
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
     }
 
-    // USER DOCUMENTS
-    // Users can only read and write their own document
-    match /users/{userId} {
-      allow read, write: if isSignedIn() && request.auth.uid == userId;
+    match /clients/{docId} {
+      allow read, write: if request.auth != null;
     }
 
-    // PROJECTS
-    match /projects/{projectId} {
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      allow read, update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
-      
-      // TASKS SUBCOLLECTION
-      // Projects can have tasks, users who own the project can read/write tasks
+    match /projects/{docId} {
+      allow read, write: if request.auth != null;
+
       match /tasks/{taskId} {
-        // Safe read: user must own the parent project
-        allow read, write: if isSignedIn() && get(/databases/$(database)/documents/projects/$(projectId)).data.userId == request.auth.uid;
+        allow read, write: if request.auth != null;
       }
     }
 
-    // TASKS (Flat Collection - if existing)
+    // Flat tasks collection (in case the app uses it directly)
     match /tasks/{taskId} {
-      allow read, write: if isSignedIn() && resource.data.userId == request.auth.uid;
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow read, write: if request.auth != null;
     }
 
-    // CLIENTS
-    match /clients/{clientId} {
-      allow read, write: if isSignedIn() && resource.data.userId == request.auth.uid;
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+    match /invoices/{docId} {
+      allow read, write: if request.auth != null;
     }
-
-    // INVOICES
-    match /invoices/{invoiceId} {
-      allow read, write: if isSignedIn() && resource.data.userId == request.auth.uid;
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-    }
-
-    // TIME LOGS
-    match /timelogs/{timeLogId} {
-      allow read, write: if isSignedIn() && resource.data.userId == request.auth.uid;
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+    
+    match /users/{docId} {
+      allow read, write: if request.auth != null && request.auth.uid == docId;
     }
   }
 }
