@@ -18,21 +18,29 @@ class ClientProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
 
-    _firestoreService.getClients().listen(
-      (clients) {
-        debugPrint('ClientProvider: Received ${clients.length} clients.');
-        _clients = clients;
-        _isLoading = false;
-        _error = null;
-        notifyListeners();
-      },
-      onError: (e) {
-        debugPrint('ClientProvider Error: $e');
-        _isLoading = false;
-        _error = e.toString();
-        notifyListeners();
-      },
-    );
+    try {
+      _firestoreService.getClients().listen(
+        (clients) {
+          debugPrint('ClientProvider: Received ${clients.length} clients.');
+          _clients = clients;
+          _isLoading = false;
+          _error = null;
+          notifyListeners();
+        },
+        onError: (e) {
+          debugPrint('ClientProvider Error: $e');
+          _isLoading = false;
+          _error = e.toString();
+          notifyListeners();
+        },
+        cancelOnError: false, // Prevents stream from silently dying on timeout
+      );
+    } catch (e) {
+      debugPrint('ClientProvider stream exception: $e');
+      _isLoading = false;
+      _error = e.toString();
+      notifyListeners();
+    }
   }
 
   Future<void> addClient(Client client) async {

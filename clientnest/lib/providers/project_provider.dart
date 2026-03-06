@@ -19,21 +19,29 @@ class ProjectProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
 
-    _firestoreService.getProjects().listen(
-      (projects) {
-        debugPrint('ProjectProvider: Received ${projects.length} projects.');
-        _projects = projects;
-        _isLoading = false;
-        _error = null;
-        notifyListeners();
-      },
-      onError: (e) {
-        debugPrint('ProjectProvider Error: $e');
-        _isLoading = false;
-        _error = e.toString();
-        notifyListeners();
-      },
-    );
+    try {
+      _firestoreService.getProjects().listen(
+        (projects) {
+          debugPrint('ProjectProvider: Received ${projects.length} projects.');
+          _projects = projects;
+          _isLoading = false;
+          _error = null;
+          notifyListeners();
+        },
+        onError: (e) {
+          debugPrint('ProjectProvider Error: $e');
+          _isLoading = false;
+          _error = e.toString();
+          notifyListeners();
+        },
+        cancelOnError: false,
+      );
+    } catch (e) {
+      debugPrint('ProjectProvider stream exception: $e');
+      _isLoading = false;
+      _error = e.toString();
+      notifyListeners();
+    }
   }
   // ... rest of the class
 

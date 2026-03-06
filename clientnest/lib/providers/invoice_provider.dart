@@ -18,21 +18,29 @@ class InvoiceProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
 
-    _firestoreService.getInvoices().listen(
-      (invoices) {
-        debugPrint('InvoiceProvider: Received ${invoices.length} invoices.');
-        _invoices = invoices;
-        _isLoading = false;
-        _error = null;
-        notifyListeners();
-      },
-      onError: (e) {
-        debugPrint('InvoiceProvider Error: $e');
-        _isLoading = false;
-        _error = e.toString();
-        notifyListeners();
-      },
-    );
+    try {
+      _firestoreService.getInvoices().listen(
+        (invoices) {
+          debugPrint('InvoiceProvider: Received ${invoices.length} invoices.');
+          _invoices = invoices;
+          _isLoading = false;
+          _error = null;
+          notifyListeners();
+        },
+        onError: (e) {
+          debugPrint('InvoiceProvider Error: $e');
+          _isLoading = false;
+          _error = e.toString();
+          notifyListeners();
+        },
+        cancelOnError: false,
+      );
+    } catch (e) {
+      debugPrint('InvoiceProvider stream exception: $e');
+      _isLoading = false;
+      _error = e.toString();
+      notifyListeners();
+    }
   }
 
   Future<void> addInvoice(Invoice invoice) async {

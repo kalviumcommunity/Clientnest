@@ -65,6 +65,7 @@ clientnest/
 │   │   ├── settings_screen.dart
 │   │   ├── calendar_screen.dart
 │   │   ├── projects_screen.dart
+│   │   ├── widget_tree_demo.dart  ← Widget Tree & Reactive UI demo
 │   │   └── projects/         → Project sub-screens (list, detail, create)
 │   │
 │   ├── widgets/              → Reusable UI components
@@ -125,3 +126,145 @@ Run `flutter doctor` and paste output here.
 ### Running Flutter App
 
 Run `flutter run` and attach a screenshot here.
+
+---
+
+## Widget Tree Explanation
+
+Flutter builds its UI as a **hierarchical tree of widgets**. Every widget is either a *layout widget* (positions children) or a *leaf widget* (renders visible content). The tree for the `WidgetTreeDemoScreen` (`lib/screens/widget_tree_demo.dart`) looks like this:
+
+```
+MaterialApp                         ← root of the whole app
+└── Scaffold                        ← page skeleton
+    ├── AppBar                      ← top navigation bar
+    │   ├── Text  ("Widget Tree …") ← title
+    │   └── _AccentDot              ← live colour indicator
+    └── body
+        └── CustomScrollView        ← scrollable viewport
+            └── SliverList          ← lazy list of sections
+                └── Column
+                    ├── _SectionLabel
+                    ├── _WidgetTreeCard     ← static tree visualisation
+                    │   └── Card
+                    │       └── Column
+                    │           ├── Row   (header)
+                    │           ├── Container  (tree ASCII)
+                    │           └── _InfoChip
+                    ├── _SectionLabel
+                    ├── _CounterCard        ← setState() counter
+                    │   └── Card
+                    │       └── Column
+                    │           ├── Row   (header)
+                    │           ├── ScaleTransition  ← animated counter circle
+                    │           │   └── Text  (counter value)
+                    │           ├── Row   (+ / – buttons)
+                    │           │   ├── _CircleButton  (decrement)
+                    │           │   └── _CircleButton  (increment)
+                    │           └── _CodeAnnotation
+                    ├── _SectionLabel
+                    ├── _ProfileCard        ← setState() show/hide toggle
+                    │   └── Card
+                    │       └── Column
+                    │           ├── Row     (avatar + name + chevron)
+                    │           └── AnimatedSize  ← collapses/expands
+                    │               └── Column  (detail rows)
+                    ├── _SectionLabel
+                    └── _ThemeSwitcherCard  ← setState() colour rotation
+                        └── Card
+                            └── Column
+                                ├── Row   (colour swatches)
+                                ├── AnimatedSwitcher  (active label)
+                                └── ElevatedButton  ("Next Colour")
+```
+
+> **Key insight:**  Flutter re-renders *only* the sub-tree that changed.
+> When you tap **+**, Flutter calls `setState()` → `_CounterCard` rebuilds →
+> only the counter `Text` and its `ScaleTransition` are repainted.
+> Every other card stays exactly as it was.
+
+---
+
+## State Change Demonstration
+
+The `WidgetTreeDemoScreen` has three interactive reactive examples.
+
+### Example 1 — Counter (`_CounterCard`)
+
+| Moment | `_counter` value | What the UI shows |
+|---|---|---|
+| Initial load | `0` | Circle displays **0**, `–` button dimmed |
+| After 3 taps on **+** | `3` | Circle displays **3**, pulse animation plays |
+| After tapping **Reset** | `0` | Returns to initial state |
+
+```dart
+// State variable (inside _WidgetTreeDemoScreenState):
+int _counter = 0;
+
+// Triggered by the + button:
+void _increment() {
+  setState(() => _counter++);   // ← Flutter rebuilds _CounterCard
+  _pulseController.forward(from: 0);
+}
+```
+
+### Example 2 — Profile Card Toggle (`_ProfileCard`)
+
+| Moment | `_showDetails` | What the UI shows |
+|---|---|---|
+| Initial load | `false` | Only avatar + name visible |
+| After tapping chevron | `true` | Email, Projects, Rating slide in via `AnimatedSize` |
+| After tapping again | `false` | Detail rows collapse |
+
+```dart
+bool _showDetails = false;
+
+void _toggleDetails() => setState(() => _showDetails = !_showDetails);
+```
+
+### Example 3 — Colour Switcher (`_ThemeSwitcherCard`)
+
+| Moment | `_accentIndex` | Colour applied across all cards |
+|---|---|---|
+| Initial load | `0` | Indigo `#6366F1` |
+| 1 tap | `1` | Emerald `#10B981` |
+| 2 taps | `2` | Amber `#F59E0B` |
+| 3 taps | `3` | Rose `#EF4444` |
+
+```dart
+int _accentIndex = 0;
+
+void _nextAccent() =>
+    setState(() => _accentIndex = (_accentIndex + 1) % _accents.length);
+```
+
+### UI Before Interaction
+
+> **Screenshot placeholder**
+> Run `flutter run`, navigate to the Widget Tree Demo screen, and add a screenshot here.
+
+### UI After Interaction
+
+> **Screenshot placeholder**
+> Tap the **+** button several times, toggle the profile card, and cycle the colour — then add a screenshot here.
+
+---
+
+## Reflection
+
+### 1. How the Widget Tree Helps Flutter Manage Complex UIs
+
+Flutter builds its entire interface as a **hierarchical widget tree**. This structure gives the framework several advantages:
+
+- **Isolation** — each widget manages its own rendering. A change deep in the tree doesn't force the root or its siblings to repaint.
+- **Composability** — complex UIs are built by nesting small, single-responsibility widgets (e.g. `_DetailRow`, `_CircleButton`, `_InfoChip`) rather than one monolithic component.
+- **Diffing efficiency** — Flutter's engine walks only the *dirty* sub-tree (widgets marked as needing a rebuild) and skips everything else. In the counter example, tapping **+** rebuilds only `_CounterCard`; the `_ProfileCard` and `_ThemeSwitcherCard` above and below it are never touched.
+- **Testability** — because every widget is a pure function of its inputs, individual widgets can be pumped in isolation during widget tests without needing the full app.
+
+### 2. Why Flutter's Reactive Model Is Efficient
+
+Flutter uses a **reactive, declarative UI model** — you describe *what* the UI should look like for a given state, and Flutter figures out *how* to get from the current frame to the next one.
+
+- **`setState()` is surgical.** Calling `setState()` marks only the enclosing `State` object as dirty. Flutter schedules a micro-task to call `build()` on that subtree only on the next frame — not the full widget tree.
+- **Element tree reconciliation.** Flutter maintains a persistent *element tree* alongside the widget tree. When a widget rebuilds, Flutter compares the new widget description against the existing element and reuses elements whose `runtimeType` and `key` match. Only genuinely new or changed elements are inflated, keeping frame times low.
+- **No manual DOM manipulation.** Unlike imperative frameworks, developers never reach into the widget tree to update a specific node. They update state variables (`_counter`, `_showDetails`, `_accentIndex`) and Flutter propagates the change automatically. This eliminates an entire class of bugs caused by out-of-sync UI state.
+- **60 / 120 fps rendering.** Because rebuilds are cheap and targeted, Flutter consistently achieves smooth animations even on mid-range devices — as visible in the pulse animation on the counter circle and the `AnimatedSize` expansion in the profile card.
