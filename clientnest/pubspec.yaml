@@ -60,3 +60,6 @@ flutter:
   assets:
     - assets/logo.svg
     - assets/logo/
+    - assets/images/
+    - assets/fonts/
+    - assets/json/
