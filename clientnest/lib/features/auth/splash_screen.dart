@@ -58,7 +58,7 @@ class _SplashScreenState extends State<SplashScreen> {
             SizedBox(
               width: 40,
               child: LinearProgressIndicator(
-                backgroundColor: colorScheme.primary.withOpacity(0.1),
+                backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
                 color: colorScheme.primary,
                 minHeight: 2,
               ),

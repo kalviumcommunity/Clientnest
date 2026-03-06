@@ -47,12 +47,12 @@ class FreelancerCard extends StatelessWidget {
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: colorScheme.outlineVariant.withOpacity(0.4),
+          color: colorScheme.outlineVariant.withValues(alpha: 0.4),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.shadow.withOpacity(0.04),
+            color: colorScheme.shadow.withValues(alpha: 0.04),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -110,7 +110,7 @@ class FreelancerCard extends StatelessWidget {
                 '${freelancer.completedJobs} jobs',
                 style: TextStyle(
                   fontSize: 12,
-                  color: colorScheme.onSurface.withOpacity(0.5),
+                  color: colorScheme.onSurface.withValues(alpha: 0.5),
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -185,7 +185,7 @@ class FreelancerCard extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: radius,
-          backgroundColor: freelancer.avatarColor.withOpacity(0.15),
+          backgroundColor: freelancer.avatarColor.withValues(alpha: 0.15),
           child: Text(
             freelancer.avatarInitial,
             style: TextStyle(
@@ -218,8 +218,8 @@ class FreelancerCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: freelancer.isOnline
-            ? Colors.green.withOpacity(0.1)
-            : colorScheme.onSurface.withOpacity(0.05),
+            ? Colors.green.withValues(alpha: 0.1)
+            : colorScheme.onSurface.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
@@ -227,7 +227,7 @@ class FreelancerCard extends StatelessWidget {
         style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w600,
-          color: freelancer.isOnline ? Colors.green : colorScheme.onSurface.withOpacity(0.4),
+          color: freelancer.isOnline ? Colors.green : colorScheme.onSurface.withValues(alpha: 0.4),
         ),
       ),
     );

@@ -1,3 +1,4 @@
+// ignore_for_file: use_build_context_synchronously
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
@@ -69,7 +70,7 @@ class _LandingPageState extends State<LandingPage> {
                     'The high-end workspace built specifically for the modern freelancer.',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: colorScheme.onSurface.withOpacity(0.6),
+                          color: colorScheme.onSurface.withValues(alpha: 0.6),
                           height: 1.5,
                         ),
                   ).animate().fadeIn(delay: 600.ms),
@@ -103,7 +104,7 @@ class _LandingPageState extends State<LandingPage> {
             backgroundColor: colorScheme.surface,
             foregroundColor: colorScheme.onSurface,
             minimumSize: const Size(double.infinity, 60),
-            side: BorderSide(color: colorScheme.outline.withOpacity(0.1)),
+            side: BorderSide(color: colorScheme.outline.withValues(alpha: 0.1)),
           ),
         ).animate().fadeIn(delay: 800.ms).slideY(begin: 0.5),
         const SizedBox(height: 16),
@@ -139,14 +140,14 @@ class _AnimatedGradientBackground extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            colorScheme.primary.withOpacity(0.08),
+            colorScheme.primary.withValues(alpha: 0.08),
             colorScheme.surface,
-            colorScheme.secondary.withOpacity(0.08),
+            colorScheme.secondary.withValues(alpha: 0.08),
             colorScheme.surface,
           ],
         ),
       ),
     ).animate(onPlay: (c) => c.repeat(reverse: true))
-     .shimmer(duration: 5.seconds, color: colorScheme.primary.withOpacity(0.05));
+     .shimmer(duration: 5.seconds, color: colorScheme.primary.withValues(alpha: 0.05));
   }
 }

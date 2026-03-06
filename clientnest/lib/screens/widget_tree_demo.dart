@@ -193,7 +193,7 @@ class _SectionLabel extends StatelessWidget {
         style: GoogleFonts.inter(
           fontSize: 13,
           fontWeight: FontWeight.w600,
-          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
           letterSpacing: 0.6,
         ),
       ),
@@ -275,7 +275,7 @@ class _WidgetTreeCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: accent.withOpacity(0.1),
+                    color: accent.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(Icons.account_tree_outlined, color: accent, size: 20),
@@ -297,7 +297,7 @@ class _WidgetTreeCard extends StatelessWidget {
                         'This screen\'s actual widget tree',
                         style: GoogleFonts.inter(
                           fontSize: 12,
-                          color: cs.onSurface.withOpacity(0.5),
+                          color: cs.onSurface.withValues(alpha: 0.5),
                         ),
                       ),
                     ],
@@ -306,7 +306,7 @@ class _WidgetTreeCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            Divider(color: cs.outlineVariant.withOpacity(0.4)),
+            Divider(color: cs.outlineVariant.withValues(alpha: 0.4)),
             const SizedBox(height: 12),
             // Tree nodes
             Container(
@@ -318,7 +318,7 @@ class _WidgetTreeCard extends StatelessWidget {
                     : const Color(0xFFF8F7FF),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: accent.withOpacity(0.15),
+                  color: accent.withValues(alpha: 0.15),
                 ),
               ),
               child: Column(
@@ -333,7 +333,7 @@ class _WidgetTreeCard extends StatelessWidget {
                         fontSize: 12,
                         color: isLeaf
                             ? accent
-                            : cs.onSurface.withOpacity(item.depth == 0 ? 1.0 : 0.75),
+                            : cs.onSurface.withValues(alpha: item.depth == 0 ? 1.0 : 0.75),
                         fontWeight: item.depth == 0
                             ? FontWeight.w700
                             : FontWeight.w400,
@@ -403,7 +403,7 @@ class _CounterCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: accent.withOpacity(0.1),
+                    color: accent.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(Icons.repeat_rounded, color: accent, size: 20),
@@ -425,7 +425,7 @@ class _CounterCard extends StatelessWidget {
                         'Tap +/– → setState() → UI rebuilds',
                         style: GoogleFonts.inter(
                           fontSize: 12,
-                          color: cs.onSurface.withOpacity(0.5),
+                          color: cs.onSurface.withValues(alpha: 0.5),
                         ),
                       ),
                     ],
@@ -434,7 +434,7 @@ class _CounterCard extends StatelessWidget {
                 // Reset
                 IconButton(
                   onPressed: onReset,
-                  icon: Icon(Icons.refresh_rounded, color: cs.onSurface.withOpacity(0.4)),
+                  icon: Icon(Icons.refresh_rounded, color: cs.onSurface.withValues(alpha: 0.4)),
                   tooltip: 'Reset counter',
                 ),
               ],
@@ -449,9 +449,9 @@ class _CounterCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
-                    colors: [accent.withOpacity(0.15), accent.withOpacity(0.03)],
+                    colors: [accent.withValues(alpha: 0.15), accent.withValues(alpha: 0.03)],
                   ),
-                  border: Border.all(color: accent.withOpacity(0.3), width: 2),
+                  border: Border.all(color: accent.withValues(alpha: 0.3), width: 2),
                 ),
                 alignment: Alignment.center,
                 child: TweenAnimationBuilder<int>(
@@ -541,7 +541,7 @@ class _ProfileCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: accent.withOpacity(0.1),
+                    color: accent.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(Icons.person_outline_rounded, color: accent, size: 20),
@@ -563,7 +563,7 @@ class _ProfileCard extends StatelessWidget {
                         'Tap to show / hide details via setState()',
                         style: GoogleFonts.inter(
                           fontSize: 12,
-                          color: cs.onSurface.withOpacity(0.5),
+                          color: cs.onSurface.withValues(alpha: 0.5),
                         ),
                       ),
                     ],
@@ -572,14 +572,14 @@ class _ProfileCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            Divider(color: cs.outlineVariant.withOpacity(0.3)),
+            Divider(color: cs.outlineVariant.withValues(alpha: 0.3)),
             const SizedBox(height: 16),
             // Avatar row
             Row(
               children: [
                 CircleAvatar(
                   radius: 30,
-                  backgroundColor: accent.withOpacity(0.15),
+                  backgroundColor: accent.withValues(alpha: 0.15),
                   child: Text(
                     'CN',
                     style: GoogleFonts.inter(
@@ -606,7 +606,7 @@ class _ProfileCard extends StatelessWidget {
                         'Full-Stack Developer',
                         style: GoogleFonts.inter(
                           fontSize: 13,
-                          color: cs.onSurface.withOpacity(0.55),
+                          color: cs.onSurface.withValues(alpha: 0.55),
                         ),
                       ),
                     ],
@@ -636,7 +636,7 @@ class _ProfileCard extends StatelessWidget {
                       padding: const EdgeInsets.only(top: 16),
                       child: Column(
                         children: [
-                          Divider(color: cs.outlineVariant.withOpacity(0.3)),
+                          Divider(color: cs.outlineVariant.withValues(alpha: 0.3)),
                           const SizedBox(height: 12),
                           _DetailRow(
                             icon: Icons.email_outlined,
@@ -706,7 +706,7 @@ class _DetailRow extends StatelessWidget {
           '$label:',
           style: GoogleFonts.inter(
             fontSize: 13,
-            color: cs.onSurface.withOpacity(0.5),
+            color: cs.onSurface.withValues(alpha: 0.5),
           ),
         ),
         const SizedBox(width: 6),
@@ -765,7 +765,7 @@ class _ThemeSwitcherCard extends StatelessWidget {
                   duration: const Duration(milliseconds: 300),
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: accent.withOpacity(0.1),
+                    color: accent.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(Icons.palette_outlined, color: accent, size: 20),
@@ -787,7 +787,7 @@ class _ThemeSwitcherCard extends StatelessWidget {
                         'setState() updates colour across all cards',
                         style: GoogleFonts.inter(
                           fontSize: 12,
-                          color: cs.onSurface.withOpacity(0.5),
+                          color: cs.onSurface.withValues(alpha: 0.5),
                         ),
                       ),
                     ],
@@ -814,7 +814,7 @@ class _ThemeSwitcherCard extends StatelessWidget {
                           ? Border.all(color: cs.onSurface, width: 3)
                           : null,
                       boxShadow: isSelected
-                          ? [BoxShadow(color: c.withOpacity(0.4), blurRadius: 12)]
+                          ? [BoxShadow(color: c.withValues(alpha: 0.4), blurRadius: 12)]
                           : null,
                     ),
                   ),
@@ -831,9 +831,9 @@ class _ThemeSwitcherCard extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
                   decoration: BoxDecoration(
-                    color: accent.withOpacity(0.1),
+                    color: accent.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(30),
-                    border: Border.all(color: accent.withOpacity(0.3)),
+                    border: Border.all(color: accent.withValues(alpha: 0.3)),
                   ),
                   child: Text(
                     'Active: $accentLabel',
@@ -907,7 +907,7 @@ class _CodeAnnotation extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF0E0E0E) : const Color(0xFFF4F3FF),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: accent.withOpacity(0.12)),
+        border: Border.all(color: accent.withValues(alpha: 0.12)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -918,10 +918,10 @@ class _CodeAnnotation extends StatelessWidget {
             style: GoogleFonts.sourceCodePro(
               fontSize: 11.5,
               color: isComment
-                  ? cs.onSurface.withOpacity(0.4)
+                  ? cs.onSurface.withValues(alpha: 0.4)
                   : line.isEmpty
                       ? Colors.transparent
-                      : cs.onSurface.withOpacity(0.8),
+                      : cs.onSurface.withValues(alpha: 0.8),
               fontStyle: isComment ? FontStyle.italic : FontStyle.normal,
             ),
           );
@@ -950,9 +950,9 @@ class _InfoChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: accent.withOpacity(0.06),
+        color: accent.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: accent.withOpacity(0.15)),
+        border: Border.all(color: accent.withValues(alpha: 0.15)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -964,7 +964,7 @@ class _InfoChip extends StatelessWidget {
               text,
               style: GoogleFonts.inter(
                 fontSize: 12,
-                color: cs.onSurface.withOpacity(0.65),
+                color: cs.onSurface.withValues(alpha: 0.65),
                 height: 1.5,
               ),
             ),
@@ -1004,7 +1004,7 @@ class _CircleButton extends StatelessWidget {
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: accent.withOpacity(0.35),
+                color: accent.withValues(alpha: 0.35),
                 blurRadius: 14,
                 offset: const Offset(0, 4),
               ),

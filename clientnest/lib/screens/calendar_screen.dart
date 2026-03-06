@@ -40,7 +40,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 },
                 eventLoader: (day) => events[DateTime(day.year, day.month, day.day)] ?? [],
                 calendarStyle: CalendarStyle(
-                  todayDecoration: BoxDecoration(color: colorScheme.primary.withOpacity(0.3), shape: BoxShape.circle),
+                  todayDecoration: BoxDecoration(color: colorScheme.primary.withValues(alpha: 0.3), shape: BoxShape.circle),
                   selectedDecoration: BoxDecoration(color: colorScheme.primary, shape: BoxShape.circle),
                   markerDecoration: BoxDecoration(color: colorScheme.secondary, shape: BoxShape.circle),
                 ),

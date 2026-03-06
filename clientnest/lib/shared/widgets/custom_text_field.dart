@@ -58,7 +58,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
               boxShadow: _isFocused && !isDark
                 ? [
                     BoxShadow(
-                      color: theme.primaryColor.withOpacity(0.1),
+                      color: theme.primaryColor.withValues(alpha: 0.1),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     )
@@ -91,7 +91,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                       )
                     : null,
                 hintStyle: TextStyle(
-                  color: Colors.grey.withOpacity(0.6),
+                  color: Colors.grey.withValues(alpha: 0.6),
                   fontSize: 15,
                 ),
               ),

@@ -52,7 +52,7 @@ class _DeadlineCountdownState extends State<DeadlineCountdown> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.primary.withOpacity(0.3),
+            color: colorScheme.primary.withValues(alpha: 0.3),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -68,7 +68,7 @@ class _DeadlineCountdownState extends State<DeadlineCountdown> {
                 'Next Deadline',
                 style: TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w500),
               ),
-              Icon(Icons.timer_outlined, color: Colors.white.withOpacity(0.8), size: 20),
+              Icon(Icons.timer_outlined, color: Colors.white.withValues(alpha: 0.8), size: 20),
             ],
           ),
           const SizedBox(height: 12),
@@ -111,7 +111,7 @@ class _TimeBox extends StatelessWidget {
         ),
         Text(
           label,
-          style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 10, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 10, fontWeight: FontWeight.bold),
         ),
       ],
     );
@@ -133,7 +133,7 @@ class FinancialSnapshot extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.5)),
+        border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -258,10 +258,10 @@ class EmptyStateWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: colorScheme.primary.withOpacity(0.05),
+              color: colorScheme.primary.withValues(alpha: 0.05),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 64, color: colorScheme.primary.withOpacity(0.4)),
+            child: Icon(icon, size: 64, color: colorScheme.primary.withValues(alpha: 0.4)),
           ),
           const SizedBox(height: 24),
           Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
@@ -269,7 +269,7 @@ class EmptyStateWidget extends StatelessWidget {
           Text(
             message,
             textAlign: TextAlign.center,
-            style: TextStyle(color: colorScheme.onSurface.withOpacity(0.5)),
+            style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.5)),
           ),
         ],
       ),

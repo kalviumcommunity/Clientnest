@@ -38,12 +38,12 @@ class CategoryChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? colorScheme.primary
-              : effectiveColor.withOpacity(0.08),
+              : effectiveColor.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
                 ? colorScheme.primary
-                : effectiveColor.withOpacity(0.25),
+                : effectiveColor.withValues(alpha: 0.25),
             width: 1.5,
           ),
         ),

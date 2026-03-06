@@ -115,7 +115,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
             Text(
               'Fill in the information below to create your project.',
               style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurface.withOpacity(0.55),
+                color: colorScheme.onSurface.withValues(alpha: 0.55),
               ),
             ),
             const SizedBox(height: 32),
@@ -170,10 +170,10 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
             const SizedBox(height: 8),
             Container(
               decoration: BoxDecoration(
-                color: colorScheme.surfaceVariant.withOpacity(0.4),
+                color: colorScheme.surfaceVariant.withValues(alpha: 0.4),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: colorScheme.outlineVariant.withOpacity(0.5),
+                  color: colorScheme.outlineVariant.withValues(alpha: 0.5),
                 ),
               ),
               child: DropdownButtonFormField<ProjectStatus>(
@@ -216,10 +216,10 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 decoration: BoxDecoration(
-                  color: colorScheme.surfaceVariant.withOpacity(0.4),
+                  color: colorScheme.surfaceVariant.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: colorScheme.outlineVariant.withOpacity(0.5),
+                    color: colorScheme.outlineVariant.withValues(alpha: 0.5),
                   ),
                 ),
                 child: Row(
@@ -235,7 +235,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                     ),
                     const Spacer(),
                     Icon(Icons.arrow_drop_down,
-                        color: colorScheme.onSurface.withOpacity(0.5)),
+                        color: colorScheme.onSurface.withValues(alpha: 0.5)),
                   ],
                 ),
               ),
@@ -285,7 +285,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
       style: TextStyle(
         fontWeight: FontWeight.w600,
         fontSize: 13,
-        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
         letterSpacing: 0.3,
       ),
     );
@@ -301,14 +301,14 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
       hintText: hint,
       prefixIcon: Icon(icon, size: 20, color: colorScheme.primary),
       filled: true,
-      fillColor: colorScheme.surfaceVariant.withOpacity(0.4),
+      fillColor: colorScheme.surfaceVariant.withValues(alpha: 0.4),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: colorScheme.outlineVariant.withOpacity(0.5)),
+        borderSide: BorderSide(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: colorScheme.outlineVariant.withOpacity(0.5)),
+        borderSide: BorderSide(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),

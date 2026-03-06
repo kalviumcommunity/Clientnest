@@ -128,7 +128,7 @@ class _ProjectCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: colorScheme.surface,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.5)),
+          border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -157,9 +157,9 @@ class _ProjectCard extends StatelessWidget {
             const SizedBox(height: 16),
             Row(
               children: [
-                Icon(Icons.calendar_today_outlined, size: 14, color: colorScheme.onSurface.withOpacity(0.6)),
+                Icon(Icons.calendar_today_outlined, size: 14, color: colorScheme.onSurface.withValues(alpha: 0.6)),
                 const SizedBox(width: 8),
-                Text(deadlineStr, style: TextStyle(fontSize: 12, color: colorScheme.onSurface.withOpacity(0.6))),
+                Text(deadlineStr, style: TextStyle(fontSize: 12, color: colorScheme.onSurface.withValues(alpha: 0.6))),
                 const Spacer(),
                 Text('\$${project.budget.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold)),
               ],

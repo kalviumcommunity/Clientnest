@@ -283,7 +283,7 @@ class _ResponsiveHomeScreenState extends State<ResponsiveHomeScreen> {
                   'Find your next great hire today',
                   style: TextStyle(
                     fontSize: 12,
-                    color: colorScheme.onSurface.withOpacity(0.5),
+                    color: colorScheme.onSurface.withValues(alpha: 0.5),
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -307,13 +307,13 @@ class _ResponsiveHomeScreenState extends State<ResponsiveHomeScreen> {
             color: colorScheme.surface,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: colorScheme.outlineVariant.withOpacity(0.4),
+              color: colorScheme.outlineVariant.withValues(alpha: 0.4),
             ),
           ),
           child: Icon(
             Icons.notifications_outlined,
             size: 22,
-            color: colorScheme.onSurface.withOpacity(0.7),
+            color: colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
         Positioned(
@@ -340,11 +340,11 @@ class _ResponsiveHomeScreenState extends State<ResponsiveHomeScreen> {
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: colorScheme.outlineVariant.withOpacity(0.4),
+          color: colorScheme.outlineVariant.withValues(alpha: 0.4),
         ),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.shadow.withOpacity(0.04),
+            color: colorScheme.shadow.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -355,12 +355,12 @@ class _ResponsiveHomeScreenState extends State<ResponsiveHomeScreen> {
         decoration: InputDecoration(
           hintText: 'Search freelancers, services...',
           hintStyle: TextStyle(
-            color: colorScheme.onSurface.withOpacity(0.35),
+            color: colorScheme.onSurface.withValues(alpha: 0.35),
             fontSize: 14,
           ),
           prefixIcon: Icon(
             Icons.search_rounded,
-            color: colorScheme.onSurface.withOpacity(0.4),
+            color: colorScheme.onSurface.withValues(alpha: 0.4),
             size: 22,
           ),
           suffixIcon: Container(
@@ -541,11 +541,11 @@ class _ResponsiveHomeScreenState extends State<ResponsiveHomeScreen> {
               color: colorScheme.surface,
               borderRadius: BorderRadius.circular(18),
               border: Border.all(
-                color: colorScheme.outlineVariant.withOpacity(0.35),
+                color: colorScheme.outlineVariant.withValues(alpha: 0.35),
               ),
               boxShadow: [
                 BoxShadow(
-                  color: color.withOpacity(0.06),
+                  color: color.withValues(alpha: 0.06),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -557,7 +557,7 @@ class _ResponsiveHomeScreenState extends State<ResponsiveHomeScreen> {
                 Container(
                   padding: const EdgeInsets.all(7),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(icon, color: color, size: 16),
@@ -580,7 +580,7 @@ class _ResponsiveHomeScreenState extends State<ResponsiveHomeScreen> {
                   label,
                   style: TextStyle(
                     fontSize: 10,
-                    color: colorScheme.onSurface.withOpacity(0.45),
+                    color: colorScheme.onSurface.withValues(alpha: 0.45),
                     fontWeight: FontWeight.w500,
                   ),
                   overflow: TextOverflow.ellipsis,

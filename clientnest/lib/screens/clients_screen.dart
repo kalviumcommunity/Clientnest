@@ -141,13 +141,13 @@ class _ClientCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.5)),
+        border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Row(
         children: [
           CircleAvatar(
             radius: 25,
-            backgroundColor: colorScheme.primary.withOpacity(0.1),
+            backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
             child: Text(client.name[0].toUpperCase(), style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold)),
           ),
           const SizedBox(width: 16),
@@ -157,15 +157,15 @@ class _ClientCard extends StatelessWidget {
               children: [
                 Text(client.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 if (client.company.isNotEmpty)
-                  Text(client.company, style: TextStyle(fontSize: 12, color: colorScheme.onSurface.withOpacity(0.6))),
+                  Text(client.company, style: TextStyle(fontSize: 12, color: colorScheme.onSurface.withValues(alpha: 0.6))),
                 const SizedBox(height: 4),
-                Text(client.email, style: TextStyle(fontSize: 12, color: colorScheme.onSurface.withOpacity(0.4))),
+                Text(client.email, style: TextStyle(fontSize: 12, color: colorScheme.onSurface.withValues(alpha: 0.4))),
               ],
             ),
           ),
           IconButton(
             onPressed: () {},
-            icon: Icon(Icons.chevron_right, color: colorScheme.onSurface.withOpacity(0.3)),
+            icon: Icon(Icons.chevron_right, color: colorScheme.onSurface.withValues(alpha: 0.3)),
           ),
         ],
       ),
