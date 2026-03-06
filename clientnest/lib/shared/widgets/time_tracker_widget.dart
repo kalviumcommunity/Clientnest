@@ -25,18 +25,18 @@ class FloatingTimeTracker extends StatelessWidget {
             borderRadius: BorderRadius.circular(40),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withValues(alpha: 0.2),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
             ],
-            border: Border.all(color: colorScheme.primary.withOpacity(0.3), width: 2),
+            border: Border.all(color: colorScheme.primary.withValues(alpha: 0.3), width: 2),
           ),
           child: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: colorScheme.primary.withOpacity(0.1), shape: BoxShape.circle),
+                decoration: BoxDecoration(color: colorScheme.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
                 child: Icon(Icons.timer, color: colorScheme.primary, size: 20),
               ),
               const SizedBox(width: 12),
@@ -53,7 +53,7 @@ class FloatingTimeTracker extends StatelessWidget {
                     ),
                     Text(
                       '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')} elapsed',
-                      style: TextStyle(fontSize: 11, color: colorScheme.onSurface.withOpacity(0.6)),
+                      style: TextStyle(fontSize: 11, color: colorScheme.onSurface.withValues(alpha: 0.6)),
                     ),
                   ],
                 ),

@@ -73,16 +73,16 @@ class _MainScreenWrapperState extends State<MainScreenWrapper> {
           filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
           child: Container(
             decoration: BoxDecoration(
-              color: colorScheme.surface.withOpacity(0.7),
+              color: colorScheme.surface.withValues(alpha: 0.7),
               border: Border(
                 top: BorderSide(
-                  color: colorScheme.outlineVariant.withOpacity(0.2),
+                  color: colorScheme.outlineVariant.withValues(alpha: 0.2),
                   width: 1,
                 ),
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
+                  color: Colors.black.withValues(alpha: 0.04),
                   blurRadius: 20,
                   offset: const Offset(0, -5),
                 ),
@@ -96,7 +96,7 @@ class _MainScreenWrapperState extends State<MainScreenWrapper> {
                   backgroundColor: Colors.transparent,
                   currentIndex: _currentIndex,
                   selectedItemColor: colorScheme.primary,
-                  unselectedItemColor: colorScheme.onSurface.withOpacity(0.4),
+                  unselectedItemColor: colorScheme.onSurface.withValues(alpha: 0.4),
                   elevation: 0,
                   selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
                   unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 11),
@@ -134,7 +134,7 @@ class _MainScreenWrapperState extends State<MainScreenWrapper> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(activeIcon, size: 24),

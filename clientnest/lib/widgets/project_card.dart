@@ -43,12 +43,12 @@ class ProjectCard extends StatelessWidget {
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: colorScheme.outlineVariant.withOpacity(0.4),
+          color: colorScheme.outlineVariant.withValues(alpha: 0.4),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: project.accentColor.withOpacity(0.05),
+            color: project.accentColor.withValues(alpha: 0.05),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -86,7 +86,7 @@ class ProjectCard extends StatelessWidget {
                       project.clientName,
                       style: TextStyle(
                         fontSize: 11,
-                        color: colorScheme.onSurface.withOpacity(0.5),
+                        color: colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -105,7 +105,7 @@ class ProjectCard extends StatelessWidget {
               Icon(
                 Icons.calendar_today_outlined,
                 size: 11,
-                color: colorScheme.onSurface.withOpacity(0.4),
+                color: colorScheme.onSurface.withValues(alpha: 0.4),
               ),
               const SizedBox(width: 4),
               Flexible(
@@ -113,7 +113,7 @@ class ProjectCard extends StatelessWidget {
                   project.deadline,
                   style: TextStyle(
                     fontSize: 11,
-                    color: colorScheme.onSurface.withOpacity(0.5),
+                    color: colorScheme.onSurface.withValues(alpha: 0.5),
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -145,7 +145,7 @@ class ProjectCard extends StatelessWidget {
               'Progress',
               style: TextStyle(
                 fontSize: 10,
-                color: colorScheme.onSurface.withOpacity(0.4),
+                color: colorScheme.onSurface.withValues(alpha: 0.4),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -164,7 +164,7 @@ class ProjectCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
             value: project.progress,
-            backgroundColor: project.accentColor.withOpacity(0.12),
+            backgroundColor: project.accentColor.withValues(alpha: 0.12),
             valueColor: AlwaysStoppedAnimation<Color>(project.accentColor),
             minHeight: 5,
           ),
@@ -195,7 +195,7 @@ class ProjectCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: chipColor.withOpacity(0.1),
+        color: chipColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(

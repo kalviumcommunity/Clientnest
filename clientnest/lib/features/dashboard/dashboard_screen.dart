@@ -40,13 +40,13 @@ class DashboardScreen extends StatelessWidget {
               height: 4,
               margin: const EdgeInsets.only(bottom: 24),
               decoration: BoxDecoration(
-                color: colorScheme.onSurface.withOpacity(0.1),
+                color: colorScheme.onSurface.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
             CircleAvatar(
               radius: 40,
-              backgroundColor: colorScheme.primary.withOpacity(0.1),
+              backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
               backgroundImage: user?.photoURL != null ? NetworkImage(user!.photoURL!) : null,
               child: user?.photoURL == null 
                   ? Text(user?.displayName?[0].toUpperCase() ?? 'U', 
@@ -60,7 +60,7 @@ class DashboardScreen extends StatelessWidget {
             ),
             Text(
               user?.email ?? 'No email available',
-              style: TextStyle(fontSize: 14, color: colorScheme.onSurface.withOpacity(0.5)),
+              style: TextStyle(fontSize: 14, color: colorScheme.onSurface.withValues(alpha: 0.5)),
             ),
             const SizedBox(height: 32),
             _buildProfileOption(
@@ -105,7 +105,7 @@ class DashboardScreen extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.5)),
+          border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -238,7 +238,7 @@ class DashboardScreen extends StatelessWidget {
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
             fontWeight: FontWeight.w900,
             letterSpacing: 2,
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
           ),
         ),
         const SizedBox(height: 8),
@@ -347,10 +347,10 @@ class DashboardScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.3)),
+        border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.3)),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.05),
+            color: color.withValues(alpha: 0.05),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -366,7 +366,7 @@ class DashboardScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: color, size: 18),
@@ -379,7 +379,7 @@ class DashboardScreen extends StatelessWidget {
           ),
           Text(
             label,
-            style: TextStyle(fontSize: 12, color: colorScheme.onSurface.withOpacity(0.5), fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 12, color: colorScheme.onSurface.withValues(alpha: 0.5), fontWeight: FontWeight.bold),
           ),
         ],
       ),

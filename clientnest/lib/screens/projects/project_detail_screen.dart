@@ -179,14 +179,14 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [statusColor, statusColor.withOpacity(0.7)],
+                colors: [statusColor, statusColor.withValues(alpha: 0.7)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: statusColor.withOpacity(0.3),
+                  color: statusColor.withValues(alpha: 0.3),
                   blurRadius: 16,
                   offset: const Offset(0, 8),
                 ),
@@ -202,7 +202,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -214,7 +214,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                       ),
                     ),
                     Icon(Icons.rocket_launch_rounded,
-                        color: Colors.white.withOpacity(0.6), size: 20),
+                        color: Colors.white.withValues(alpha: 0.6), size: 20),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -230,32 +230,32 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                   Text(
                     project.description,
                     style: TextStyle(
-                        color: Colors.white.withOpacity(0.75), fontSize: 13),
+                        color: Colors.white.withValues(alpha: 0.75), fontSize: 13),
                   ),
                 ],
                 const SizedBox(height: 16),
                 Row(
                   children: [
                     Icon(Icons.person_outline_rounded,
-                        size: 14, color: Colors.white.withOpacity(0.8)),
+                        size: 14, color: Colors.white.withValues(alpha: 0.8)),
                     const SizedBox(width: 6),
                     Text(
                       project.clientName.isNotEmpty
                           ? project.clientName
                           : 'No client set',
                       style: TextStyle(
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                           fontSize: 13,
                           fontWeight: FontWeight.w500),
                     ),
                     const Spacer(),
                     Icon(Icons.calendar_today_outlined,
-                        size: 14, color: Colors.white.withOpacity(0.8)),
+                        size: 14, color: Colors.white.withValues(alpha: 0.8)),
                     const SizedBox(width: 6),
                     Text(
                       'Due ${DateFormat('MMM dd, yyyy').format(project.deadline)}',
                       style: TextStyle(
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                           fontSize: 13,
                           fontWeight: FontWeight.w500),
                     ),
@@ -291,7 +291,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                   decoration: InputDecoration(
                     hintText: 'Add a new task...',
                     filled: true,
-                    fillColor: colorScheme.surfaceVariant.withOpacity(0.4),
+                    fillColor: colorScheme.surfaceVariant.withValues(alpha: 0.4),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide.none,
@@ -365,12 +365,12 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                     children: [
                       Icon(Icons.task_outlined,
                           size: 48,
-                          color: colorScheme.onSurface.withOpacity(0.2)),
+                          color: colorScheme.onSurface.withValues(alpha: 0.2)),
                       const SizedBox(height: 12),
                       Text(
                         'No tasks yet',
                         style: TextStyle(
-                          color: colorScheme.onSurface.withOpacity(0.4),
+                          color: colorScheme.onSurface.withValues(alpha: 0.4),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -378,7 +378,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                       Text(
                         'Add a task above to get started.',
                         style: TextStyle(
-                          color: colorScheme.onSurface.withOpacity(0.3),
+                          color: colorScheme.onSurface.withValues(alpha: 0.3),
                           fontSize: 13,
                         ),
                       ),
@@ -427,8 +427,8 @@ class _TaskTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: task.isCompleted
-              ? colorScheme.primary.withOpacity(0.25)
-              : colorScheme.outlineVariant.withOpacity(0.4),
+              ? colorScheme.primary.withValues(alpha: 0.25)
+              : colorScheme.outlineVariant.withValues(alpha: 0.4),
         ),
       ),
       child: ListTile(
@@ -445,7 +445,7 @@ class _TaskTile extends StatelessWidget {
               border: Border.all(
                 color: task.isCompleted
                     ? colorScheme.primary
-                    : colorScheme.onSurface.withOpacity(0.3),
+                    : colorScheme.onSurface.withValues(alpha: 0.3),
                 width: 2,
               ),
               shape: BoxShape.circle,
@@ -461,14 +461,14 @@ class _TaskTile extends StatelessWidget {
             decoration:
                 task.isCompleted ? TextDecoration.lineThrough : null,
             color: task.isCompleted
-                ? colorScheme.onSurface.withOpacity(0.4)
+                ? colorScheme.onSurface.withValues(alpha: 0.4)
                 : colorScheme.onSurface,
             fontWeight: FontWeight.w500,
           ),
         ),
         trailing: IconButton(
           icon: Icon(Icons.close_rounded,
-              size: 18, color: colorScheme.onSurface.withOpacity(0.35)),
+              size: 18, color: colorScheme.onSurface.withValues(alpha: 0.35)),
           onPressed: onDelete,
           splashRadius: 20,
           tooltip: 'Delete task',

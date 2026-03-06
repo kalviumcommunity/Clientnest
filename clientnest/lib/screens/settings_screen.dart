@@ -26,7 +26,7 @@ class SettingsScreen extends StatelessWidget {
           if (user != null)
             ListTile(
               leading: CircleAvatar(
-                backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                backgroundColor: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                 backgroundImage: user.photoURL != null ? NetworkImage(user.photoURL!) : null,
                 child: user.photoURL == null
                     ? Text(user.displayName?.substring(0, 1).toUpperCase() ?? 'U', style: TextStyle(color: Theme.of(context).primaryColor))

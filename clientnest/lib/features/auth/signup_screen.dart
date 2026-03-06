@@ -201,7 +201,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 
                 Row(
                   children: [
-                    Expanded(child: Divider(color: Colors.grey.withOpacity(0.2))),
+                    Expanded(child: Divider(color: Colors.grey.withValues(alpha: 0.2))),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
@@ -212,7 +212,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                       ),
                     ),
-                    Expanded(child: Divider(color: Colors.grey.withOpacity(0.2))),
+                    Expanded(child: Divider(color: Colors.grey.withValues(alpha: 0.2))),
                   ],
                 ).animate().fadeIn(delay: 700.ms),
                 

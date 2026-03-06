@@ -180,7 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 
                 Row(
                   children: [
-                    Expanded(child: Divider(color: Colors.grey.withOpacity(0.2))),
+                    Expanded(child: Divider(color: Colors.grey.withValues(alpha: 0.2))),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
@@ -191,7 +191,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-                    Expanded(child: Divider(color: Colors.grey.withOpacity(0.2))),
+                    Expanded(child: Divider(color: Colors.grey.withValues(alpha: 0.2))),
                   ],
                 ).animate().fadeIn(delay: 600.ms),
                 

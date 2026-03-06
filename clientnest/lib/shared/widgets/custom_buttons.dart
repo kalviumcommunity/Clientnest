@@ -28,14 +28,14 @@ class CustomButton extends StatelessWidget {
           boxShadow: theme.brightness == Brightness.dark 
             ? [
                 BoxShadow(
-                  color: theme.primaryColor.withOpacity(0.3),
+                  color: theme.primaryColor.withValues(alpha: 0.3),
                   blurRadius: 15,
                   offset: const Offset(0, 4),
                 )
               ]
             : [
                 BoxShadow(
-                  color: theme.primaryColor.withOpacity(0.2),
+                  color: theme.primaryColor.withValues(alpha: 0.2),
                   blurRadius: 12,
                   offset: const Offset(0, 6),
                 )
@@ -71,7 +71,7 @@ class CustomButton extends StatelessWidget {
      .shimmer(
         duration: 3.seconds,
         delay: 2.seconds,
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
       );
   }
 
@@ -128,12 +128,12 @@ class SocialButton extends StatelessWidget {
       style: OutlinedButton.styleFrom(
         minimumSize: const Size(double.infinity, 56),
         side: BorderSide(
-          color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey.withOpacity(0.2),
+          color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.2),
         ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        backgroundColor: isDark ? Colors.white.withOpacity(0.05) : Colors.transparent,
+        backgroundColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.transparent,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,

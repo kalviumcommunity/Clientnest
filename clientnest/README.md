@@ -66,6 +66,7 @@ clientnest/
 │   │   ├── calendar_screen.dart
 │   │   ├── projects_screen.dart
 │   │   ├── widget_tree_demo.dart  ← Widget Tree & Reactive UI demo
+│   │   ├── stateless_stateful_demo.dart ← Stateless vs Stateful demo
 │   │   └── projects/         → Project sub-screens (list, detail, create)
 │   │
 │   ├── widgets/              → Reusable UI components
@@ -268,3 +269,66 @@ Flutter uses a **reactive, declarative UI model** — you describe *what* the UI
 - **Element tree reconciliation.** Flutter maintains a persistent *element tree* alongside the widget tree. When a widget rebuilds, Flutter compares the new widget description against the existing element and reuses elements whose `runtimeType` and `key` match. Only genuinely new or changed elements are inflated, keeping frame times low.
 - **No manual DOM manipulation.** Unlike imperative frameworks, developers never reach into the widget tree to update a specific node. They update state variables (`_counter`, `_showDetails`, `_accentIndex`) and Flutter propagates the change automatically. This eliminates an entire class of bugs caused by out-of-sync UI state.
 - **60 / 120 fps rendering.** Because rebuilds are cheap and targeted, Flutter consistently achieves smooth animations even on mid-range devices — as visible in the pulse animation on the counter circle and the `AnimatedSize` expansion in the profile card.
+
+---
+
+## Stateless vs Stateful Widgets
+
+**Stateless Widgets**
+Widgets that display static content and do not change during runtime.
+
+**Stateful Widgets**
+Widgets that maintain internal state and update the UI dynamically using `setState()`.
+
+### Code Snippets
+
+**StatelessWidget example**
+
+```dart
+class GreetingWidget extends StatelessWidget {
+  final String name;
+
+  const GreetingWidget({required this.name});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text('Hello, $name!');
+  }
+}
+```
+
+**StatefulWidget example**
+
+```dart
+class CounterWidget extends StatefulWidget {
+  @override
+  _CounterWidgetState createState() => _CounterWidgetState();
+}
+```
+
+---
+
+## Demo Screenshots
+
+Here is how the Stateless vs Stateful screen looks and behaves.
+
+### Initial State
+
+> [Insert screenshot]
+
+### Updated State
+
+> [Insert screenshot]
+
+---
+
+## Reflection: Stateless vs Stateful
+
+**When to use StatelessWidget**
+Stateless widgets are used for UI elements that do not change after being built.
+
+**When to use StatefulWidget**
+Stateful widgets are required when UI needs to change dynamically during runtime.
+
+**How Flutter rebuilds widgets efficiently**
+Flutter rebuilds only the widgets affected by state changes instead of redrawing the entire screen.

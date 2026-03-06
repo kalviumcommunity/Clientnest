@@ -195,11 +195,11 @@ class _ProjectCard extends StatelessWidget {
           color: colorScheme.surface,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: colorScheme.outlineVariant.withOpacity(0.4),
+            color: colorScheme.outlineVariant.withValues(alpha: 0.4),
           ),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.06),
+              color: color.withValues(alpha: 0.06),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
@@ -248,7 +248,7 @@ class _ProjectCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.12),
+                    color: color.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -267,7 +267,7 @@ class _ProjectCard extends StatelessWidget {
                 project.description,
                 style: TextStyle(
                     fontSize: 13,
-                    color: colorScheme.onSurface.withOpacity(0.55)),
+                    color: colorScheme.onSurface.withValues(alpha: 0.55)),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -278,18 +278,18 @@ class _ProjectCard extends StatelessWidget {
               children: [
                 Icon(Icons.calendar_today_outlined,
                     size: 13,
-                    color: colorScheme.onSurface.withOpacity(0.45)),
+                    color: colorScheme.onSurface.withValues(alpha: 0.45)),
                 const SizedBox(width: 6),
                 Text(
                   'Due ${DateFormat('MMM dd, yyyy').format(project.deadline)}',
                   style: TextStyle(
                       fontSize: 12,
-                      color: colorScheme.onSurface.withOpacity(0.5)),
+                      color: colorScheme.onSurface.withValues(alpha: 0.5)),
                 ),
                 const Spacer(),
                 Icon(Icons.chevron_right_rounded,
                     size: 18,
-                    color: colorScheme.onSurface.withOpacity(0.3)),
+                    color: colorScheme.onSurface.withValues(alpha: 0.3)),
               ],
             ),
           ],

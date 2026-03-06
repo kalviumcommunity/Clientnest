@@ -1,3 +1,4 @@
+// ignore_for_file: prefer_const_constructors
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/project_provider.dart';
@@ -32,7 +33,7 @@ class HomeScreen extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         radius: 18,
-                        backgroundColor: colorScheme.primary.withOpacity(0.1),
+                        backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
                         backgroundImage: user?.photoURL != null ? NetworkImage(user!.photoURL!) : null,
                         child: user?.photoURL == null 
                             ? Text(user?.displayName?[0].toUpperCase() ?? 'U', style: TextStyle(color: colorScheme.primary, fontSize: 14))
@@ -45,7 +46,7 @@ class HomeScreen extends StatelessWidget {
                         children: [
                           Text('Hi, ${user?.displayName?.split(' ')[0] ?? 'Freelancer'}', 
                               style: TextStyle(color: colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 16)),
-                          Text('Ready to nest?', style: TextStyle(color: colorScheme.onSurface.withOpacity(0.5), fontSize: 10)),
+                          Text('Ready to nest?', style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.5), fontSize: 10)),
                         ],
                       ),
                     ],
@@ -151,19 +152,19 @@ class _DashboardStatTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.5)),
+        border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: color.withOpacity(0.1), shape: BoxShape.circle),
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.1), shape: BoxShape.circle),
             child: Icon(icon, color: color, size: 20),
           ),
           const SizedBox(height: 12),
           Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-          Text(label, style: TextStyle(fontSize: 12, color: colorScheme.onSurface.withOpacity(0.5))),
+          Text(label, style: TextStyle(fontSize: 12, color: colorScheme.onSurface.withValues(alpha: 0.5))),
         ],
       ),
     );
