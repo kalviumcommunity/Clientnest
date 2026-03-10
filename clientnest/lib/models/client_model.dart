@@ -7,6 +7,7 @@ class Client {
   final String email;
   final String phone;
   final String company;
+  final String notes;
   final DateTime createdAt;
 
   Client({
@@ -16,6 +17,7 @@ class Client {
     required this.email,
     required this.phone,
     required this.company,
+    required this.notes,
     required this.createdAt,
   });
 
@@ -27,6 +29,7 @@ class Client {
       email: map['email'] ?? '',
       phone: map['phone'] ?? '',
       company: map['company'] ?? '',
+      notes: map['notes'] ?? '',
       createdAt: (map['createdAt'] as Timestamp).toDate(),
     );
   }
@@ -38,6 +41,7 @@ class Client {
       'email': email,
       'phone': phone,
       'company': company,
+      'notes': notes,
       'createdAt': Timestamp.fromDate(createdAt),
     };
   }
@@ -49,6 +53,7 @@ class Client {
     String? email,
     String? phone,
     String? company,
+    String? notes,
     DateTime? createdAt,
   }) {
     return Client(
@@ -58,6 +63,7 @@ class Client {
       email: email ?? this.email,
       phone: phone ?? this.phone,
       company: company ?? this.company,
+      notes: notes ?? this.notes,
       createdAt: createdAt ?? this.createdAt,
     );
   }
