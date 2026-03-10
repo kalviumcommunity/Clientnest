@@ -11,6 +11,7 @@ import '../providers/client_provider.dart';
 import '../providers/project_provider.dart';
 import '../providers/invoice_provider.dart';
 import '../providers/time_tracker_provider.dart';
+import '../services/dummy_data_service.dart';
 
 class MainScreenWrapper extends StatefulWidget {
   const MainScreenWrapper({super.key});
@@ -68,6 +69,14 @@ class _MainScreenWrapperState extends State<MainScreenWrapper> {
         physics: const BouncingScrollPhysics(),
         children: _screens,
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => DummyDataService.seedDummyData(context),
+        icon: const Icon(Icons.add_to_drive),
+        label: const Text('Seed Dummy Data'),
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: ClipRRect(
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),

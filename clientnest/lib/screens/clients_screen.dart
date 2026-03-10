@@ -16,7 +16,7 @@ class ClientsScreen extends StatelessWidget {
         title: const Text('CRM Dashboard'),
         actions: [
           IconButton(
-            onPressed: () => _showAddClientDialog(context),
+            onPressed: () => _showAddOrEditClientDialog(context),
             icon: Icon(Icons.person_add_outlined, color: colorScheme.primary),
           ),
           const SizedBox(width: 8),
@@ -49,7 +49,11 @@ class ClientsScreen extends StatelessWidget {
             itemCount: clients.length,
             itemBuilder: (context, index) {
               final client = clients[index];
-              return _ClientCard(client: client);
+              return _ClientCard(
+                client: client,
+                onEdit: () => _showAddOrEditClientDialog(context, client: client),
+                onDelete: () => _confirmDeleteClient(context, client),
+              );
             },
           );
         },
@@ -57,69 +61,127 @@ class ClientsScreen extends StatelessWidget {
     );
   }
 
-  void _showAddClientDialog(BuildContext context) {
-    final nameController = TextEditingController();
-    final emailController = TextEditingController();
-    final companyController = TextEditingController();
-    final phoneController = TextEditingController();
+  void _confirmDeleteClient(BuildContext context, Client client) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Client'),
+        content: Text('Are you sure you want to delete ${client.name}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Provider.of<ClientProvider>(context, listen: false).deleteClient(client.id);
+              Navigator.pop(ctx);
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAddOrEditClientDialog(BuildContext context, {Client? client}) {
+    final isEditing = client != null;
+    final nameController = TextEditingController(text: client?.name ?? '');
+    final emailController = TextEditingController(text: client?.email ?? '');
+    final companyController = TextEditingController(text: client?.company ?? '');
+    final phoneController = TextEditingController(text: client?.phone ?? '');
+    final notesController = TextEditingController(text: client?.notes ?? '');
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, top: 20, left: 20, right: 20),
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          top: 20,
+          left: 20,
+          right: 20,
+        ),
         decoration: BoxDecoration(
           color: Theme.of(context).scaffoldBackgroundColor,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Add New Client', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 20),
-            _buildTextField(nameController, 'Full Name', Icons.person_outline),
-            const SizedBox(height: 12),
-            _buildTextField(emailController, 'Email Address', Icons.email_outlined),
-            const SizedBox(height: 12),
-            _buildTextField(companyController, 'Company (Optional)', Icons.business_outlined),
-            const SizedBox(height: 12),
-            _buildTextField(phoneController, 'Phone Number', Icons.phone_outlined),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () {
-                if (nameController.text.isNotEmpty) {
-                  final clientProvider = Provider.of<ClientProvider>(context, listen: false);
-                  // userId is handled by FirestoreService
-                  // I'll use a dummy for now, but I should pass userId
-                  // Actually I can get it from AuthService inside provider/service
-                  clientProvider.addClient(Client(
-                    id: '',
-                    userId: '', // Service fills this
-                    name: nameController.text,
-                    email: emailController.text,
-                    company: companyController.text,
-                    phone: phoneController.text,
-                    createdAt: DateTime.now(),
-                  ));
-                  Navigator.pop(context);
-                }
-              },
-              child: const Text('Create Profile'),
-            ),
-            const SizedBox(height: 20),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                isEditing ? 'Edit Client' : 'Add New Client',
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+              _buildTextField(nameController, 'Full Name', Icons.person_outline),
+              const SizedBox(height: 12),
+              _buildTextField(emailController, 'Email Address', Icons.email_outlined),
+              const SizedBox(height: 12),
+              _buildTextField(companyController, 'Company (Optional)', Icons.business_outlined),
+              const SizedBox(height: 12),
+              _buildTextField(phoneController, 'Phone Number', Icons.phone_outlined),
+              const SizedBox(height: 12),
+              _buildTextField(notesController, 'Notes (Optional)', Icons.notes_outlined, maxLines: 3),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  onPressed: () {
+                    if (nameController.text.isNotEmpty) {
+                      final clientProvider = Provider.of<ClientProvider>(context, listen: false);
+                      
+                      if (isEditing) {
+                        clientProvider.updateClient(
+                          client.copyWith(
+                            name: nameController.text,
+                            email: emailController.text,
+                            company: companyController.text,
+                            phone: phoneController.text,
+                            notes: notesController.text,
+                          ),
+                        );
+                      } else {
+                        clientProvider.addClient(
+                          Client(
+                            id: '',
+                            userId: '', // Service fills this
+                            name: nameController.text,
+                            email: emailController.text,
+                            company: companyController.text,
+                            phone: phoneController.text,
+                            notes: notesController.text,
+                            createdAt: DateTime.now(),
+                          ),
+                        );
+                      }
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: Text(isEditing ? 'Update Profile' : 'Create Profile'),
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label, IconData icon) {
+  Widget _buildTextField(TextEditingController controller, String label, IconData icon, {int maxLines = 1}) {
     return TextField(
       controller: controller,
+      maxLines: maxLines,
       decoration: InputDecoration(
         labelText: label,
+        alignLabelWithHint: maxLines > 1,
         prefixIcon: Icon(icon, size: 20),
       ),
     );
@@ -128,8 +190,14 @@ class ClientsScreen extends StatelessWidget {
 
 class _ClientCard extends StatelessWidget {
   final Client client;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
 
-  const _ClientCard({required this.client});
+  const _ClientCard({
+    required this.client,
+    required this.onEdit,
+    required this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -163,9 +231,37 @@ class _ClientCard extends StatelessWidget {
               ],
             ),
           ),
-          IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.chevron_right, color: colorScheme.onSurface.withValues(alpha: 0.3)),
+          PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert, color: colorScheme.onSurface.withValues(alpha: 0.5)),
+            onSelected: (value) {
+              if (value == 'edit') {
+                onEdit();
+              } else if (value == 'delete') {
+                onDelete();
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'edit',
+                child: Row(
+                  children: [
+                    Icon(Icons.edit_outlined, size: 20),
+                    SizedBox(width: 8),
+                    Text('Edit'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete_outline, size: 20, color: Colors.red),
+                    SizedBox(width: 8),
+                    Text('Delete', style: TextStyle(color: Colors.red)),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),

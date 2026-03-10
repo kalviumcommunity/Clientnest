@@ -13,6 +13,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('HomeScreen: build() called - Widget rebuild event');
     final user = Provider.of<AuthService>(context).currentUser;
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -118,6 +119,8 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 24),
+                    const _HotReloadDemo(),
                     const SizedBox(height: 100), // Space for persistent time tracker
                   ]),
                 ),
@@ -170,3 +173,98 @@ class _DashboardStatTile extends StatelessWidget {
     );
   }
 }
+
+class _HotReloadDemo extends StatefulWidget {
+  const _HotReloadDemo();
+
+  @override
+  State<_HotReloadDemo> createState() => _HotReloadDemoState();
+}
+
+class _HotReloadDemoState extends State<_HotReloadDemo> {
+  int _count = 0;
+
+  void _increment() {
+    setState(() {
+      _count++;
+      debugPrint('Button pressed. Current count: $_count');
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    debugPrint('Building _HotReloadDemo - Widget Tree can be inspected in DevTools');
+    final colorScheme = Theme.of(context).colorScheme;
+    
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Hot Reload & Debugging Demo',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Modify this widget\'s text or colours in code, then save to see Hot Reload update instantly.',
+            style: TextStyle(
+              fontSize: 12,
+              color: colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: colorScheme.primary.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  'Welcome to Clientnest',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  '$_count',
+                  style: TextStyle(
+                    fontSize: 48,
+                    fontWeight: FontWeight.w800,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton.icon(
+                  onPressed: _increment,
+                  icon: const Icon(Icons.touch_app),
+                  label: const Text('Press Me'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
