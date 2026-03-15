@@ -21,6 +21,7 @@ import 'screens/main_screen_wrapper.dart';
 import 'screens/nav_demo_home_screen.dart';
 import 'screens/details_screen.dart';
 import 'screens/responsive_layout.dart';
+import 'screens/scrollable_views.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -70,6 +71,10 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/responsive',
       builder: (context, state) => const ResponsiveLayoutScreen(),
+    ),
+    GoRoute(
+      path: '/scrollable',
+      builder: (context, state) => const ScrollableViewsScreen(),
     ),
   ],
 );
