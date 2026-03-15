@@ -19,6 +19,8 @@ import 'features/auth/login_screen.dart'    as feature_login;
 import 'features/auth/signup_screen.dart'   as feature_signup;
 import 'screens/main_screen_wrapper.dart';
 import 'screens/nav_demo_home_screen.dart';
+import 'screens/details_screen.dart';
+import 'screens/responsive_layout.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -64,6 +66,10 @@ final GoRouter _router = GoRouter(
         message: (state.extra as Map<String, dynamic>?)?['message'] as String?,
         method:  (state.extra as Map<String, dynamic>?)?['method']  as String?,
       ),
+    ),
+    GoRoute(
+      path: '/responsive',
+      builder: (context, state) => const ResponsiveLayoutScreen(),
     ),
   ],
 );
