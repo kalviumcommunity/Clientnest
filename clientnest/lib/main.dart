@@ -22,6 +22,7 @@ import 'screens/nav_demo_home_screen.dart';
 import 'screens/details_screen.dart';
 import 'screens/responsive_layout.dart';
 import 'screens/scrollable_views.dart';
+import 'screens/user_input_form.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -75,6 +76,10 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/scrollable-dashboard',
       builder: (context, state) => const ScrollableViewsScreen(),
+    ),
+    GoRoute(
+      path: '/add-client',
+      builder: (context, state) => const UserInputForm(),
     ),
   ],
 );
