@@ -1,3 +1,5 @@
+rootProject.name = "first_flutter_app"
+
 pluginManagement {
     val flutterSdkPath =
         run {

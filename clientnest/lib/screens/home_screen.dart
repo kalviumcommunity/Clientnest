@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/project_provider.dart';
 import '../providers/invoice_provider.dart';
 import '../services/auth_service.dart';
@@ -47,7 +48,7 @@ class HomeScreen extends StatelessWidget {
                         children: [
                           Text('Hi, ${user?.displayName?.split(' ')[0] ?? 'Freelancer'}', 
                               style: TextStyle(color: colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 16)),
-                          Text('Ready to nest?', style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.5), fontSize: 10)),
+                          Text('Home Screen', style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.5), fontSize: 10)),
                         ],
                       ),
                     ],
@@ -121,6 +122,25 @@ class HomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
                     const _HotReloadDemo(),
+                    const SizedBox(height: 24),
+                    Center(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                        ),
+                        onPressed: () {
+                          Navigator.pushNamed(
+                            context,
+                            '/details',
+                            arguments: "Hello from Home Screen",
+                          );
+                        },
+                        child: const Text('Go to Details'),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    // ── Navigator Demo entry card ─────────────────────────────
+                    _NavigatorDemoCard(),
                     const SizedBox(height: 100), // Space for persistent time tracker
                   ]),
                 ),
@@ -268,3 +288,89 @@ class _HotReloadDemoState extends State<_HotReloadDemo> {
   }
 }
 
+// ────────────────────────────────────────────────────────────────────────────
+// Navigator Demo Entry Card (shown on Home dashboard)
+// ────────────────────────────────────────────────────────────────────────────
+
+class _NavigatorDemoCard extends StatelessWidget {
+  const _NavigatorDemoCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          debugPrint('HomeScreen: Navigating to /nav-demo via GoRouter');
+          context.push('/nav-demo');
+        },
+        borderRadius: BorderRadius.circular(20),
+        child: Ink(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                const Color(0xFF6366F1).withValues(alpha: 0.08),
+                const Color(0xFF8B5CF6).withValues(alpha: 0.08),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: const Color(0xFF6366F1).withValues(alpha: 0.25),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF6366F1).withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Icon(
+                    Icons.route_rounded,
+                    color: Color(0xFF6366F1),
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Navigator API Demo',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF6366F1),
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        'Explore push(), pop() & named routes',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: colorScheme.onSurface.withValues(alpha: 0.55),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: const Color(0xFF6366F1).withValues(alpha: 0.6),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

@@ -1,3 +1,5 @@
+rootProject.name = "clientnest"
+
 pluginManagement {
     val flutterSdkPath =
         run {

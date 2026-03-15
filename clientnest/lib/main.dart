@@ -18,6 +18,7 @@ import 'features/auth/landing_page.dart';
 import 'features/auth/login_screen.dart'    as feature_login;
 import 'features/auth/signup_screen.dart'   as feature_signup;
 import 'screens/main_screen_wrapper.dart';
+import 'screens/nav_demo_home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,6 +52,18 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/home',
       builder: (context, state) => const MainScreenWrapper(),
+    ),
+    // ── Navigation Demo routes ──────────────────────────────────────────────
+    GoRoute(
+      path: '/nav-demo',
+      builder: (context, state) => const NavDemoHomeScreen(),
+    ),
+    GoRoute(
+      path: '/details',
+      builder: (context, state) => DetailsScreen(
+        message: (state.extra as Map<String, dynamic>?)?['message'] as String?,
+        method:  (state.extra as Map<String, dynamic>?)?['method']  as String?,
+      ),
     ),
   ],
 );
