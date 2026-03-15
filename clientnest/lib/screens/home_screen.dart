@@ -9,6 +9,7 @@ import '../shared/widgets/dashboard_widgets.dart';
 import '../shared/widgets/time_tracker_widget.dart';
 import '../models/project_model.dart';
 import '../widgets/client_card.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -120,9 +121,9 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ),
                       ],
-                    ),
+                    ).animate().fadeIn(duration: 500.ms).slideX(begin: -0.1),
                     const SizedBox(height: 24),
-                    const _HotReloadDemo(),
+                    const _HotReloadDemo().animate().fadeIn(delay: 200.ms, duration: 500.ms),
                     const SizedBox(height: 24),
                     Center(
                       child: ElevatedButton(
@@ -138,10 +139,10 @@ class HomeScreen extends StatelessWidget {
                         },
                         child: const Text('Go to Details'),
                       ),
-                    ),
+                    ).animate().scale(delay: 400.ms),
                     const SizedBox(height: 24),
                     // ── Navigator Demo entry card ─────────────────────────────
-                    _NavigatorDemoCard(),
+                    _NavigatorDemoCard().animate().fadeIn(delay: 600.ms),
                     const SizedBox(height: 32),
                     
                     // --- Our Top Clients Section ---
@@ -154,26 +155,28 @@ class HomeScreen extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
+                    ).animate().fadeIn(delay: 800.ms),
                     const SizedBox(height: 16),
-                    const ClientCard(
-                      clientName: 'Alex Johnson',
-                      companyName: 'Tech Solutions',
-                      status: 'Active',
-                      icon: Icons.person_rounded,
-                    ),
-                    const ClientCard(
-                      clientName: 'Maria Garcia',
-                      companyName: 'Design Co',
-                      status: 'Pending',
-                      icon: Icons.person_add_rounded,
-                    ),
-                    const ClientCard(
-                      clientName: 'Global Inc',
-                      companyName: 'Corporate Hub',
-                      status: 'Active',
-                      icon: Icons.business_rounded,
-                    ),
+                    ...[
+                      const ClientCard(
+                        clientName: 'Alex Johnson',
+                        companyName: 'Tech Solutions',
+                        status: 'Active',
+                        icon: Icons.person_rounded,
+                      ),
+                      const ClientCard(
+                        clientName: 'Maria Garcia',
+                        companyName: 'Design Co',
+                        status: 'Pending',
+                        icon: Icons.person_add_rounded,
+                      ),
+                      const ClientCard(
+                        clientName: 'Global Inc',
+                        companyName: 'Corporate Hub',
+                        status: 'Active',
+                        icon: Icons.business_rounded,
+                      ),
+                    ].animate(interval: 100.ms).fadeIn(delay: 900.ms).slideY(begin: 0.1),
                     
                     const SizedBox(height: 100), // Space for persistent time tracker
                   ]),
