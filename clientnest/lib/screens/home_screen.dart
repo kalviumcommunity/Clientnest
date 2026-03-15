@@ -8,6 +8,7 @@ import '../services/auth_service.dart';
 import '../shared/widgets/dashboard_widgets.dart';
 import '../shared/widgets/time_tracker_widget.dart';
 import '../models/project_model.dart';
+import '../widgets/client_card.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -141,6 +142,39 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(height: 24),
                     // ── Navigator Demo entry card ─────────────────────────────
                     _NavigatorDemoCard(),
+                    const SizedBox(height: 32),
+                    
+                    // --- Our Top Clients Section ---
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4),
+                      child: Text(
+                        'Top Clients',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const ClientCard(
+                      clientName: 'Alex Johnson',
+                      companyName: 'Tech Solutions',
+                      status: 'Active',
+                      icon: Icons.person_rounded,
+                    ),
+                    const ClientCard(
+                      clientName: 'Maria Garcia',
+                      companyName: 'Design Co',
+                      status: 'Pending',
+                      icon: Icons.person_add_rounded,
+                    ),
+                    const ClientCard(
+                      clientName: 'Global Inc',
+                      companyName: 'Corporate Hub',
+                      status: 'Active',
+                      icon: Icons.business_rounded,
+                    ),
+                    
                     const SizedBox(height: 100), // Space for persistent time tracker
                   ]),
                 ),
