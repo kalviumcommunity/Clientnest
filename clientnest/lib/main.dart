@@ -23,6 +23,7 @@ import 'screens/details_screen.dart';
 import 'screens/responsive_layout.dart';
 import 'screens/scrollable_views.dart';
 import 'screens/user_input_form.dart';
+import 'screens/state_management_demo.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -80,6 +81,10 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/add-client',
       builder: (context, state) => const UserInputForm(),
+    ),
+    GoRoute(
+      path: '/activity-tracker',
+      builder: (context, state) => const StateManagementDemo(),
     ),
   ],
 );
