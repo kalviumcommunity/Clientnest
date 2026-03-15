@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/client_card.dart';
 
 class DetailsScreen extends StatelessWidget {
   final String? message;
@@ -23,11 +24,27 @@ class DetailsScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: Center(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              const Text(
+                'Client Detail Summary',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const ClientCard(
+                clientName: 'Featured Client',
+                companyName: 'Premium Partner LLC',
+                status: 'Active',
+                icon: Icons.star_rounded,
+              ),
+              const SizedBox(height: 32),
               if (displayMessage != null) ...[
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
