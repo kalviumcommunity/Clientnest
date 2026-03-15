@@ -27,6 +27,7 @@ import 'screens/state_management_demo.dart';
 import 'screens/responsive_dashboard.dart';
 import 'screens/assets_demo_screen.dart';
 import 'screens/animation_demo_screen.dart';
+import 'screens/firebase_status_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -100,6 +101,10 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/animation-demo',
       builder: (context, state) => const AnimationDemoScreen(),
+    ),
+    GoRoute(
+      path: '/firebase-status',
+      builder: (context, state) => const FirebaseStatusScreen(),
     ),
   ],
 );
