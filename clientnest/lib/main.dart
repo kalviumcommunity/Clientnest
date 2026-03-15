@@ -25,6 +25,7 @@ import 'screens/scrollable_views.dart';
 import 'screens/user_input_form.dart';
 import 'screens/state_management_demo.dart';
 import 'screens/responsive_dashboard.dart';
+import 'screens/assets_demo_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -90,6 +91,10 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/responsive-dashboard',
       builder: (context, state) => const ResponsiveDashboard(),
+    ),
+    GoRoute(
+      path: '/assets-demo',
+      builder: (context, state) => const AssetsDemoScreen(),
     ),
   ],
 );
