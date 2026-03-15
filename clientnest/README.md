@@ -332,3 +332,166 @@ Stateful widgets are required when UI needs to change dynamically during runtime
 
 **How Flutter rebuilds widgets efficiently**
 Flutter rebuilds only the widgets affected by state changes instead of redrawing the entire screen.
+
+---
+
+## Screen Navigation — Flutter Navigator API
+
+This section documents the navigation architecture added in the **Stateful-Widgets** branch.
+
+### Navigation Flow
+
+```
+MainScreenWrapper (bottom nav)
+    └── HomeScreen  (dashboard tab)
+            └── [Navigator API Demo card]
+                        └── NavDemoHomeScreen   ← /nav-demo
+                                ├── Navigator.push()    → DetailsScreen
+                                └── Navigator.pushNamed()  → /details  → DetailsScreen
+                                            └── Navigator.pop() → back to NavDemoHomeScreen
+```
+
+---
+
+### Named Routes Configuration (GoRouter)
+
+The app uses **GoRouter** for declarative, URL-based navigation. Named paths are registered in `main.dart`:
+
+```dart
+final GoRouter _router = GoRouter(
+  initialLocation: '/',
+  routes: [
+    GoRoute(path: '/',           builder: (_, __) => const SplashScreen()),
+    GoRoute(path: '/auth-wrapper', builder: (_, __) => const AuthWrapper()),
+    GoRoute(path: '/landing',    builder: (_, __) => const LandingPage()),
+    GoRoute(path: '/login',      builder: (_, __) => const LoginScreen()),
+    GoRoute(path: '/signup',     builder: (_, __) => const SignupScreen()),
+    GoRoute(path: '/home',       builder: (_, __) => const MainScreenWrapper()),
+
+    // ── Navigation Demo ───────────────────────────────────────────────────
+    GoRoute(path: '/nav-demo',   builder: (_, __) => const NavDemoHomeScreen()),
+    GoRoute(
+      path: '/details',
+      builder: (context, state) => DetailsScreen(
+        message: (state.extra as Map<String, dynamic>?)?['message'] as String?,
+        method:  (state.extra as Map<String, dynamic>?)?['method']  as String?,
+      ),
+    ),
+  ],
+);
+```
+
+---
+
+### Navigator.push()
+
+Imperatively pushes a new route onto the Navigator stack with a custom slide transition.
+
+```dart
+Navigator.push(
+  context,
+  PageRouteBuilder(
+    pageBuilder: (_, animation, __) => const DetailsScreen(
+      message: 'Navigated via Navigator.push() 🚀',
+      method: 'Navigator.push',
+    ),
+    transitionsBuilder: (_, animation, __, child) {
+      return SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(1, 0),
+          end: Offset.zero,
+        ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
+        child: child,
+      );
+    },
+  ),
+);
+```
+
+---
+
+### Navigator.pushNamed() (via GoRouter context.push)
+
+Navigates to a named route and passes typed arguments via GoRouter's `extra`:
+
+```dart
+// In NavDemoHomeScreen:
+context.push('/details', extra: {
+  'message': 'Navigated via Navigator.pushNamed() 📌',
+  'method': 'Navigator.pushNamed',
+});
+```
+
+Receiving arguments in DetailsScreen:
+
+```dart
+// Via GoRouter extra:
+final goExtra = GoRouterState.of(context).extra;
+if (goExtra is Map<String, dynamic>) {
+  final message = goExtra['message'] as String?;
+  final method  = goExtra['method']  as String?;
+}
+
+// Via legacy ModalRoute (also supported):
+final message = ModalRoute.of(context)!.settings.arguments as String?;
+```
+
+---
+
+### Navigator.pop()
+
+Removes the current route from the stack, returning to the previous screen:
+
+```dart
+// In DetailsScreen — tapping the back button:
+Navigator.pop(context);
+
+// Or via GoRouter:
+context.pop();
+```
+
+---
+
+### Demo Screenshots
+
+#### Home Screen — Navigator Demo Card
+> Run `flutter run`, log in, go to the Home tab, and capture the **"Navigator API Demo"** card.
+
+#### NavDemoHomeScreen
+> Tap the card to open `/nav-demo` and screenshot the two method cards.
+
+#### DetailsScreen
+> Navigate to DetailsScreen via either method and screenshot the data-received banner.
+
+---
+
+## Reflection — Navigator API
+
+### 1. What is the role of the Navigator in Flutter?
+
+The `Navigator` is Flutter's built-in widget that manages a **stack of routes** (screens). It provides an imperative API (`push`, `pop`, `pushReplacement`, etc.) allowing you to move between screens at runtime. Each `MaterialApp` creates a default `Navigator` at the root — GoRouter builds on top of it to add declarative, URL-aware routing. Screens lower in the stack remain in memory (their widget tree is preserved), so popping back is instant.
+
+### 2. Why are named routes useful in larger applications?
+
+Named routes (`'/details'`, `'/home'`, `'/profile'`) decouple navigation calls from concrete widget imports. Benefits include:
+
+- **Decoupling** — any widget can navigate to `'/details'` without importing the `DetailsScreen` file, reducing coupling between features.
+- **Deep linking** — URL-based paths enable direct navigation from notifications or web URLs.
+- **Central route registry** — all routes live in one place (`GoRouter` config in `main.dart`), making the navigation graph easy to audit and refactor.
+- **Guards & middleware** — GoRouter supports `redirect` callbacks, making it trivial to protect routes behind auth checks without modifying individual screens.
+
+### 3. How does Flutter manage the navigation stack?
+
+Flutter's `Navigator` maintains an ordered list of `Route` objects. Key mechanics:
+
+| Operation | Effect on Stack |
+|---|---|
+| `Navigator.push(route)` | Adds `route` on top; previous screen stays alive below |
+| `Navigator.pop()` | Removes top route; screen below becomes active |
+| `Navigator.pushReplacement(route)` | Replaces top route; previous screen is disposed |
+| `Navigator.pushAndRemoveUntil(route, pred)` | Pushes route and removes all routes below that don't match `pred` |
+| `GoRouter context.push(path)` | Delegate to Navigator.push via GoRouter's internal controller |
+| `GoRouter context.go(path)` | Replaces the entire stack with the new path (unlike push) |
+
+When `pop()` is called, Flutter disposes the popped route's widget tree, calls `dispose()` on any `AnimationController`s or streams in that route, and hands focus back to the route below — all in a single frame.
+
