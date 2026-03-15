@@ -28,10 +28,19 @@ import 'screens/responsive_dashboard.dart';
 import 'screens/assets_demo_screen.dart';
 import 'screens/animation_demo_screen.dart';
 import 'screens/firebase_status_screen.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  
+  // Initialize Firebase only if it hasn't been initialized yet
+  if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    debugPrint('Firebase initialized successfully.');
+  }
+  
   runApp(const ClientNestApp());
 }
 
