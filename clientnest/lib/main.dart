@@ -73,7 +73,7 @@ final GoRouter _router = GoRouter(
       builder: (context, state) => const ResponsiveLayoutScreen(),
     ),
     GoRoute(
-      path: '/scrollable',
+      path: '/scrollable-dashboard',
       builder: (context, state) => const ScrollableViewsScreen(),
     ),
   ],
