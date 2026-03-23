@@ -5,13 +5,12 @@ import 'projects_screen.dart';
 import 'clients_screen.dart';
 import 'payments_screen.dart';
 import 'calendar_screen.dart';
-
 import 'package:provider/provider.dart';
 import '../providers/client_provider.dart';
 import '../providers/project_provider.dart';
 import '../providers/invoice_provider.dart';
 import '../providers/time_tracker_provider.dart';
-
+import '../shared/widgets/premium_background.dart';
 
 class MainScreenWrapper extends StatefulWidget {
   const MainScreenWrapper({super.key});
@@ -59,15 +58,17 @@ class _MainScreenWrapperState extends State<MainScreenWrapper> {
 
     return Scaffold(
       extendBody: true,
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        physics: const BouncingScrollPhysics(),
-        children: _screens,
+      body: PremiumBackground(
+        child: PageView(
+          controller: _pageController,
+          onPageChanged: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+          physics: const BouncingScrollPhysics(),
+          children: _screens,
+        ),
       ),
       bottomNavigationBar: ClipRRect(
         child: BackdropFilter(

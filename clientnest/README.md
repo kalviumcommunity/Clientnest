@@ -1,51 +1,65 @@
-# ClientNest
+# ClientNest - Premium Freelancer Workspace
 
-A Flutter-based **Freelancer Management App** for tracking clients, projects, payments, and tasks — powered by Firebase (Authentication + Firestore).
+ClientNest is a high-end Workspace built specifically for the modern freelancer to organize clients, track project progress, and manage finances with a premium, glassmorphism-inspired UI.
 
-## 🔐 Secure User Authentication
+## 🔐 Secure User Authentication System
 
-ClientNest uses **Firebase Authentication** to provide a secure and reliable entry point for freelancers. It supports both traditional Email & Password sign-ups and modern Google Sign-In.
+This application implements a complete authentication flow using **Firebase Authentication**, featuring real-time session tracking and automatic navigation based on user state.
 
-### Setup Instructions
+### 🚀 How it Works
+The authentication system uses a `StreamBuilder` that listens to `authStateChanges()`. 
+- **Logged Out**: The app automatically shows the `LandingPage` and provides access to Signup/Login screens.
+- **Logged In**: The system automatically redirects the user to the `HomeScreen` (Dashboard) without manual navigation logic.
+- **Logout**: Calling `signOut()` triggers the stream to update, instantly returning the user to the auth flow.
 
-To enable authentication in your own instance:
-1. **Enable Email & Password**:
-   - Open [Firebase Console](https://console.firebase.google.com/) → **Authentication** → **Sign-in method**.
-   - Select **Email/Password** and click **Enable**, then hit **Save**.
-2. **Initialize Firebase**: Ensure `firebase_core` and `firebase_auth` are in your `pubspec.yaml`.
-3. **Configure Options**: Run `flutterfire configure` to generate your `firebase_options.dart`.
+### 🛠️ Implementation Details
 
-### Features
-- **Sign Up**: Create new accounts with email, password, and display name.
-- **Login**: Securely access your freelance dashboard.
-- **Google Auth**: One-tap access using Google accounts.
-- **Session Persistence**: Automatic login on app launch via `authStateChanges()`.
-
-### Implementation Details
-
-**Signup Logic:**
+#### **1. Real-time Auth State (StreamBuilder)**
+Located in `lib/main.dart`, this ensures the app is always in the correct state:
 ```dart
-await FirebaseAuth.instance.createUserWithEmailAndPassword(
-  email: email,
-  password: password,
-);
+StreamBuilder<User?>(
+  stream: FirebaseAuth.instance.authStateChanges(),
+  builder: (context, snapshot) {
+    if (snapshot.connectionState == ConnectionState.active) {
+      final User? user = snapshot.data;
+      if (user == null) {
+        return const LandingPage();
+      }
+      return const MainScreenWrapper();
+    }
+    return const SplashScreen();
+  },
+)
 ```
 
-**Login Logic:**
+#### **2. User Sign Up**
 ```dart
-await FirebaseAuth.instance.signInWithEmailAndPassword(
-  email: email,
-  password: password,
-);
+Future<UserCredential> signUp(String email, String password, String name) async {
+  final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+    email: email, 
+    password: password,
+  );
+  await userCredential.user?.updateDisplayName(name);
+  return userCredential;
+}
 ```
 
-**Session Tracking:**
+#### **3. User Login**
 ```dart
-FirebaseAuth.instance.authStateChanges().listen((User? user) {
-  if (user != null) {
-    debugPrint("Logged in as ${user.email}");
-  }
-});
+Future<UserCredential> login(String email, String password) async {
+  return await FirebaseAuth.instance.signInWithEmailAndPassword(
+    email: email, 
+    password: password,
+  );
+}
+```
+
+#### **4. Secure Logout**
+```dart
+Future<void> logout() async {
+  await FirebaseAuth.instance.signOut();
+  await GoogleSignIn().signOut();
+}
 ```
 
 ---
