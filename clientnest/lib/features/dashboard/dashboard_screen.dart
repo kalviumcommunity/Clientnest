@@ -13,6 +13,7 @@ import '../../providers/client_provider.dart';
 import '../../models/project_model.dart';
 import '../../screens/projects/create_project_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../shared/widgets/premium_background.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -161,9 +162,9 @@ class DashboardScreen extends StatelessWidget {
         }
 
         return Scaffold(
+          backgroundColor: Colors.transparent,
           body: Stack(
             children: [
-              const _DashboardBackground(),
               CustomScrollView(
                 physics: const BouncingScrollPhysics(),
                 slivers: [
@@ -257,8 +258,6 @@ class DashboardScreen extends StatelessWidget {
   Widget _buildDashboardContent(BuildContext context) {
     return Consumer3<ProjectProvider, ClientProvider, InvoiceProvider>(
       builder: (context, projectProvider, clientProvider, invoiceProvider, child) {
-        debugPrint('DashboardContent: ProjectLoad=${projectProvider.isLoading}, Error=${projectProvider.error}');
-
         if (projectProvider.error != null) {
           return ErrorStateWidget(
             error: projectProvider.error!,
@@ -311,9 +310,9 @@ class DashboardScreen extends StatelessWidget {
     final activeCount = projectProvider.projects
         .where((p) => p.status == ProjectStatus.active)
         .length;
-    final pendingTasksCount = projectProvider.projects
+    final pendingWorkCount = projectProvider.projects
         .where((p) => p.status != ProjectStatus.completed)
-        .length; // placeholder: count non-completed projects as proxy for pending work
+        .length;
 
     return GridView.count(
       shrinkWrap: true,
@@ -333,7 +332,7 @@ class DashboardScreen extends StatelessWidget {
         _buildStatCard(
           context,
           'Pending Work',
-          pendingTasksCount.toString(),
+          pendingWorkCount.toString(),
           Icons.pending_actions_rounded,
           const Color(0xFFF59E0B),
         ),
@@ -401,44 +400,5 @@ class DashboardScreen extends StatelessWidget {
         .animate()
         .fadeIn(delay: 600.ms)
         .slideY(begin: 0.1);
-  }
-}
-
-class _DashboardBackground extends StatelessWidget {
-  const _DashboardBackground();
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Stack(
-      children: [
-        Positioned(
-          top: -150,
-          left: -100,
-          child: Container(
-            width: 400,
-            height: 400,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: colorScheme.primary.withValues(alpha: 0.03),
-            ),
-          ).animate(onPlay: (c) => c.repeat(reverse: true))
-           .scale(duration: 8.seconds, begin: const Offset(1, 1), end: const Offset(1.1, 1.1)),
-        ),
-        Positioned(
-          top: 200,
-          right: -150,
-          child: Container(
-            width: 350,
-            height: 350,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: colorScheme.secondary.withValues(alpha: 0.03),
-            ),
-          ).animate(onPlay: (c) => c.repeat(reverse: true))
-           .scale(duration: 10.seconds, begin: const Offset(1, 1), end: const Offset(1.2, 1.2)),
-        ),
-      ],
-    );
   }
 }

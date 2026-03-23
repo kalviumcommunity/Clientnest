@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../providers/client_provider.dart';
 import '../models/client_model.dart';
 import '../shared/widgets/dashboard_widgets.dart';
+import '../shared/widgets/premium_background.dart';
 
 class ClientsScreen extends StatelessWidget {
   const ClientsScreen({super.key});
@@ -14,10 +15,15 @@ class ClientsScreen extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         title: Text(
           'CRM Dashboard',
-          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900, letterSpacing: -1),
         ),
         actions: [
           IconButton(
@@ -29,42 +35,42 @@ class ClientsScreen extends StatelessWidget {
         ],
       ),
       body: Consumer<ClientProvider>(
-        builder: (context, provider, child) {
-          if (provider.error != null) {
-            return ErrorStateWidget(
-              error: provider.error!,
-              onRetry: () => provider.fetchClients(),
+          builder: (context, provider, child) {
+            if (provider.error != null) {
+              return ErrorStateWidget(
+                error: provider.error!,
+                onRetry: () => provider.fetchClients(),
+              );
+            }
+
+            if (provider.isLoading && provider.clients.isEmpty) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            
+            final clients = provider.clients;
+            if (clients.isEmpty) {
+              return const EmptyStateWidget(
+                title: 'No Clients Found',
+                message: 'Get started by adding your first client profile.',
+                icon: Icons.person_add_rounded,
+              ).animate().fadeIn();
+            }
+
+            return ListView.builder(
+              padding: const EdgeInsets.only(left: 20, right: 20, top: 100, bottom: 100),
+              physics: const BouncingScrollPhysics(),
+              itemCount: clients.length,
+              itemBuilder: (context, index) {
+                final client = clients[index];
+                return _ClientCard(
+                  client: client,
+                  onEdit: () => _showAddOrEditClientDialog(context, client: client),
+                  onDelete: () => _confirmDeleteClient(context, client),
+                ).animate().fadeIn(duration: 400.ms, delay: (index * 50).ms).slideX(begin: 0.1, end: 0);
+              },
             );
-          }
-
-          if (provider.isLoading && provider.clients.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          
-          final clients = provider.clients;
-          if (clients.isEmpty) {
-            return const EmptyStateWidget(
-              title: 'No Clients Found',
-              message: 'Get started by adding your first client profile.',
-              icon: Icons.person_add_rounded,
-            ).animate().fadeIn();
-          }
-
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            physics: const BouncingScrollPhysics(),
-            itemCount: clients.length,
-            itemBuilder: (context, index) {
-              final client = clients[index];
-              return _ClientCard(
-                client: client,
-                onEdit: () => _showAddOrEditClientDialog(context, client: client),
-                onDelete: () => _confirmDeleteClient(context, client),
-              ).animate().fadeIn(duration: 400.ms, delay: (index * 50).ms).slideX(begin: 0.1, end: 0);
-            },
-          );
-        },
-      ),
+          },
+        ),
     );
   }
 
@@ -343,4 +349,3 @@ class _ClientCard extends StatelessWidget {
     );
   }
 }
-

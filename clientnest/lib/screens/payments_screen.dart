@@ -6,6 +6,7 @@ import '../providers/invoice_provider.dart';
 import '../services/pdf_service.dart';
 import '../models/invoice_model.dart';
 import '../shared/widgets/dashboard_widgets.dart';
+import '../shared/widgets/premium_background.dart';
 
 class PaymentsScreen extends StatelessWidget {
   const PaymentsScreen({super.key});
@@ -16,10 +17,15 @@ class PaymentsScreen extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         title: Text(
           'Financial Suite',
-          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900, letterSpacing: -1),
         ),
         actions: [
           IconButton(
@@ -31,40 +37,40 @@ class PaymentsScreen extends StatelessWidget {
         ],
       ),
       body: Consumer<InvoiceProvider>(
-        builder: (context, provider, child) {
-          if (provider.error != null) {
-            return ErrorStateWidget(
-              error: provider.error!,
-              onRetry: () => provider.fetchInvoices(),
+          builder: (context, provider, child) {
+            if (provider.error != null) {
+              return ErrorStateWidget(
+                error: provider.error!,
+                onRetry: () => provider.fetchInvoices(),
+              );
+            }
+
+            if (provider.isLoading && provider.invoices.isEmpty) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final invoices = provider.invoices;
+            if (invoices.isEmpty) {
+              return const EmptyStateWidget(
+                title: 'No Invoices',
+                message: 'Your financial portfolio is empty. Create your first invoice to get started.',
+                icon: Icons.receipt_long_rounded,
+              ).animate().fadeIn();
+            }
+
+            return ListView.builder(
+              padding: const EdgeInsets.only(left: 20, right: 20, top: 100, bottom: 100),
+              physics: const BouncingScrollPhysics(),
+              itemCount: invoices.length,
+              itemBuilder: (context, index) {
+                return _InvoiceCard(invoice: invoices[index])
+                    .animate()
+                    .fadeIn(duration: 400.ms, delay: (index * 50).ms)
+                    .slideY(begin: 0.1, end: 0);
+              },
             );
-          }
-
-          if (provider.isLoading && provider.invoices.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          final invoices = provider.invoices;
-          if (invoices.isEmpty) {
-            return const EmptyStateWidget(
-              title: 'No Invoices',
-              message: 'Your financial portfolio is empty. Create your first invoice to get started.',
-              icon: Icons.receipt_long_rounded,
-            ).animate().fadeIn();
-          }
-
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            physics: const BouncingScrollPhysics(),
-            itemCount: invoices.length,
-            itemBuilder: (context, index) {
-              return _InvoiceCard(invoice: invoices[index])
-                  .animate()
-                  .fadeIn(duration: 400.ms, delay: (index * 50).ms)
-                  .slideY(begin: 0.1, end: 0);
-            },
-          );
-        },
-      ),
+          },
+        ),
     );
   }
 
@@ -192,4 +198,3 @@ class _InvoiceCard extends StatelessWidget {
     );
   }
 }
-

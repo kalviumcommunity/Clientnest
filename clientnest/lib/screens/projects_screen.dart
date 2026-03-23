@@ -6,8 +6,9 @@ import '../providers/time_tracker_provider.dart';
 import '../models/project_model.dart';
 import 'package:intl/intl.dart';
 import '../shared/widgets/dashboard_widgets.dart';
-import 'projects/create_project_screen.dart';
-import 'projects/project_detail_screen.dart';
+import '../screens/projects/create_project_screen.dart';
+import '../screens/projects/project_detail_screen.dart';
+import '../shared/widgets/premium_background.dart';
 
 class ProjectsScreen extends StatefulWidget {
   const ProjectsScreen({super.key});
@@ -37,10 +38,15 @@ class _ProjectsScreenState extends State<ProjectsScreen> with SingleTickerProvid
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         title: Text(
           'Project Nest',
-          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900, letterSpacing: -1),
         ),
         bottom: TabBar(
           controller: _tabController,
@@ -58,42 +64,45 @@ class _ProjectsScreenState extends State<ProjectsScreen> with SingleTickerProvid
         ),
       ),
       body: Consumer<ProjectProvider>(
-        builder: (context, provider, child) {
-          if (provider.error != null) {
-            return ErrorStateWidget(
-              error: provider.error!,
-              onRetry: () => provider.fetchProjects(),
+          builder: (context, provider, child) {
+            if (provider.error != null) {
+              return ErrorStateWidget(
+                error: provider.error!,
+                onRetry: () => provider.fetchProjects(),
+              );
+            }
+
+            if (provider.isLoading && provider.projects.isEmpty) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final leads = provider.projects.where((p) => p.status == ProjectStatus.lead).toList();
+            final active = provider.projects.where((p) => p.status == ProjectStatus.active).toList();
+            final completed = provider.projects.where((p) => p.status == ProjectStatus.completed).toList();
+
+            return TabBarView(
+              controller: _tabController,
+              physics: const BouncingScrollPhysics(),
+              children: [
+                _ProjectListView(projects: leads, emptyMsg: 'No leads found.', icon: Icons.local_fire_department_rounded),
+                _ProjectListView(projects: active, emptyMsg: 'No active projects.', icon: Icons.rocket_launch_rounded),
+                _ProjectListView(projects: completed, emptyMsg: 'No completed projects yet.', icon: Icons.task_alt_rounded),
+              ],
             );
-          }
-
-          if (provider.isLoading && provider.projects.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          final leads = provider.projects.where((p) => p.status == ProjectStatus.lead).toList();
-          final active = provider.projects.where((p) => p.status == ProjectStatus.active).toList();
-          final completed = provider.projects.where((p) => p.status == ProjectStatus.completed).toList();
-
-          return TabBarView(
-            controller: _tabController,
-            physics: const BouncingScrollPhysics(),
-            children: [
-              _ProjectListView(projects: leads, emptyMsg: 'No leads found.', icon: Icons.local_fire_department_rounded),
-              _ProjectListView(projects: active, emptyMsg: 'No active projects.', icon: Icons.rocket_launch_rounded),
-              _ProjectListView(projects: completed, emptyMsg: 'No completed projects yet.', icon: Icons.task_alt_rounded),
-            ],
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'projects_screen_fab',
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const CreateProjectScreen()),
+          },
         ),
-        label: const Text('Add Nest', style: TextStyle(fontWeight: FontWeight.bold)),
-        icon: const Icon(Icons.add),
-        elevation: 4,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 80),
+        child: FloatingActionButton.extended(
+          heroTag: 'projects_screen_fab',
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const CreateProjectScreen()),
+          ),
+          label: const Text('Add Nest', style: TextStyle(fontWeight: FontWeight.bold)),
+          icon: const Icon(Icons.add),
+          elevation: 4,
+        ),
       ),
     );
   }
@@ -117,7 +126,7 @@ class _ProjectListView extends StatelessWidget {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: const EdgeInsets.only(left: 20, right: 20, top: 160, bottom: 100),
       physics: const BouncingScrollPhysics(),
       itemCount: projects.length,
       itemBuilder: (context, index) => _ProjectCard(project: projects[index])
@@ -267,4 +276,3 @@ class _ProjectCard extends StatelessWidget {
     );
   }
 }
-
