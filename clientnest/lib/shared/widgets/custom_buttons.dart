@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class CustomButton extends StatelessWidget {
   final String text;
@@ -109,46 +110,51 @@ class CustomButton extends StatelessWidget {
 
 class SocialButton extends StatelessWidget {
   final String text;
-  final String iconPath;
+  final String? iconPath;
   final VoidCallback? onPressed;
 
   const SocialButton({
     super.key,
     required this.text,
-    required this.iconPath,
+    this.iconPath,
     this.onPressed,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return OutlinedButton(
       onPressed: onPressed,
       style: OutlinedButton.styleFrom(
-        minimumSize: const Size(double.infinity, 56),
+        minimumSize: const Size(double.infinity, 60),
         side: BorderSide(
-          color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.2),
+          color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.15),
         ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        backgroundColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.transparent,
+        backgroundColor: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.white,
+        elevation: isDark ? 0 : 1,
+        shadowColor: Colors.black.withValues(alpha: 0.05),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image.network(
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png',
+          SvgPicture.network(
+            'https://www.vectorlogo.zone/logos/google/google-icon.svg',
             height: 24,
+            placeholderBuilder: (_) => const Icon(Icons.g_mobiledata),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
           Text(
             text,
             style: TextStyle(
               fontSize: 16,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
               color: isDark ? Colors.white : Colors.black87,
+              letterSpacing: 0.2,
             ),
           ),
         ],
