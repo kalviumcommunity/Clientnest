@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../providers/project_provider.dart';
 import '../providers/time_tracker_provider.dart';
 import '../models/project_model.dart';
@@ -25,14 +26,30 @@ class _ProjectsScreenState extends State<ProjectsScreen> with SingleTickerProvid
   }
 
   @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Project Nest'),
+        title: Text(
+          'Project Nest',
+          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+        ),
         bottom: TabBar(
           controller: _tabController,
           indicatorSize: TabBarIndicatorSize.label,
           labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal),
+          indicatorColor: colorScheme.primary,
+          indicatorWeight: 3,
+          dividerColor: Colors.transparent,
           tabs: const [
             Tab(text: 'Leads'),
             Tab(text: 'Active'),
@@ -59,6 +76,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> with SingleTickerProvid
 
           return TabBarView(
             controller: _tabController,
+            physics: const BouncingScrollPhysics(),
             children: [
               _ProjectListView(projects: leads, emptyMsg: 'No leads found.', icon: Icons.local_fire_department_rounded),
               _ProjectListView(projects: active, emptyMsg: 'No active projects.', icon: Icons.rocket_launch_rounded),
@@ -73,8 +91,9 @@ class _ProjectsScreenState extends State<ProjectsScreen> with SingleTickerProvid
           context,
           MaterialPageRoute(builder: (_) => const CreateProjectScreen()),
         ),
-        label: const Text('Add Nest'),
+        label: const Text('Add Nest', style: TextStyle(fontWeight: FontWeight.bold)),
         icon: const Icon(Icons.add),
+        elevation: 4,
       ),
     );
   }
@@ -94,13 +113,17 @@ class _ProjectListView extends StatelessWidget {
         title: 'Empty Category',
         message: emptyMsg,
         icon: icon,
-      );
+      ).animate().fadeIn();
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      physics: const BouncingScrollPhysics(),
       itemCount: projects.length,
-      itemBuilder: (context, index) => _ProjectCard(project: projects[index]),
+      itemBuilder: (context, index) => _ProjectCard(project: projects[index])
+          .animate()
+          .fadeIn(duration: 400.ms, delay: (index * 50).ms)
+          .slideY(begin: 0.1, end: 0),
     );
   }
 }
@@ -112,7 +135,8 @@ class _ProjectCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final deadlineStr = DateFormat('MMM dd, yyyy').format(project.deadline);
 
     return GestureDetector(
@@ -123,12 +147,19 @@ class _ProjectCard extends StatelessWidget {
         ),
       ),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
+        margin: const EdgeInsets.only(bottom: 20),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(28),
           border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,28 +171,48 @@ class _ProjectCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(project.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                      Text(project.clientName, style: TextStyle(fontSize: 12, color: colorScheme.primary)),
+                      Text(
+                        project.title, 
+                        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 18),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        project.clientName, 
+                        style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.primary, fontWeight: FontWeight.bold),
+                      ),
                     ],
                   ),
                 ),
-                IconButton(
-                  onPressed: () => Provider.of<TimeTrackerProvider>(context, listen: false)
+                GestureDetector(
+                  onTap: () => Provider.of<TimeTrackerProvider>(context, listen: false)
                       .startTracking(project.id, project.title),
-                  icon: Icon(Icons.play_circle_fill, color: colorScheme.primary, size: 32),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.play_arrow_rounded, color: colorScheme.primary, size: 28),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             _buildProgressStepper(context, project.status),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Row(
               children: [
-                Icon(Icons.calendar_today_outlined, size: 14, color: colorScheme.onSurface.withValues(alpha: 0.6)),
+                Icon(Icons.calendar_today_outlined, size: 14, color: colorScheme.onSurface.withValues(alpha: 0.4)),
                 const SizedBox(width: 8),
-                Text(deadlineStr, style: TextStyle(fontSize: 12, color: colorScheme.onSurface.withValues(alpha: 0.6))),
+                Text(
+                  deadlineStr, 
+                  style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.onSurface.withValues(alpha: 0.4)),
+                ),
                 const Spacer(),
-                Text('\$${project.budget.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(
+                  '\$${project.budget.toStringAsFixed(0)}', 
+                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900, color: colorScheme.onSurface),
+                ),
               ],
             ),
           ],
@@ -178,27 +229,35 @@ class _ProjectCard extends StatelessWidget {
 
     return Row(
       children: List.generate(3, (index) {
+        final isActive = index <= currentStep;
+        final isCompleted = index < currentStep;
+
         return Expanded(
           child: Row(
             children: [
               Container(
-                width: 24,
-                height: 24,
+                width: 28,
+                height: 28,
                 decoration: BoxDecoration(
-                  color: index <= currentStep ? colorScheme.primary : colorScheme.surfaceVariant,
+                  color: isActive ? colorScheme.primary : colorScheme.surfaceVariant,
                   shape: BoxShape.circle,
+                  border: isActive ? null : Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
                 ),
                 child: Icon(
-                  index < currentStep ? Icons.check : Icons.circle,
-                  size: 14,
-                  color: index <= currentStep ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
+                  isCompleted ? Icons.check : Icons.circle,
+                  size: isCompleted ? 16 : 8,
+                  color: isActive ? colorScheme.onPrimary : colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                 ),
               ),
               if (index < 2)
                 Expanded(
                   child: Container(
-                    height: 2,
-                    color: index < currentStep ? colorScheme.primary : colorScheme.surfaceVariant,
+                    height: 3,
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(
+                      color: isCompleted ? colorScheme.primary : colorScheme.surfaceVariant,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
             ],
@@ -208,3 +267,4 @@ class _ProjectCard extends StatelessWidget {
     );
   }
 }
+

@@ -34,11 +34,16 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Initialize Firebase only if it hasn't been initialized yet
-  if (Firebase.apps.isEmpty) {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-    debugPrint('Firebase initialized successfully.');
+  try {
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+      debugPrint('Firebase initialized successfully.');
+    }
+  } catch (e) {
+    debugPrint('Firebase initialization failed: $e');
+    // We continue so the app can at least show an error state later if needed
   }
   
   runApp(const ClientNestApp());

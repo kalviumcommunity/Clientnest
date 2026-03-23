@@ -1,8 +1,8 @@
-// ignore_for_file: use_build_context_synchronously
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../shared/widgets/logo_widget.dart';
 import '../../services/auth_service.dart';
 
@@ -98,7 +98,11 @@ class _LandingPageState extends State<LandingPage> {
       children: [
         ElevatedButton.icon(
           onPressed: _handleGoogleSignIn,
-          icon: Image.network('https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg', height: 20, errorBuilder: (_, __, ___) => const Icon(Icons.g_mobiledata)),
+          icon: SvgPicture.network(
+            'https://www.vectorlogo.zone/logos/google/google-icon.svg', 
+            height: 20, 
+            placeholderBuilder: (BuildContext context) => const Icon(Icons.g_mobiledata),
+          ),
           label: const Text('Continue with Google', style: TextStyle(fontWeight: FontWeight.bold)),
           style: ElevatedButton.styleFrom(
             backgroundColor: colorScheme.surface,
@@ -129,6 +133,7 @@ class _LandingPageState extends State<LandingPage> {
     );
   }
 }
+
 
 class _AnimatedGradientBackground extends StatelessWidget {
   @override
