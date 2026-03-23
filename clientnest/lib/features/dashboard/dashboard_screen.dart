@@ -163,12 +163,13 @@ class DashboardScreen extends StatelessWidget {
         return Scaffold(
           body: Stack(
             children: [
+              const _DashboardBackground(),
               CustomScrollView(
                 physics: const BouncingScrollPhysics(),
                 slivers: [
                   _buildAppBar(context, user),
                   SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                     sliver: SliverList(
                       delegate: SliverChildListDelegate([
                         _buildWelcomeSection(context, user),
@@ -400,5 +401,44 @@ class DashboardScreen extends StatelessWidget {
         .animate()
         .fadeIn(delay: 600.ms)
         .slideY(begin: 0.1);
+  }
+}
+
+class _DashboardBackground extends StatelessWidget {
+  const _DashboardBackground();
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Stack(
+      children: [
+        Positioned(
+          top: -150,
+          left: -100,
+          child: Container(
+            width: 400,
+            height: 400,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: colorScheme.primary.withValues(alpha: 0.03),
+            ),
+          ).animate(onPlay: (c) => c.repeat(reverse: true))
+           .scale(duration: 8.seconds, begin: const Offset(1, 1), end: const Offset(1.1, 1.1)),
+        ),
+        Positioned(
+          top: 200,
+          right: -150,
+          child: Container(
+            width: 350,
+            height: 350,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: colorScheme.secondary.withValues(alpha: 0.03),
+            ),
+          ).animate(onPlay: (c) => c.repeat(reverse: true))
+           .scale(duration: 10.seconds, begin: const Offset(1, 1), end: const Offset(1.2, 1.2)),
+        ),
+      ],
+    );
   }
 }
