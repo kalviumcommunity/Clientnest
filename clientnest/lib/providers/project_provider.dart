@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/project_model.dart';
 import '../models/task_model.dart';
@@ -8,21 +9,21 @@ class ProjectProvider extends ChangeNotifier {
   List<Project> _projects = [];
   bool _isLoading = false;
   String? _error;
+  StreamSubscription<List<Project>>? _subscription;
 
   List<Project> get projects => _projects;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
   void fetchProjects() {
-    debugPrint('ProjectProvider: Fetching projects...');
+    _subscription?.cancel();
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      _firestoreService.getProjects().listen(
+      _subscription = _firestoreService.getProjects().listen(
         (projects) {
-          debugPrint('ProjectProvider: Received ${projects.length} projects.');
           _projects = projects;
           _isLoading = false;
           _error = null;
@@ -31,45 +32,100 @@ class ProjectProvider extends ChangeNotifier {
         onError: (e) {
           debugPrint('ProjectProvider Error: $e');
           _isLoading = false;
-          _error = e.toString();
+          _error = e.toString().replaceAll('Exception: ', '');
           notifyListeners();
         },
         cancelOnError: false,
       );
     } catch (e) {
-      debugPrint('ProjectProvider stream exception: $e');
       _isLoading = false;
-      _error = e.toString();
+      _error = e.toString().replaceAll('Exception: ', '');
       notifyListeners();
     }
   }
-  // ... rest of the class
+
+  void clear() {
+    _subscription?.cancel();
+    _subscription = null;
+    _projects = [];
+    _isLoading = false;
+    _error = null;
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
 
   Stream<List<Task>> getProjectTasks(String projectId) {
-    return _firestoreService.getTasks(projectId);
+    try {
+      return _firestoreService.getTasks(projectId);
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      return const Stream.empty();
+    }
   }
 
   Future<void> addProject(Project project) async {
-    await _firestoreService.addProject(project);
+    try {
+      await _firestoreService.addProject(project);
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      rethrow;
+    }
   }
 
   Future<void> updateProject(Project project) async {
-    await _firestoreService.updateProject(project);
+    try {
+      await _firestoreService.updateProject(project);
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      rethrow;
+    }
   }
 
   Future<void> deleteProject(String projectId) async {
-    await _firestoreService.deleteProject(projectId);
+    try {
+      await _firestoreService.deleteProject(projectId);
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      rethrow;
+    }
   }
 
   Future<void> addTask(Task task) async {
-    await _firestoreService.addTask(task);
+    try {
+      await _firestoreService.addTask(task);
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      rethrow;
+    }
   }
 
   Future<void> toggleTask(String taskId, bool isCompleted) async {
-    await _firestoreService.toggleTask(taskId, isCompleted);
+    try {
+      await _firestoreService.toggleTask(taskId, isCompleted);
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      rethrow;
+    }
   }
 
   Future<void> deleteTask(String taskId) async {
-    await _firestoreService.deleteTask(taskId);
+    try {
+      await _firestoreService.deleteTask(taskId);
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      rethrow;
+    }
   }
 }

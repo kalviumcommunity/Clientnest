@@ -163,32 +163,35 @@ class DashboardScreen extends StatelessWidget {
 
         return Scaffold(
           backgroundColor: Colors.transparent,
-          body: Stack(
-            children: [
-              CustomScrollView(
-                physics: const BouncingScrollPhysics(),
-                slivers: [
-                  _buildAppBar(context, user),
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    sliver: SliverList(
-                      delegate: SliverChildListDelegate([
-                        _buildWelcomeSection(context, user),
-                        const SizedBox(height: 32),
-                        _buildDashboardContent(context),
-                        const SizedBox(height: 120),
-                      ]),
+          body: SafeArea(
+            bottom: false,
+            child: Stack(
+              children: [
+                Column(
+                  children: [
+                    _buildTopHeader(context, user),
+                    Expanded(
+                      child: ListView(
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        children: [
+                          _buildWelcomeSection(context, user),
+                          const SizedBox(height: 32),
+                          _buildDashboardContent(context),
+                          const SizedBox(height: 120),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: FloatingTimeTracker(),
-              ),
-            ],
+                  ],
+                ),
+                const Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: FloatingTimeTracker(),
+                ),
+              ],
+            ),
           ),
           floatingActionButton: FloatingActionButton(
             heroTag: 'dashboard_create_project_fab',
@@ -204,19 +207,15 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAppBar(BuildContext context, dynamic user) {
-    return SliverAppBar(
-      expandedHeight: 0,
-      floating: true,
-      pinned: true,
-      elevation: 0,
-      scrolledUnderElevation: 0,
-      title: const LogoWithText(iconSize: 28, fontSize: 20),
-      actions: [
-        GestureDetector(
-          onTap: () => _showProfileSheet(context, user),
-          child: Padding(
-            padding: const EdgeInsets.only(right: 16),
+  Widget _buildTopHeader(BuildContext context, dynamic user) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const LogoWithText(iconSize: 28, fontSize: 20),
+          GestureDetector(
+            onTap: () => _showProfileSheet(context, user),
             child: CircleAvatar(
               radius: 18,
               backgroundColor: Theme.of(context).colorScheme.primaryContainer,
@@ -226,8 +225,8 @@ class DashboardScreen extends StatelessWidget {
                   : null,
             ).animate().scale(delay: 200.ms),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

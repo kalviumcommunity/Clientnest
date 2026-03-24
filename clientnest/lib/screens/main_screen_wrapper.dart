@@ -6,6 +6,7 @@ import 'clients_screen.dart';
 import 'payments_screen.dart';
 import 'calendar_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../providers/client_provider.dart';
 import '../providers/project_provider.dart';
 import '../providers/invoice_provider.dart';
@@ -30,11 +31,13 @@ class _MainScreenWrapperState extends State<MainScreenWrapper> {
     
     // Trigger initial data fetch when main wrapper is built (user is authenticated)
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      debugPrint('MainScreenWrapper: Fetching data for all providers...');
-      context.read<ClientProvider>().fetchClients();
-      context.read<ProjectProvider>().fetchProjects();
-      context.read<InvoiceProvider>().fetchInvoices();
-      context.read<TimeTrackerProvider>().init();
+      if (FirebaseAuth.instance.currentUser != null) {
+        debugPrint('MainScreenWrapper: Fetching data for all providers...');
+        context.read<ClientProvider>().fetchClients();
+        context.read<ProjectProvider>().fetchProjects();
+        context.read<InvoiceProvider>().fetchInvoices();
+        context.read<TimeTrackerProvider>().init();
+      }
     });
   }
 
