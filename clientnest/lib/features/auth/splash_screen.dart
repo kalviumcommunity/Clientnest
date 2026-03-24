@@ -21,7 +21,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   void _navigateToNext() async {
     await Future.delayed(const Duration(milliseconds: 2800));
-    if (mounted) context.go('/auth-wrapper');
+    if (mounted) context.go('/home');
   }
 
   @override

@@ -29,6 +29,7 @@ import 'screens/assets_demo_screen.dart';
 import 'screens/animation_demo_screen.dart';
 import 'screens/firebase_status_screen.dart';
 import 'firebase_options.dart';
+import 'core/utils/go_router_refresh_stream.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,14 +52,11 @@ void main() async {
 
 final GoRouter _router = GoRouter(
   initialLocation: '/',
+  refreshListenable: GoRouterRefreshStream(FirebaseAuth.instance.authStateChanges()),
   routes: [
     GoRoute(
       path: '/',
       builder: (context, state) => const SplashScreen(),
-    ),
-    GoRoute(
-      path: '/auth-wrapper',
-      builder: (context, state) => const AuthWrapper(),
     ),
     GoRoute(
       path: '/landing',
@@ -167,75 +165,6 @@ class ClientNestApp extends StatelessWidget {
           );
         },
       ),
-    );
-  }
-}
-
-class AuthWrapper extends StatelessWidget {
-  const AuthWrapper({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    debugPrint('AuthWrapper: Building...');
-    final authService = Provider.of<AuthService>(context, listen: false);
-
-    return StreamBuilder<User?>(
-      stream: authService.authStateChanges,
-      builder: (context, snapshot) {
-        debugPrint('AuthWrapper Stream: State=${snapshot.connectionState}, HasData=${snapshot.hasData}, HasError=${snapshot.hasError}');
-        
-        if (snapshot.hasError) {
-          return Scaffold(
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, color: Colors.red, size: 60),
-                  const SizedBox(height: 16),
-                  Text('Authentication Error', style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: 8),
-                  Text(snapshot.error.toString(), textAlign: TextAlign.center),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: () => context.go('/auth-wrapper'),
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('Verifying session...'),
-                ],
-              ),
-            ),
-          );
-        }
-
-        if (snapshot.connectionState == ConnectionState.active) {
-          final User? user = snapshot.data;
-          debugPrint('AuthWrapper: User is ${user?.uid ?? "null"}');
-          if (user == null) {
-            return const LandingPage();
-          }
-          return const MainScreenWrapper();
-        }
-        
-        return const Scaffold(
-          body: Center(
-            child: CircularProgressIndicator(),
-          ),
-        );
-      },
     );
   }
 }

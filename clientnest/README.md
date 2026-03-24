@@ -7,29 +7,34 @@ ClientNest is a high-end Workspace built specifically for the modern freelancer 
 This application implements a complete authentication flow using **Firebase Authentication**, featuring real-time session tracking and automatic navigation based on user state.
 
 ### 🚀 How it Works
-The authentication system uses a `StreamBuilder` that listens to `authStateChanges()`. 
-- **Logged Out**: The app automatically shows the `LandingPage` and provides access to Signup/Login screens.
-- **Logged In**: The system automatically redirects the user to the `HomeScreen` (Dashboard) without manual navigation logic.
-- **Logout**: Calling `signOut()` triggers the stream to update, instantly returning the user to the auth flow.
+The authentication system integrates elegantly with **GoRouter** to protect routes.
+- **`refreshListenable` Integration**: The router listens to changes in `FirebaseAuth.instance.authStateChanges()` via a custom `GoRouterRefreshStream` adapter.
+- **Automatic Redirects**: The router's global `redirect` checks session states on every navigation and auth state flutter. 
+  - Unauthenticated users trying to hit `/home` are instantly bounced to `/landing`.
+  - Authenticated users are prevented from seeing `/login` or `/signup` and snapped directly to `/home`.
 
 ### 🛠️ Implementation Details
 
-#### **1. Real-time Auth State (StreamBuilder)**
-Located in `lib/main.dart`, this ensures the app is always in the correct state:
+#### **1. Real-time Auth State (GoRouter)**
+Located in `lib/main.dart`, `GoRouter` manages session routing:
 ```dart
-StreamBuilder<User?>(
-  stream: FirebaseAuth.instance.authStateChanges(),
-  builder: (context, snapshot) {
-    if (snapshot.connectionState == ConnectionState.active) {
-      final User? user = snapshot.data;
-      if (user == null) {
-        return const LandingPage();
-      }
-      return const MainScreenWrapper();
-    }
-    return const SplashScreen();
+final GoRouter _router = GoRouter(
+  initialLocation: '/',
+  refreshListenable: GoRouterRefreshStream(FirebaseAuth.instance.authStateChanges()),
+  redirect: (context, state) {
+    final user = FirebaseAuth.instance.currentUser;
+    final isGoingToSecuredRoute = state.uri.path == '/home';
+    final isGoingToAuthRoute = state.uri.path == '/login' || 
+                               state.uri.path == '/signup' || 
+                               state.uri.path == '/landing';
+
+    if (user == null && isGoingToSecuredRoute) return '/landing';
+    if (user != null && isGoingToAuthRoute) return '/home';
+
+    return null; 
   },
-)
+  // ...
+);
 ```
 
 #### **2. User Sign Up**
