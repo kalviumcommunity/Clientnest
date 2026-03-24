@@ -73,52 +73,55 @@ class _MainScreenWrapperState extends State<MainScreenWrapper> {
           children: _screens,
         ),
       ),
-      bottomNavigationBar: ClipRRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-          child: Container(
-            decoration: BoxDecoration(
-              color: colorScheme.surface.withValues(alpha: 0.7),
-              border: Border(
-                top: BorderSide(
-                  color: colorScheme.outlineVariant.withValues(alpha: 0.2),
-                  width: 1,
-                ),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 20,
-                  offset: const Offset(0, -5),
-                ),
-              ],
-            ),
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                child: BottomNavigationBar(
-                  type: BottomNavigationBarType.fixed,
-                  backgroundColor: Colors.transparent,
-                  currentIndex: _currentIndex,
-                  selectedItemColor: colorScheme.primary,
-                  unselectedItemColor: colorScheme.onSurface.withValues(alpha: 0.4),
-                  elevation: 0,
-                  selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
-                  unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 11),
-                  onTap: (index) {
-                    _pageController.animateToPage(
-                      index,
-                      duration: const Duration(milliseconds: 500),
-                      curve: Curves.easeInOutCubicEmphasized,
-                    );
-                  },
-                  items: [
-                    _buildNavItem(Icons.people_outlined, Icons.people, 'CRM'),
-                    _buildNavItem(Icons.assignment_outlined, Icons.assignment, 'Nests'),
-                    _buildNavItem(Icons.grid_view_outlined, Icons.grid_view_rounded, 'Home'),
-                    _buildNavItem(Icons.account_balance_wallet_outlined, Icons.account_balance_wallet, 'Finance'),
-                    _buildNavItem(Icons.calendar_month_outlined, Icons.calendar_month, 'Planner'),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(32),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: colorScheme.surface.withValues(alpha: 0.65),
+                  border: Border.all(
+                    color: colorScheme.outlineVariant.withValues(alpha: 0.3),
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 24,
+                      spreadRadius: 2,
+                      offset: const Offset(0, 8),
+                    ),
                   ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                  child: BottomNavigationBar(
+                    type: BottomNavigationBarType.fixed,
+                    backgroundColor: Colors.transparent,
+                    currentIndex: _currentIndex,
+                    selectedItemColor: colorScheme.primary,
+                    unselectedItemColor: colorScheme.onSurface.withValues(alpha: 0.4),
+                    elevation: 0,
+                    showSelectedLabels: false,
+                    showUnselectedLabels: false,
+                    onTap: (index) {
+                      _pageController.animateToPage(
+                        index,
+                        duration: const Duration(milliseconds: 500),
+                        curve: Curves.easeInOutCubicEmphasized,
+                      );
+                    },
+                    items: [
+                      _buildNavItem(Icons.people_outlined, Icons.people, 'CRM', _currentIndex == 0),
+                      _buildNavItem(Icons.assignment_outlined, Icons.assignment, 'Nests', _currentIndex == 1),
+                      _buildNavItem(Icons.grid_view_outlined, Icons.grid_view_rounded, 'Home', _currentIndex == 2),
+                      _buildNavItem(Icons.account_balance_wallet_outlined, Icons.account_balance_wallet, 'Finance', _currentIndex == 3),
+                      _buildNavItem(Icons.calendar_month_outlined, Icons.calendar_month, 'Planner', _currentIndex == 4),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -128,21 +131,24 @@ class _MainScreenWrapperState extends State<MainScreenWrapper> {
     );
   }
 
-  BottomNavigationBarItem _buildNavItem(IconData icon, IconData activeIcon, String label) {
+  BottomNavigationBarItem _buildNavItem(IconData icon, IconData activeIcon, String label, bool isSelected) {
     return BottomNavigationBarItem(
-      icon: Padding(
-        padding: const EdgeInsets.only(bottom: 4),
-        child: Icon(icon, size: 24),
-      ),
-      activeIcon: Padding(
-        padding: const EdgeInsets.only(bottom: 4),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(activeIcon, size: 24),
+      icon: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutQubic,
+        padding: EdgeInsets.symmetric(
+          horizontal: isSelected ? 20 : 12, 
+          vertical: 8
+        ),
+        decoration: BoxDecoration(
+          color: isSelected 
+              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15) 
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Icon(
+          isSelected ? activeIcon : icon, 
+          size: isSelected ? 26 : 24,
         ),
       ),
       label: label,

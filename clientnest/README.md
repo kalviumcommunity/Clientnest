@@ -69,6 +69,22 @@ Future<void> logout() async {
 
 ---
 
+## 💾 Cloud Firestore Database Schema
+
+ClientNest utilizes a robust, user-scoped NoSQL schema. For maximum performance and strict security rules, all data is partitioned by User ID (`uid`). 
+
+### Core Structure
+- **Users** (`users/{uid}`): Stores global profile and preference data.
+  - **Clients** (`crm` subcollection): Stores businesses and personal clients.
+  - **Projects** (`nests` subcollection): Workspaces storing budget, client linkage, and deadline.
+  - **Tasks** (`tasks` subcollection): Todos mapped structurally via `projectId`.
+  - **Invoices** (`finance` subcollection): Billing documents with nested `items` arrays.
+  - **Time Logs** (`timelogs` subcollection): Active and historical time tracking sessions.
+
+For a full Entity Relationship Diagram and JSON data examples, see the [database_schema.md](database_schema.md) file included in the root directory.
+
+---
+
 ## Getting Started
 
 ### Prerequisites
