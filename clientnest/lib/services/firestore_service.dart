@@ -12,6 +12,14 @@ class FirestoreService {
 
   String? get currentUserId => _auth.currentUser?.uid;
 
+  String _handleError(dynamic e) {
+    if (e is FirebaseException) {
+      if (e.code == 'permission-denied') return 'Permission denied. Please login to continue.';
+      if (e.code == 'unavailable') return 'Network unavailable. Check your connection.';
+    }
+    return 'Something went wrong: ${e.toString()}';
+  }
+
   // --- Users ---
   Future<void> saveUser(User user) async {
     try {
@@ -32,71 +40,107 @@ class FirestoreService {
 
       await userRef.set(userData, SetOptions(merge: true));
     } catch (e) {
-      throw Exception('Failed to save user data: $e');
+      throw Exception(_handleError(e));
     }
   }
 
   // --- Clients ---
   Stream<List<Client>> getClients() {
     final uid = currentUserId;
-    if (uid == null) return Stream.value([]);
-    return _db.collection('clients')
-        .where('userId', isEqualTo: uid)
+    if (uid == null) throw Exception('Please login to continue');
+    return _db.collection('users').doc(uid).collection('crm')
         .orderBy('name')
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) => Client.fromMap(doc.data(), doc.id)).toList());
   }
 
   Future<void> addClient(Client client) async {
-    final uid = currentUserId;
-    if (uid == null) return;
-    final map = client.toMap();
-    map['userId'] = uid;
-    await _db.collection('clients').add(map);
+    try {
+      final uid = currentUserId;
+      if (uid == null) throw Exception('Please login to continue');
+      final map = client.toMap();
+      map['userId'] = uid;
+      await _db.collection('users').doc(uid).collection('crm').add(map);
+    } catch (e) {
+      throw Exception(_handleError(e));
+    }
   }
 
   Future<void> updateClient(Client client) async {
-    await _db.collection('clients').doc(client.id).update(client.toMap());
+    try {
+      final uid = currentUserId;
+      if (uid == null) throw Exception('Please login to continue');
+      await _db.collection('users').doc(uid).collection('crm').doc(client.id).update(client.toMap());
+    } catch (e) {
+      throw Exception(_handleError(e));
+    }
+  }
+  
+  Future<void> deleteClient(String clientId) async {
+    try {
+      final uid = currentUserId;
+      if (uid == null) throw Exception('Please login to continue');
+      await _db.collection('users').doc(uid).collection('crm').doc(clientId).delete();
+    } catch (e) {
+      throw Exception(_handleError(e));
+    }
   }
 
   // --- Projects ---
   Stream<List<Project>> getProjects() {
     final uid = currentUserId;
-    if (uid == null) return Stream.value([]);
-    return _db.collection('projects')
-        .where('userId', isEqualTo: uid)
+    if (uid == null) throw Exception('Please login to continue');
+    return _db.collection('users').doc(uid).collection('nests')
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) => Project.fromMap(doc.data(), doc.id)).toList());
   }
 
   Future<void> addProject(Project project) async {
-    final uid = currentUserId;
-    if (uid == null) return;
-    final map = project.toMap();
-    map['userId'] = uid;
-    await _db.collection('projects').add(map);
+    try {
+      final uid = currentUserId;
+      if (uid == null) throw Exception('Please login to continue');
+      final map = project.toMap();
+      map['userId'] = uid;
+      await _db.collection('users').doc(uid).collection('nests').add(map);
+    } catch (e) {
+      throw Exception(_handleError(e));
+    }
   }
 
   Future<void> updateProject(Project project) async {
-    await _db.collection('projects').doc(project.id).update(project.toMap());
+    try {
+      final uid = currentUserId;
+      if (uid == null) throw Exception('Please login to continue');
+      await _db.collection('users').doc(uid).collection('nests').doc(project.id).update(project.toMap());
+    } catch (e) {
+      throw Exception(_handleError(e));
+    }
   }
 
   Future<void> deleteProject(String projectId) async {
-    // Delete sub-collection tasks first to avoid orphaned documents
-    final tasksSnap = await _db.collection('tasks')
-        .where('projectId', isEqualTo: projectId)
-        .get();
-    final batch = _db.batch();
-    for (final doc in tasksSnap.docs) {
-      batch.delete(doc.reference);
+    try {
+      final uid = currentUserId;
+      if (uid == null) throw Exception('Please login to continue');
+      // Delete sub-collection tasks first to avoid orphaned documents
+      final tasksSnap = await _db.collection('users').doc(uid).collection('tasks')
+          .where('projectId', isEqualTo: projectId)
+          .get();
+      final batch = _db.batch();
+      for (final doc in tasksSnap.docs) {
+        batch.delete(doc.reference);
+      }
+      batch.delete(_db.collection('users').doc(uid).collection('nests').doc(projectId));
+      await batch.commit();
+    } catch (e) {
+      throw Exception(_handleError(e));
     }
-    batch.delete(_db.collection('projects').doc(projectId));
-    await batch.commit();
   }
 
   // --- Tasks ---
   Stream<List<Task>> getTasks(String projectId) {
-    return _db.collection('tasks')
+    final uid = currentUserId;
+    if (uid == null) throw Exception('Please login to continue');
+    return _db.collection('users').doc(uid).collection('tasks')
         .where('projectId', isEqualTo: projectId)
         .orderBy('createdAt', descending: true)
         .snapshots()
@@ -104,50 +148,87 @@ class FirestoreService {
   }
 
   Future<void> addTask(Task task) async {
-    final uid = currentUserId;
-    if (uid == null) return;
-    final map = task.toMap();
-    map['userId'] = uid;
-    await _db.collection('tasks').add(map);
-    // Update last activity for project
-    await _db.collection('projects').doc(task.projectId).update({
-      'lastActivity': FieldValue.serverTimestamp(),
-    });
+    try {
+      final uid = currentUserId;
+      if (uid == null) throw Exception('Please login to continue');
+      final map = task.toMap();
+      map['userId'] = uid;
+      await _db.collection('users').doc(uid).collection('tasks').add(map);
+      await _db.collection('users').doc(uid).collection('nests').doc(task.projectId).update({
+        'lastActivity': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw Exception(_handleError(e));
+    }
   }
 
   Future<void> toggleTask(String taskId, bool isCompleted) async {
-    await _db.collection('tasks').doc(taskId).update({'isCompleted': isCompleted});
+    try {
+      final uid = currentUserId;
+      if (uid == null) throw Exception('Please login to continue');
+      await _db.collection('users').doc(uid).collection('tasks').doc(taskId).update({'isCompleted': isCompleted});
+    } catch (e) {
+      throw Exception(_handleError(e));
+    }
   }
 
   Future<void> deleteTask(String taskId) async {
-    await _db.collection('tasks').doc(taskId).delete();
+    try {
+      final uid = currentUserId;
+      if (uid == null) throw Exception('Please login to continue');
+      await _db.collection('users').doc(uid).collection('tasks').doc(taskId).delete();
+    } catch (e) {
+      throw Exception(_handleError(e));
+    }
   }
 
   // --- Invoices ---
   Stream<List<Invoice>> getInvoices() {
     final uid = currentUserId;
-    if (uid == null) return Stream.value([]);
-    return _db.collection('invoices')
-        .where('userId', isEqualTo: uid)
+    if (uid == null) throw Exception('Please login to continue');
+    return _db.collection('users').doc(uid).collection('finance')
         .orderBy('issueDate', descending: true)
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) => Invoice.fromMap(doc.data(), doc.id)).toList());
   }
 
   Future<void> addInvoice(Invoice invoice) async {
-    final uid = currentUserId;
-    if (uid == null) return;
-    final map = invoice.toMap();
-    map['userId'] = uid;
-    await _db.collection('invoices').add(map);
+    try {
+      final uid = currentUserId;
+      if (uid == null) throw Exception('Please login to continue');
+      final map = invoice.toMap();
+      map['userId'] = uid;
+      await _db.collection('users').doc(uid).collection('finance').add(map);
+    } catch (e) {
+      throw Exception(_handleError(e));
+    }
+  }
+
+  Future<void> updateInvoice(Invoice invoice) async {
+    try {
+      final uid = currentUserId;
+      if (uid == null) throw Exception('Please login to continue');
+      await _db.collection('users').doc(uid).collection('finance').doc(invoice.id).update(invoice.toMap());
+    } catch (e) {
+      throw Exception(_handleError(e));
+    }
+  }
+
+  Future<void> deleteInvoice(String invoiceId) async {
+    try {
+      final uid = currentUserId;
+      if (uid == null) throw Exception('Please login to continue');
+      await _db.collection('users').doc(uid).collection('finance').doc(invoiceId).delete();
+    } catch (e) {
+      throw Exception(_handleError(e));
+    }
   }
 
   // --- Time Tracker ---
   Stream<TimeLog?> getActiveTimeLog() {
     final uid = currentUserId;
-    if (uid == null) return Stream.value(null);
-    return _db.collection('timelogs')
-        .where('userId', isEqualTo: uid)
+    if (uid == null) throw Exception('Please login to continue');
+    return _db.collection('users').doc(uid).collection('timelogs')
         .where('isRunning', isEqualTo: true)
         .limit(1)
         .snapshots()
@@ -157,61 +238,59 @@ class FirestoreService {
   }
 
   Future<void> startTimeLog(String projectId, String projectTitle) async {
-    final uid = currentUserId;
-    if (uid == null) return;
-
-    final log = {
-      'userId': uid,
-      'projectId': projectId,
-      'projectTitle': projectTitle,
-      'startTime': FieldValue.serverTimestamp(),
-      'isRunning': true,
-      'durationInMinutes': 0,
-    };
-    await _db.collection('timelogs').add(log);
+    try {
+      final uid = currentUserId;
+      if (uid == null) throw Exception('Please login to continue');
+      final log = {
+        'userId': uid,
+        'projectId': projectId,
+        'projectTitle': projectTitle,
+        'startTime': FieldValue.serverTimestamp(),
+        'isRunning': true,
+        'durationInMinutes': 0,
+      };
+      await _db.collection('users').doc(uid).collection('timelogs').add(log);
+    } catch (e) {
+      throw Exception(_handleError(e));
+    }
   }
 
   Future<void> stopTimeLog(String logId, int duration) async {
-    await _db.collection('timelogs').doc(logId).update({
-      'endTime': FieldValue.serverTimestamp(),
-      'isRunning': false,
-      'durationInMinutes': duration,
-    });
+    try {
+      final uid = currentUserId;
+      if (uid == null) throw Exception('Please login to continue');
+      await _db.collection('users').doc(uid).collection('timelogs').doc(logId).update({
+        'endTime': FieldValue.serverTimestamp(),
+        'isRunning': false,
+        'durationInMinutes': duration,
+      });
+    } catch (e) {
+      throw Exception(_handleError(e));
+    }
   }
 
   // --- User Profile ---
-
-  /// Generic upsert for user document (used after sign-up if extra data is needed).
   Future<void> addUserData(String uid, Map<String, dynamic> data) async {
     try {
       await _db.collection('users').doc(uid).set(data, SetOptions(merge: true));
     } catch (e) {
-      throw Exception('Failed to write user data: $e');
+      throw Exception(_handleError(e));
     }
   }
 
-  /// Real-time stream of the current user's Firestore document.
   Stream<DocumentSnapshot> getUserStream() {
     final uid = currentUserId;
-    if (uid == null) {
-      return const Stream.empty();
-    }
+    if (uid == null) throw Exception('Please login to continue');
     return _db.collection('users').doc(uid).snapshots();
   }
 
-  /// Update the "open for work" availability flag on the user's Firestore doc.
   Future<void> updateAvailability(bool isAvailable) async {
-    final uid = currentUserId;
-    if (uid == null) return;
     try {
+      final uid = currentUserId;
+      if (uid == null) throw Exception('Please login to continue');
       await _db.collection('users').doc(uid).update({'isAvailable': isAvailable});
     } catch (e) {
-      throw Exception('Failed to update availability: $e');
+      throw Exception(_handleError(e));
     }
-  }
-
-  // --- Clients (delete) ---
-  Future<void> deleteClient(String clientId) async {
-    await _db.collection('clients').doc(clientId).delete();
   }
 }

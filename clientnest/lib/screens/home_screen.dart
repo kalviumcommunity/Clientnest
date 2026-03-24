@@ -1,14 +1,13 @@
 // ignore_for_file: prefer_const_constructors
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 import '../providers/project_provider.dart';
 import '../providers/invoice_provider.dart';
+import '../providers/client_provider.dart';
 import '../services/auth_service.dart';
 import '../shared/widgets/dashboard_widgets.dart';
 import '../shared/widgets/time_tracker_widget.dart';
 import '../models/project_model.dart';
-import '../widgets/client_card.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -16,7 +15,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('HomeScreen: build() called - Widget rebuild event');
+    debugPrint('HomeScreen: build() called');
     final user = Provider.of<AuthService>(context).currentUser;
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -39,8 +38,11 @@ class HomeScreen extends StatelessWidget {
                         radius: 18,
                         backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
                         backgroundImage: user?.photoURL != null ? NetworkImage(user!.photoURL!) : null,
-                        child: user?.photoURL == null 
-                            ? Text(user?.displayName?[0].toUpperCase() ?? 'U', style: TextStyle(color: colorScheme.primary, fontSize: 14))
+                        child: user?.photoURL == null
+                            ? Text(
+                                user?.displayName?[0].toUpperCase() ?? 'U',
+                                style: TextStyle(color: colorScheme.primary, fontSize: 14),
+                              )
                             : null,
                       ),
                       const SizedBox(width: 12),
@@ -48,9 +50,21 @@ class HomeScreen extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Hi, ${user?.displayName?.split(' ')[0] ?? 'Freelancer'}', 
-                              style: TextStyle(color: colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 16)),
-                          Text('Home Screen', style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.5), fontSize: 10)),
+                          Text(
+                            'Hi, ${user?.displayName?.split(' ')[0] ?? 'Freelancer'}',
+                            style: TextStyle(
+                              color: colorScheme.onSurface,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          Text(
+                            'Welcome back',
+                            style: TextStyle(
+                              color: colorScheme.onSurface.withValues(alpha: 0.5),
+                              fontSize: 10,
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -61,29 +75,34 @@ class HomeScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(20),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
-                    // Next Deadline Countdown
+                    // ── Next Deadline Countdown ──────────────────────────────
                     Consumer<ProjectProvider>(
                       builder: (context, provider, child) {
                         final now = DateTime.now();
                         final upcoming = provider.projects
-                            .where((p) => p.status != ProjectStatus.completed && p.deadline.isAfter(now))
+                            .where((p) =>
+                                p.status != ProjectStatus.completed &&
+                                p.deadline.isAfter(now))
                             .toList();
-                        
+
                         if (upcoming.isEmpty) return const SizedBox.shrink();
-                        
+
                         upcoming.sort((a, b) => a.deadline.compareTo(b.deadline));
                         final next = upcoming.first;
-                        
+
                         return Column(
                           children: [
-                            DeadlineCountdown(deadline: next.deadline, title: next.title),
+                            DeadlineCountdown(
+                              deadline: next.deadline,
+                              title: next.title,
+                            ),
                             const SizedBox(height: 24),
                           ],
                         );
-                      }
+                      },
                     ),
 
-                    // Financial Snapshot
+                    // ── Financial Snapshot ───────────────────────────────────
                     Consumer<InvoiceProvider>(
                       builder: (context, provider, child) {
                         double totalIncome = 0;
@@ -95,18 +114,25 @@ class HomeScreen extends StatelessWidget {
                             totalPending += inv.amount;
                           }
                         }
-                        return FinancialSnapshot(income: totalIncome, pending: totalPending);
-                      }
+                        return FinancialSnapshot(
+                          income: totalIncome,
+                          pending: totalPending,
+                        );
+                      },
                     ),
                     const SizedBox(height: 32),
 
-                    // Quick Stats Row
+                    // ── Quick Stats Row ──────────────────────────────────────
                     Row(
                       children: [
                         Expanded(
                           child: _DashboardStatTile(
                             label: 'Active Projects',
-                            value: Provider.of<ProjectProvider>(context).projects.where((p) => p.status == ProjectStatus.active).length.toString(),
+                            value: Provider.of<ProjectProvider>(context)
+                                .projects
+                                .where((p) => p.status == ProjectStatus.active)
+                                .length
+                                .toString(),
                             icon: Icons.rocket_launch_outlined,
                             color: Colors.blueAccent,
                           ),
@@ -115,69 +141,94 @@ class HomeScreen extends StatelessWidget {
                         Expanded(
                           child: _DashboardStatTile(
                             label: 'Leads',
-                            value: Provider.of<ProjectProvider>(context).projects.where((p) => p.status == ProjectStatus.lead).length.toString(),
+                            value: Provider.of<ProjectProvider>(context)
+                                .projects
+                                .where((p) => p.status == ProjectStatus.lead)
+                                .length
+                                .toString(),
                             icon: Icons.flash_on_outlined,
                             color: Colors.amber,
                           ),
                         ),
                       ],
                     ).animate().fadeIn(duration: 500.ms).slideX(begin: -0.1),
-                    const SizedBox(height: 24),
-                    const _HotReloadDemo().animate().fadeIn(delay: 200.ms, duration: 500.ms),
-                    const SizedBox(height: 24),
-                    Center(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                        ),
-                        onPressed: () {
-                          Navigator.pushNamed(
-                            context,
-                            '/details',
-                            arguments: "Hello from Home Screen",
-                          );
-                        },
-                        child: const Text('Go to Details'),
-                      ),
-                    ).animate().scale(delay: 400.ms),
-                    const SizedBox(height: 24),
-                    // ── Navigator Demo entry card ─────────────────────────────
-                    _NavigatorDemoCard().animate().fadeIn(delay: 600.ms),
                     const SizedBox(height: 32),
-                    
-                    // --- Our Top Clients Section ---
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 4),
+
+                    // ── Top Clients ──────────────────────────────────────────
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: Text(
                         'Top Clients',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ).animate().fadeIn(delay: 800.ms),
+                    ).animate().fadeIn(delay: 300.ms),
                     const SizedBox(height: 16),
-                    ...[
-                      const ClientCard(
-                        clientName: 'Alex Johnson',
-                        companyName: 'Tech Solutions',
-                        status: 'Active',
-                        icon: Icons.person_rounded,
-                      ),
-                      const ClientCard(
-                        clientName: 'Maria Garcia',
-                        companyName: 'Design Co',
-                        status: 'Pending',
-                        icon: Icons.person_add_rounded,
-                      ),
-                      const ClientCard(
-                        clientName: 'Global Inc',
-                        companyName: 'Corporate Hub',
-                        status: 'Active',
-                        icon: Icons.business_rounded,
-                      ),
-                    ].animate(interval: 100.ms).fadeIn(delay: 900.ms).slideY(begin: 0.1),
-                    
+
+                    Consumer<ClientProvider>(
+                      builder: (context, clientProvider, child) {
+                        if (clientProvider.isLoading && clientProvider.clients.isEmpty) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
+
+                        final clients = clientProvider.clients;
+
+                        if (clients.isEmpty) {
+                          return Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: colorScheme.surface,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                  color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
+                            ),
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.person_add_rounded,
+                                  size: 40,
+                                  color: colorScheme.primary.withValues(alpha: 0.4),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'No clients yet',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: colorScheme.onSurface,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Add your first client in the CRM tab.',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: colorScheme.onSurface.withValues(alpha: 0.5),
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ).animate().fadeIn(delay: 400.ms);
+                        }
+
+                        // Show up to 5 most recent clients
+                        final displayClients = clients.take(5).toList();
+                        return Column(
+                          children: displayClients.asMap().entries.map((entry) {
+                            final i = entry.key;
+                            final client = entry.value;
+                            return _ClientRow(client: client)
+                                .animate()
+                                .fadeIn(delay: (400 + i * 80).ms)
+                                .slideX(begin: 0.05, end: 0);
+                          }).toList(),
+                        );
+                      },
+                    ),
+
                     const SizedBox(height: 100), // Space for persistent time tracker
                   ]),
                 ),
@@ -196,13 +247,20 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
+// ── Dashboard Stat Tile ──────────────────────────────────────────────────────
+
 class _DashboardStatTile extends StatelessWidget {
   final String label;
   final String value;
   final IconData icon;
   final Color color;
 
-  const _DashboardStatTile({required this.label, required this.value, required this.icon, required this.color});
+  const _DashboardStatTile({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -219,194 +277,113 @@ class _DashboardStatTile extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: color.withValues(alpha: 0.1), shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
             child: Icon(icon, color: color, size: 20),
           ),
           const SizedBox(height: 12),
           Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-          Text(label, style: TextStyle(fontSize: 12, color: colorScheme.onSurface.withValues(alpha: 0.5))),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: colorScheme.onSurface.withValues(alpha: 0.5),
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-class _HotReloadDemo extends StatefulWidget {
-  const _HotReloadDemo();
+// ── Client Row (replaces the hardcoded ClientCard) ───────────────────────────
 
-  @override
-  State<_HotReloadDemo> createState() => _HotReloadDemoState();
-}
+class _ClientRow extends StatelessWidget {
+  final dynamic client;
 
-class _HotReloadDemoState extends State<_HotReloadDemo> {
-  int _count = 0;
-
-  void _increment() {
-    setState(() {
-      _count++;
-      debugPrint('Button pressed. Current count: $_count');
-    });
-  }
+  const _ClientRow({required this.client});
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('Building _HotReloadDemo - Widget Tree can be inspected in DevTools');
     final colorScheme = Theme.of(context).colorScheme;
-    
+    final theme = Theme.of(context);
+
     return Container(
-      padding: const EdgeInsets.all(24),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Hot Reload & Debugging Demo',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Modify this widget\'s text or colours in code, then save to see Hot Reload update instantly.',
-            style: TextStyle(
-              fontSize: 12,
-              color: colorScheme.onSurface.withValues(alpha: 0.6),
-            ),
-          ),
-          const SizedBox(height: 24),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: colorScheme.primary.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              children: [
-                Text(
-                  'Welcome to Clientnest',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.primary,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  '$_count',
-                  style: TextStyle(
-                    fontSize: 48,
-                    fontWeight: FontWeight.w800,
-                    color: colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton.icon(
-                  onPressed: _increment,
-                  icon: const Icon(Icons.touch_app),
-                  label: const Text('Press Me'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colorScheme.primary,
-                    foregroundColor: colorScheme.onPrimary,
-                  ),
-                ),
-              ],
-            ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-    );
-  }
-}
-
-// ────────────────────────────────────────────────────────────────────────────
-// Navigator Demo Entry Card (shown on Home dashboard)
-// ────────────────────────────────────────────────────────────────────────────
-
-class _NavigatorDemoCard extends StatelessWidget {
-  const _NavigatorDemoCard();
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          debugPrint('HomeScreen: Navigating to /nav-demo via GoRouter');
-          context.push('/nav-demo');
-        },
-        borderRadius: BorderRadius.circular(20),
-        child: Ink(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                const Color(0xFF6366F1).withValues(alpha: 0.08),
-                const Color(0xFF8B5CF6).withValues(alpha: 0.08),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  colorScheme.primary.withValues(alpha: 0.15),
+                  colorScheme.primary.withValues(alpha: 0.05),
+                ],
+              ),
+              shape: BoxShape.circle,
             ),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: const Color(0xFF6366F1).withValues(alpha: 0.25),
+            child: Center(
+              child: Text(
+                client.name.isNotEmpty ? client.name[0].toUpperCase() : '?',
+                style: TextStyle(
+                  color: colorScheme.primary,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 16,
+                ),
+              ),
             ),
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF6366F1).withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: const Icon(
-                    Icons.route_rounded,
-                    color: Color(0xFF6366F1),
-                    size: 24,
+                Text(
+                  client.name,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Navigator API Demo',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF6366F1),
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        'Explore push(), pop() & named routes',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: colorScheme.onSurface.withValues(alpha: 0.55),
-                        ),
-                      ),
-                    ],
+                if (client.company.isNotEmpty)
+                  Text(
+                    client.company,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  )
+                else if (client.email.isNotEmpty)
+                  Text(
+                    client.email,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
                   ),
-                ),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  color: const Color(0xFF6366F1).withValues(alpha: 0.6),
-                ),
               ],
             ),
           ),
-        ),
+          Icon(
+            Icons.chevron_right_rounded,
+            color: colorScheme.onSurface.withValues(alpha: 0.3),
+          ),
+        ],
       ),
     );
   }

@@ -8,13 +8,18 @@ class TimeTrackerProvider extends ChangeNotifier {
   TimeLog? _activeLog;
   Timer? _timer;
   int _currentDuration = 0;
+  String? _error;
+  StreamSubscription<TimeLog?>? _subscription;
 
   TimeLog? get activeLog => _activeLog;
   int get currentDuration => _currentDuration;
+  String? get error => _error;
 
   void init() {
+    _subscription?.cancel();
+    _error = null;
     try {
-      _firestoreService.getActiveTimeLog().listen(
+      _subscription = _firestoreService.getActiveTimeLog().listen(
         (log) {
           _activeLog = log;
           if (_activeLog != null && _activeLog!.isRunning) {
@@ -27,7 +32,9 @@ class TimeTrackerProvider extends ChangeNotifier {
         onError: (Object e) {
           debugPrint('TimeTrackerProvider stream error: $e');
           _activeLog = null;
+          _error = e.toString().replaceAll('Exception: ', '');
           _stopLocalTimer();
+          notifyListeners();
         },
         onDone: () {
           debugPrint('TimeTrackerProvider stream closed.');
@@ -37,7 +44,9 @@ class TimeTrackerProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint('TimeTrackerProvider stream exception: $e');
       _activeLog = null;
+      _error = e.toString().replaceAll('Exception: ', '');
       _stopLocalTimer();
+      notifyListeners();
     }
   }
 
@@ -59,18 +68,31 @@ class TimeTrackerProvider extends ChangeNotifier {
   }
 
   Future<void> startTracking(String projectId, String projectTitle) async {
-    await _firestoreService.startTimeLog(projectId, projectTitle);
+    try {
+      await _firestoreService.startTimeLog(projectId, projectTitle);
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      rethrow;
+    }
   }
 
   Future<void> stopTracking() async {
-    if (_activeLog != null) {
-      await _firestoreService.stopTimeLog(_activeLog!.id, _activeLog!.currentDuration);
+    try {
+      if (_activeLog != null) {
+        await _firestoreService.stopTimeLog(_activeLog!.id, _activeLog!.currentDuration);
+      }
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      rethrow;
     }
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    _subscription?.cancel();
     super.dispose();
   }
 }

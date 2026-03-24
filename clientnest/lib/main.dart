@@ -121,6 +121,24 @@ final GoRouter _router = GoRouter(
       builder: (context, state) => const FirebaseStatusScreen(),
     ),
   ],
+  redirect: (context, state) {
+    final user = FirebaseAuth.instance.currentUser;
+    final isGoingToSecuredRoute = state.uri.path == '/home';
+    final isGoingToAuthRoute = state.uri.path == '/login' || 
+                               state.uri.path == '/signup' || 
+                               state.uri.path == '/landing';
+
+    // Prevent unauthenticated access to secure routes
+    if (user == null && isGoingToSecuredRoute) {
+      return '/landing';
+    }
+    // Prevent authenticated access to auth routes
+    if (user != null && isGoingToAuthRoute) {
+      return '/home';
+    }
+
+    return null; // No redirect needed
+  },
 );
 
 class ClientNestApp extends StatelessWidget {

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/invoice_model.dart';
 import '../services/firestore_service.dart';
@@ -7,21 +8,21 @@ class InvoiceProvider extends ChangeNotifier {
   List<Invoice> _invoices = [];
   bool _isLoading = false;
   String? _error;
+  StreamSubscription<List<Invoice>>? _subscription;
 
   List<Invoice> get invoices => _invoices;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
   void fetchInvoices() {
-    debugPrint('InvoiceProvider: Fetching invoices...');
+    _subscription?.cancel();
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      _firestoreService.getInvoices().listen(
+      _subscription = _firestoreService.getInvoices().listen(
         (invoices) {
-          debugPrint('InvoiceProvider: Received ${invoices.length} invoices.');
           _invoices = invoices;
           _isLoading = false;
           _error = null;
@@ -30,20 +31,60 @@ class InvoiceProvider extends ChangeNotifier {
         onError: (e) {
           debugPrint('InvoiceProvider Error: $e');
           _isLoading = false;
-          _error = e.toString();
+          _error = e.toString().replaceAll('Exception: ', '');
           notifyListeners();
         },
         cancelOnError: false,
       );
     } catch (e) {
-      debugPrint('InvoiceProvider stream exception: $e');
       _isLoading = false;
-      _error = e.toString();
+      _error = e.toString().replaceAll('Exception: ', '');
       notifyListeners();
     }
   }
 
+  void clear() {
+    _subscription?.cancel();
+    _subscription = null;
+    _invoices = [];
+    _isLoading = false;
+    _error = null;
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+
   Future<void> addInvoice(Invoice invoice) async {
-    await _firestoreService.addInvoice(invoice);
+    try {
+      await _firestoreService.addInvoice(invoice);
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  Future<void> updateInvoice(Invoice invoice) async {
+    try {
+      await _firestoreService.updateInvoice(invoice);
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  Future<void> deleteInvoice(String invoiceId) async {
+    try {
+      await _firestoreService.deleteInvoice(invoiceId);
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      rethrow;
+    }
   }
 }

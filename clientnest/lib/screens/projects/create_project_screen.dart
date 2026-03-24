@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
+import 'package:provider/provider.dart';
 import '../../models/project_model.dart';
-import '../../services/project_service.dart';
+import '../../providers/project_provider.dart';
 
 class CreateProjectScreen extends StatefulWidget {
   const CreateProjectScreen({super.key});
@@ -17,7 +18,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _clientIdController = TextEditingController();
-  final ProjectService _service = ProjectService();
+  final _budgetController = TextEditingController();
 
   DateTime _deadline = DateTime.now().add(const Duration(days: 30));
   ProjectStatus _status = ProjectStatus.active;
@@ -28,6 +29,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
     _titleController.dispose();
     _descriptionController.dispose();
     _clientIdController.dispose();
+    _budgetController.dispose();
     super.dispose();
   }
 
@@ -50,6 +52,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
 
     try {
       final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
+      final budget = double.tryParse(_budgetController.text.replaceAll(',', '')) ?? 0.0;
       final project = Project(
         id: const Uuid().v4(),
         userId: uid,
@@ -58,12 +61,12 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
         status: _status,
-        budget: 0.0,
+        budget: budget,
         deadline: _deadline,
         createdAt: DateTime.now(),
       );
 
-      await _service.createProject(project);
+      await context.read<ProjectProvider>().addProject(project);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -160,6 +163,21 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                 context,
                 hint: 'e.g. Acme Corp',
                 icon: Icons.person_outline_rounded,
+              ),
+              textInputAction: TextInputAction.next,
+            ),
+            const SizedBox(height: 20),
+
+            // Budget
+            _buildLabel('Budget (\$)'),
+            const SizedBox(height: 8),
+            TextFormField(
+              controller: _budgetController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: _inputDecoration(
+                context,
+                hint: 'e.g. 5000',
+                icon: Icons.attach_money_rounded,
               ),
               textInputAction: TextInputAction.done,
             ),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/client_model.dart';
 import '../services/firestore_service.dart';
@@ -7,21 +8,21 @@ class ClientProvider extends ChangeNotifier {
   List<Client> _clients = [];
   bool _isLoading = false;
   String? _error;
+  StreamSubscription<List<Client>>? _subscription;
 
   List<Client> get clients => _clients;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
   void fetchClients() {
-    debugPrint('ClientProvider: Fetching clients...');
+    _subscription?.cancel();
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      _firestoreService.getClients().listen(
+      _subscription = _firestoreService.getClients().listen(
         (clients) {
-          debugPrint('ClientProvider: Received ${clients.length} clients.');
           _clients = clients;
           _isLoading = false;
           _error = null;
@@ -30,29 +31,60 @@ class ClientProvider extends ChangeNotifier {
         onError: (e) {
           debugPrint('ClientProvider Error: $e');
           _isLoading = false;
-          _error = e.toString();
+          _error = e.toString().replaceAll('Exception: ', '');
           notifyListeners();
         },
-        cancelOnError: false, // Prevents stream from silently dying on timeout
+        cancelOnError: false,
       );
     } catch (e) {
-      debugPrint('ClientProvider stream exception: $e');
       _isLoading = false;
-      _error = e.toString();
+      _error = e.toString().replaceAll('Exception: ', '');
       notifyListeners();
     }
   }
 
+  void clear() {
+    _subscription?.cancel();
+    _subscription = null;
+    _clients = [];
+    _isLoading = false;
+    _error = null;
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+
   Future<void> addClient(Client client) async {
-    await _firestoreService.addClient(client);
+    try {
+      await _firestoreService.addClient(client);
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      rethrow;
+    }
   }
 
   Future<void> updateClient(Client client) async {
-    await _firestoreService.updateClient(client);
+    try {
+      await _firestoreService.updateClient(client);
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      rethrow;
+    }
   }
 
   Future<void> deleteClient(String clientId) async {
-    await _firestoreService.deleteClient(clientId);
+    try {
+      await _firestoreService.deleteClient(clientId);
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      rethrow;
+    }
   }
 }
-
