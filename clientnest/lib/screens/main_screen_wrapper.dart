@@ -135,7 +135,7 @@ class _MainScreenWrapperState extends State<MainScreenWrapper> {
     return BottomNavigationBarItem(
       icon: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutQubic,
+        curve: Curves.easeOutCubic,
         padding: EdgeInsets.symmetric(
           horizontal: isSelected ? 20 : 12, 
           vertical: 8

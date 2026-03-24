@@ -83,6 +83,14 @@ ClientNest utilizes a robust, user-scoped NoSQL schema. For maximum performance 
 
 For a full Entity Relationship Diagram and JSON data examples, see the [database_schema.md](database_schema.md) file included in the root directory.
 
+### ⚡ Real-Time Live Data Streaming
+To guarantee users see the most up-to-date data without refreshing, ClientNest binds the UI directly to Firestore data streams natively.
+
+1. **Provider layer**: `ProjectProvider` continuously listens to `FirebaseFirestore.instance.collection('users').doc(uid).collection('nests').snapshots()`.
+2. **Consumption layer**: UI components (e.g. `DashboardScreen`, `ProjectsScreen`) read from these streams instantly via `Consumer<ProjectProvider>`. Sub-components immediately react to changes via Flutter's widget tree rebuilds—like glassmorphic Dashboard statistical numbers jumping dynamically when a project changes status.
+
+We take advantage of `ClipRRect` and `BackdropFilter(ImageFilter.blur(sigmaX: 10, ...))` alongside these live-updating Stream values to render luxurious, responsive, multi-layered interfaces.
+
 ---
 
 ## Getting Started

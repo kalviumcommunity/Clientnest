@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'dart:ui';
 import '../providers/project_provider.dart';
 import '../providers/time_tracker_provider.dart';
 import '../models/project_model.dart';
@@ -157,19 +158,24 @@ class _ProjectCard extends StatelessWidget {
       ),
       child: Container(
         margin: const EdgeInsets.only(bottom: 20),
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
+        child: ClipRRect(
           borderRadius: BorderRadius.circular(28),
-          border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: colorScheme.surface.withValues(alpha: 0.45),
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.3)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -227,6 +233,9 @@ class _ProjectCard extends StatelessWidget {
           ],
         ),
       ),
+    ),
+  ),
+),
     );
   }
 
