@@ -93,7 +93,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> with SingleTickerProvid
           },
         ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 80),
+        padding: const EdgeInsets.only(bottom: 110.0),
         child: FloatingActionButton.extended(
           heroTag: 'projects_screen_fab',
           onPressed: () => Navigator.push(

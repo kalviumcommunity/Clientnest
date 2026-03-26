@@ -7,7 +7,8 @@ import '../../models/project_model.dart';
 import '../../providers/project_provider.dart';
 
 class CreateProjectScreen extends StatefulWidget {
-  const CreateProjectScreen({super.key});
+  final Project? project;
+  const CreateProjectScreen({super.key, this.project});
 
   @override
   State<CreateProjectScreen> createState() => _CreateProjectScreenState();
@@ -15,14 +16,25 @@ class CreateProjectScreen extends StatefulWidget {
 
 class _CreateProjectScreenState extends State<CreateProjectScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  final _clientIdController = TextEditingController();
-  final _budgetController = TextEditingController();
+  late final TextEditingController _titleController;
+  late final TextEditingController _descriptionController;
+  late final TextEditingController _clientIdController;
+  late final TextEditingController _budgetController;
 
-  DateTime _deadline = DateTime.now().add(const Duration(days: 30));
-  ProjectStatus _status = ProjectStatus.active;
+  late DateTime _deadline;
+  late ProjectStatus _status;
   bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.project?.title ?? '');
+    _descriptionController = TextEditingController(text: widget.project?.description ?? '');
+    _clientIdController = TextEditingController(text: widget.project?.clientName ?? '');
+    _budgetController = TextEditingController(text: widget.project?.budget.toString() ?? '');
+    _deadline = widget.project?.deadline ?? DateTime.now().add(const Duration(days: 30));
+    _status = widget.project?.status ?? ProjectStatus.active;
+  }
 
   @override
   void dispose() {
@@ -53,9 +65,10 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
     try {
       final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
       final budget = double.tryParse(_budgetController.text.replaceAll(',', '')) ?? 0.0;
+      
       final project = Project(
-        id: const Uuid().v4(),
-        userId: uid,
+        id: widget.project?.id ?? const Uuid().v4(),
+        userId: widget.project?.userId ?? uid,
         clientId: _clientIdController.text.trim(),
         clientName: _clientIdController.text.trim(),
         title: _titleController.text.trim(),
@@ -63,15 +76,19 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
         status: _status,
         budget: budget,
         deadline: _deadline,
-        createdAt: DateTime.now(),
+        createdAt: widget.project?.createdAt ?? DateTime.now(),
       );
 
-      await context.read<ProjectProvider>().addProject(project);
+      if (widget.project != null) {
+        await context.read<ProjectProvider>().updateProject(project);
+      } else {
+        await context.read<ProjectProvider>().addProject(project);
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Project created successfully!'),
+          SnackBar(
+            content: Text(widget.project != null ? 'Project updated successfully!' : 'Project created successfully!'),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -99,7 +116,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('New Project'),
+        title: Text(widget.project != null ? 'Edit Project' : 'New Project'),
         centerTitle: true,
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -111,7 +128,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
           children: [
             // Header
             Text(
-              'Project Details',
+              widget.project != null ? 'Edit Project Details' : 'Project Details',
               style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 6),
@@ -283,9 +300,9 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                           color: Colors.white,
                         ),
                       )
-                    : const Text(
-                        'Create Project',
-                        style: TextStyle(
+                    : Text(
+                        widget.project != null ? 'Update Project' : 'Create Project',
+                        style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold),
                       ),
               ),

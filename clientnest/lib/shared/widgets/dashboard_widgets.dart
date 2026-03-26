@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'dart:async';
+import 'dart:ui';
 
 class DeadlineCountdown extends StatefulWidget {
   final DateTime deadline;
@@ -41,55 +42,62 @@ class _DeadlineCountdownState extends State<DeadlineCountdown> {
     final days = _remaining.inDays;
     final hours = _remaining.inHours % 24;
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [colorScheme.primary, colorScheme.secondary],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(32),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [colorScheme.primary.withValues(alpha: 0.8), colorScheme.secondary.withValues(alpha: 0.8)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(32),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+            boxShadow: [
+              BoxShadow(
+                color: colorScheme.primary.withValues(alpha: 0.2),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Next Deadline',
+                    style: TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w500),
+                  ),
+                  Icon(Icons.timer_outlined, color: Colors.white.withValues(alpha: 0.8), size: 20),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                widget.title,
+                style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: -0.5),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  _TimeBox(value: days.toString(), label: 'DAYS'),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    child: Text(':', style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+                  ),
+                  _TimeBox(value: hours.toString(), label: 'HOURS'),
+                ],
+              ),
+            ],
+          ),
         ),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.primary.withValues(alpha: 0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Next Deadline',
-                style: TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w500),
-              ),
-              Icon(Icons.timer_outlined, color: Colors.white.withValues(alpha: 0.8), size: 20),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            widget.title,
-            style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              _TimeBox(value: days.toString(), label: 'DAYS'),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8),
-                child: Text(':', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-              ),
-              _TimeBox(value: hours.toString(), label: 'HOURS'),
-            ],
-          ),
-        ],
       ),
     );
   }
@@ -128,84 +136,101 @@ class FinancialSnapshot extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Financial Snapshot',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(32),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: colorScheme.surface.withValues(alpha: 0.6),
+            borderRadius: BorderRadius.circular(32),
+            border: Border.all(color: colorScheme.primary.withValues(alpha: 0.1)),
           ),
-          const SizedBox(height: 20),
-          SizedBox(
-            height: 200,
-            child: BarChart(
-              BarChartData(
-                alignment: BarChartAlignment.spaceAround,
-                maxY: (income > pending ? income : pending) * 1.2,
-                barTouchData: BarTouchData(enabled: false),
-                titlesData: FlTitlesData(
-                  show: true,
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (value, meta) {
-                        switch (value.toInt()) {
-                          case 0: return const Text('Income', style: TextStyle(fontSize: 12));
-                          case 1: return const Text('Pending', style: TextStyle(fontSize: 12));
-                          default: return const Text('');
-                        }
-                      },
-                    ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Financial Snapshot',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, letterSpacing: -0.5),
                   ),
-                  leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                ),
-                gridData: const FlGridData(show: false),
-                borderData: FlBorderData(show: false),
-                barGroups: [
-                  BarChartGroupData(
-                    x: 0,
-                    barRods: [
-                      BarChartRodData(
-                        toY: income,
-                        color: Colors.greenAccent[400],
-                        width: 40,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ],
-                  ),
-                  BarChartGroupData(
-                    x: 1,
-                    barRods: [
-                      BarChartRodData(
-                        toY: pending,
-                        color: Colors.orangeAccent,
-                        width: 40,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ],
-                  ),
+                  Icon(Icons.account_balance_wallet_outlined, color: colorScheme.primary, size: 22),
                 ],
               ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _StatItem(label: 'Total Income', value: '\$${income.toStringAsFixed(0)}', color: Colors.greenAccent[400]!),
-              _StatItem(label: 'Pending', value: '\$${pending.toStringAsFixed(0)}', color: Colors.orangeAccent),
+              const SizedBox(height: 24),
+              SizedBox(
+                height: 200,
+                child: BarChart(
+                  BarChartData(
+                    alignment: BarChartAlignment.spaceAround,
+                    maxY: (income > pending ? income : pending) * 1.2,
+                    barTouchData: BarTouchData(enabled: false),
+                    titlesData: FlTitlesData(
+                      show: true,
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          getTitlesWidget: (value, meta) {
+                            final style = TextStyle(
+                              color: colorScheme.onSurface.withValues(alpha: 0.5),
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            );
+                            switch (value.toInt()) {
+                              case 0: return Text('INCOME', style: style);
+                              case 1: return Text('PENDING', style: style);
+                              default: return const Text('');
+                            }
+                          },
+                        ),
+                      ),
+                      leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    ),
+                    gridData: const FlGridData(show: false),
+                    borderData: FlBorderData(show: false),
+                    barGroups: [
+                      BarChartGroupData(
+                        x: 0,
+                        barRods: [
+                          BarChartRodData(
+                            toY: income,
+                            color: const Color(0xFF10B981),
+                            width: 48,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ],
+                      ),
+                      BarChartGroupData(
+                        x: 1,
+                        barRods: [
+                          BarChartRodData(
+                            toY: pending,
+                            color: const Color(0xFFF43F5E),
+                            width: 48,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _StatItem(label: 'Total Income', value: '\$${income.toStringAsFixed(0)}', color: const Color(0xFF10B981)),
+                  _StatItem(label: 'Pending', value: '\$${pending.toStringAsFixed(0)}', color: const Color(0xFFF43F5E)),
+                ],
+              ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }

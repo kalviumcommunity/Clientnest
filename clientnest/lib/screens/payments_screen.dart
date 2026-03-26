@@ -66,7 +66,7 @@ class PaymentsScreen extends StatelessWidget {
         },
       ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 80),
+        padding: const EdgeInsets.only(bottom: 110.0),
         child: FloatingActionButton.extended(
           heroTag: 'payments_screen_fab',
           onPressed: () => _showCreateInvoiceModal(context),
