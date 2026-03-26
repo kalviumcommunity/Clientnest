@@ -5,6 +5,7 @@ import '../../models/project_model.dart';
 import '../../models/task_model.dart';
 import '../../providers/project_provider.dart';
 import '../../services/project_service.dart';
+import 'create_project_screen.dart';
 
 class ProjectDetailScreen extends StatefulWidget {
   final Project project;
@@ -164,6 +165,14 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.edit_outlined),
+            tooltip: 'Edit Project',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => CreateProjectScreen(project: widget.project)),
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent),
             tooltip: 'Delete Project',

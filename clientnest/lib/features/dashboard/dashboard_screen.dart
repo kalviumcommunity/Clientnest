@@ -186,22 +186,25 @@ class DashboardScreen extends StatelessWidget {
                   ],
                 ),
                 const Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
+                  bottom: 110,
+                  left: 16,
+                  right: 16,
                   child: FloatingTimeTracker(),
                 ),
               ],
             ),
           ),
-          floatingActionButton: FloatingActionButton(
-            heroTag: 'dashboard_create_project_fab',
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const CreateProjectScreen()),
+          floatingActionButton: Padding(
+            padding: const EdgeInsets.only(bottom: 110.0),
+            child: FloatingActionButton(
+              heroTag: 'dashboard_create_project_fab',
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const CreateProjectScreen()),
+              ),
+              tooltip: 'New Project',
+              child: const Icon(Icons.add_rounded),
             ),
-            tooltip: 'New Project',
-            child: const Icon(Icons.add_rounded),
           ),
         );
       },
@@ -354,24 +357,17 @@ class DashboardScreen extends StatelessWidget {
   Widget _buildStatCard(BuildContext context, String label, String value, IconData icon, Color color) {
     final colorScheme = Theme.of(context).colorScheme;
     return ClipRRect(
-      borderRadius: BorderRadius.circular(28),
+      borderRadius: BorderRadius.circular(32),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
         child: Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: colorScheme.surface.withValues(alpha: 0.45),
-            borderRadius: BorderRadius.circular(28),
+            color: colorScheme.surface.withValues(alpha: 0.6),
+            borderRadius: BorderRadius.circular(32),
             border: Border.all(
-              color: colorScheme.outlineVariant.withValues(alpha: 0.3),
+              color: colorScheme.primary.withValues(alpha: 0.1),
             ),
-            boxShadow: [
-              BoxShadow(
-                color: color.withValues(alpha: 0.05),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -381,22 +377,27 @@ class DashboardScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
+                      color: color.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(14),
                     ),
-                    child: Icon(icon, color: color, size: 18),
+                    child: Icon(icon, color: color, size: 20),
                   ),
                   Text(
                     value,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: -1),
+                    style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w900, letterSpacing: -1.5),
                   ),
                 ],
               ),
               Text(
-                label,
-                style: TextStyle(fontSize: 12, color: colorScheme.onSurface.withValues(alpha: 0.5), fontWeight: FontWeight.bold),
+                label.toUpperCase(),
+                style: TextStyle(
+                  fontSize: 10, 
+                  color: colorScheme.onSurface.withValues(alpha: 0.5), 
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.2,
+                ),
               ),
             ],
           ),

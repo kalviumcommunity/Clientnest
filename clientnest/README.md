@@ -69,9 +69,14 @@ Future<void> logout() async {
 
 ---
 
-## 💾 Cloud Firestore Database Schema
+## 💾 Cloud Firestore & CRUD Operations
 
-ClientNest utilizes a robust, user-scoped NoSQL schema. For maximum performance and strict security rules, all data is partitioned by User ID (`uid`). 
+ClientNest utilizes a robust, user-scoped NoSQL schema with full **Create, Read, Update, and Delete (CRUD)** capabilities for project and client management.
+
+### 🚀 Key Features
+- **Project Editing**: Seamlessly update project details, budgets, and deadlines with real-time Firestore sync.
+- **Client CRM**: A functional CRM system to add, edit, and manage clients, linked directly to your projects.
+- **Data Validation**: Secure write operations with validation logic in both the UI and the service layer.
 
 ### Core Structure
 - **Users** (`users/{uid}`): Stores global profile and preference data.
@@ -81,15 +86,12 @@ ClientNest utilizes a robust, user-scoped NoSQL schema. For maximum performance 
   - **Invoices** (`finance` subcollection): Billing documents with nested `items` arrays.
   - **Time Logs** (`timelogs` subcollection): Active and historical time tracking sessions.
 
-For a full Entity Relationship Diagram and JSON data examples, see the [database_schema.md](database_schema.md) file included in the root directory.
-
-### ⚡ Real-Time Live Data Streaming
-To guarantee users see the most up-to-date data without refreshing, ClientNest binds the UI directly to Firestore data streams natively.
-
-1. **Provider layer**: `ProjectProvider` continuously listens to `FirebaseFirestore.instance.collection('users').doc(uid).collection('nests').snapshots()`.
-2. **Consumption layer**: UI components (e.g. `DashboardScreen`, `ProjectsScreen`) read from these streams instantly via `Consumer<ProjectProvider>`. Sub-components immediately react to changes via Flutter's widget tree rebuilds—like glassmorphic Dashboard statistical numbers jumping dynamically when a project changes status.
-
-We take advantage of `ClipRRect` and `BackdropFilter(ImageFilter.blur(sigmaX: 10, ...))` alongside these live-updating Stream values to render luxurious, responsive, multi-layered interfaces.
+### ⚡ Premium Glassmorphism UI
+The application features a production-ready, high-end aesthetic inspired by modern glassmorphism principles.
+- **Dynamic Blurs**: Utilizing `BackdropFilter` and `ImageFilter` for multi-layered depth.
+- **Vibrant Palette**: A custom-tuned Indigo and Rose color scheme that adapts perfectly to light and dark modes.
+- **Micro-Animations**: Powered by `flutter_animate` for smooth transitions and interactive feedback.
+- **Modern Typography**: Using Google Fonts **Outfit** for a sleek, professional look.
 
 ---
 

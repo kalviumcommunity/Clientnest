@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../models/client_model.dart';
+import '../providers/client_provider.dart';
 
 class UserInputForm extends StatefulWidget {
   const UserInputForm({super.key});
@@ -16,6 +19,8 @@ class _UserInputFormState extends State<UserInputForm> {
   final _companyController = TextEditingController();
   final _phoneController = TextEditingController();
 
+  bool _isSaving = false;
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -25,27 +30,54 @@ class _UserInputFormState extends State<UserInputForm> {
     super.dispose();
   }
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      // Simulate saving data
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.check_circle, color: Colors.white),
-              const SizedBox(width: 12),
-              const Text('Client added successfully'),
-            ],
-          ),
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          margin: const EdgeInsets.all(16),
-        ),
-      );
-      
-      // Optional: Clear form after success
-      // _formKey.currentState!.reset();
+      setState(() => _isSaving = true);
+      try {
+        final client = Client(
+          id: '', // Service fills this
+          userId: '', // Service fills this
+          name: _nameController.text.trim(),
+          email: _emailController.text.trim(),
+          company: _companyController.text.trim(),
+          phone: _phoneController.text.trim(),
+          notes: '',
+          createdAt: DateTime.now(),
+        );
+
+        await context.read<ClientProvider>().addClient(client);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.check_circle, color: Colors.white),
+                  const SizedBox(width: 12),
+                  const Text('Client added successfully'),
+                ],
+              ),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              margin: const EdgeInsets.all(16),
+            ),
+          );
+          Navigator.pop(context);
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to add client: $e'),
+              backgroundColor: Colors.redAccent,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) setState(() => _isSaving = false);
+      }
     }
   }
 
@@ -172,13 +204,19 @@ class _UserInputFormState extends State<UserInputForm> {
                   ),
                   elevation: 2,
                 ),
-                child: const Text(
-                  'Add Client',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                child: _isSaving 
+                  ? const SizedBox(
+                      height: 20, 
+                      width: 20, 
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
+                    )
+                  : const Text(
+                      'Add Client',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
               ),
               const SizedBox(height: 20),
             ],
