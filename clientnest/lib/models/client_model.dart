@@ -46,6 +46,11 @@ class Client {
     };
   }
 
+  factory Client.fromFirestore(DocumentSnapshot doc) {
+    Map<String, dynamic> map = doc.data() as Map<String, dynamic>? ?? {};
+    return Client.fromMap(map, doc.id);
+  }
+
   Client copyWith({
     String? id,
     String? userId,

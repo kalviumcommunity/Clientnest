@@ -1,12 +1,12 @@
 import 'package:get_it/get_it.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'features/tasks/data/datasources/task_local_data_source.dart';
-import 'features/tasks/data/models/task_model.dart';
-import 'features/tasks/data/repositories/task_repository_impl.dart';
-import 'features/tasks/domain/repositories/task_repository.dart';
-import 'features/tasks/domain/usecases/add_task.dart';
-import 'features/tasks/domain/usecases/get_tasks.dart';
-import 'features/tasks/presentation/bloc/task_bloc.dart';
+import 'package:clientnest/services/tasks/data/datasources/task_local_data_source.dart';
+import 'package:clientnest/services/tasks/data/models/task_model.dart';
+import 'package:clientnest/services/tasks/data/repositories/task_repository_impl.dart';
+import 'package:clientnest/services/tasks/domain/repositories/task_repository.dart';
+import 'package:clientnest/services/tasks/domain/usecases/add_task.dart';
+import 'package:clientnest/services/tasks/domain/usecases/get_tasks.dart';
+import 'package:clientnest/services/tasks/presentation/bloc/task_bloc.dart';
 
 final sl = GetIt.instance;
 

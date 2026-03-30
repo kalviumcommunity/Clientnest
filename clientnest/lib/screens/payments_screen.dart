@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import '../providers/invoice_provider.dart';
 import '../services/pdf_service.dart';
 import '../models/invoice_model.dart';
-import '../shared/widgets/dashboard_widgets.dart';
+import 'package:clientnest/widgets/dashboard_widgets.dart';
 
 class PaymentsScreen extends StatelessWidget {
   const PaymentsScreen({super.key});

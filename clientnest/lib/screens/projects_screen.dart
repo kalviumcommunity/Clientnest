@@ -6,10 +6,10 @@ import '../providers/project_provider.dart';
 import '../providers/time_tracker_provider.dart';
 import '../models/project_model.dart';
 import 'package:intl/intl.dart';
-import '../shared/widgets/dashboard_widgets.dart';
+import 'package:clientnest/widgets/dashboard_widgets.dart';
 import '../screens/projects/create_project_screen.dart';
 import '../screens/projects/project_detail_screen.dart';
-import '../shared/widgets/premium_background.dart';
+import 'package:clientnest/widgets/premium_background.dart';
 
 class ProjectsScreen extends StatefulWidget {
   const ProjectsScreen({super.key});
@@ -77,7 +77,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> with SingleTickerProvid
               return const Center(child: CircularProgressIndicator());
             }
 
-            final leads = provider.projects.where((p) => p.status == ProjectStatus.lead).toList();
+            final leads = provider.projects.where((p) => p.status == ProjectStatus.lead || p.status == ProjectStatus.pending).toList();
             final active = provider.projects.where((p) => p.status == ProjectStatus.active).toList();
             final completed = provider.projects.where((p) => p.status == ProjectStatus.completed).toList();
 

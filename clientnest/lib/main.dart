@@ -13,10 +13,10 @@ import 'providers/invoice_provider.dart';
 import 'providers/time_tracker_provider.dart';
 
 // Features
-import 'features/auth/splash_screen.dart';
-import 'features/auth/landing_page.dart';
-import 'features/auth/login_screen.dart'    as feature_login;
-import 'features/auth/signup_screen.dart'   as feature_signup;
+import 'package:clientnest/screens/splash_screen.dart';
+import 'package:clientnest/screens/landing_page.dart';
+import 'package:clientnest/screens/login_screen.dart'    as feature_login;
+import 'package:clientnest/screens/signup_screen.dart'   as feature_signup;
 import 'screens/main_screen_wrapper.dart';
 import 'screens/nav_demo_home_screen.dart';
 import 'screens/details_screen.dart';
@@ -29,7 +29,7 @@ import 'screens/assets_demo_screen.dart';
 import 'screens/animation_demo_screen.dart';
 import 'screens/firebase_status_screen.dart';
 import 'firebase_options.dart';
-import 'core/utils/go_router_refresh_stream.dart';
+import 'package:clientnest/utils/go_router_refresh_stream.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

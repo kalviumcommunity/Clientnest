@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
-import '../../shared/widgets/logo_widget.dart';
-import '../../shared/widgets/premium_background.dart';
+import 'package:clientnest/widgets/logo_widget.dart';
+import 'package:clientnest/widgets/premium_background.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

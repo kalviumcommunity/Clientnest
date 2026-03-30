@@ -66,7 +66,7 @@ class Invoice {
       projectId: map['projectId'] ?? '',
       invoiceNumber: map['invoiceNumber'] ?? '',
       amount: (map['amount'] ?? 0.0).toDouble(),
-      status: map['status'] ?? 'Pending',
+      status: map['status'] ?? 'unpaid',
       issueDate: (map['issueDate'] as Timestamp).toDate(),
       dueDate: (map['dueDate'] as Timestamp).toDate(),
       items: (map['items'] as List? ?? [])
@@ -88,5 +88,10 @@ class Invoice {
       'dueDate': Timestamp.fromDate(dueDate),
       'items': items.map((i) => i.toMap()).toList(),
     };
+  }
+
+  factory Invoice.fromFirestore(DocumentSnapshot doc) {
+    Map<String, dynamic> map = doc.data() as Map<String, dynamic>? ?? {};
+    return Invoice.fromMap(map, doc.id);
   }
 }

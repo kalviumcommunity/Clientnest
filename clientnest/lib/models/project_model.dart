@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-enum ProjectStatus { lead, active, completed }
+enum ProjectStatus { lead, pending, active, completed }
 
 class Project {
   final String id;
@@ -39,13 +39,17 @@ class Project {
       description: map['description'] ?? '',
       status: ProjectStatus.values.firstWhere(
         (e) => e.name == map['status'],
-        orElse: () => ProjectStatus.active,
+        orElse: () => ProjectStatus.pending,
       ),
       budget: (map['budget'] ?? 0.0).toDouble(),
-      deadline: (map['deadline'] as Timestamp).toDate(),
-      createdAt: (map['createdAt'] as Timestamp).toDate(),
-      lastActivity: map['lastActivity'] != null 
-          ? (map['lastActivity'] as Timestamp).toDate() 
+      deadline: map['deadline'] != null
+          ? (map['deadline'] as Timestamp).toDate()
+          : DateTime.now().add(const Duration(days: 30)),
+      createdAt: map['createdAt'] != null
+          ? (map['createdAt'] as Timestamp).toDate()
+          : DateTime.now(),
+      lastActivity: map['lastActivity'] != null
+          ? (map['lastActivity'] as Timestamp).toDate()
           : null,
     );
   }
@@ -63,6 +67,11 @@ class Project {
       'createdAt': Timestamp.fromDate(createdAt),
       'lastActivity': lastActivity != null ? Timestamp.fromDate(lastActivity!) : null,
     };
+  }
+
+  factory Project.fromFirestore(DocumentSnapshot doc) {
+    Map<String, dynamic> map = doc.data() as Map<String, dynamic>? ?? {};
+    return Project.fromMap(map, doc.id);
   }
 
   Project copyWith({

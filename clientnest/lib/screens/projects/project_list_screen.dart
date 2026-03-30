@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../providers/project_provider.dart';
 import '../../models/project_model.dart';
-import '../../shared/widgets/dashboard_widgets.dart';
+import 'package:clientnest/widgets/dashboard_widgets.dart';
 import 'create_project_screen.dart';
 import 'project_detail_screen.dart';
 
@@ -67,7 +67,7 @@ class _ProjectListScreenState extends State<ProjectListScreen>
           }
 
           final leads = provider.projects
-              .where((p) => p.status == ProjectStatus.lead)
+              .where((p) => p.status == ProjectStatus.lead || p.status == ProjectStatus.pending)
               .toList();
           final active = provider.projects
               .where((p) => p.status == ProjectStatus.active)
@@ -159,6 +159,7 @@ class _ProjectCard extends StatelessWidget {
       case ProjectStatus.active:
         return const Color(0xFF6366F1);
       case ProjectStatus.lead:
+      case ProjectStatus.pending:
         return const Color(0xFFF59E0B);
       case ProjectStatus.completed:
         return const Color(0xFF10B981);
@@ -171,6 +172,8 @@ class _ProjectCard extends StatelessWidget {
         return 'Active';
       case ProjectStatus.lead:
         return 'Lead';
+      case ProjectStatus.pending:
+        return 'Pending';
       case ProjectStatus.completed:
         return 'Completed';
     }
