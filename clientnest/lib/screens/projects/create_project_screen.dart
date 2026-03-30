@@ -226,6 +226,10 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                     child: Text('Lead'),
                   ),
                   DropdownMenuItem(
+                    value: ProjectStatus.pending,
+                    child: Text('Pending'),
+                  ),
+                  DropdownMenuItem(
                     value: ProjectStatus.active,
                     child: Text('Active'),
                   ),

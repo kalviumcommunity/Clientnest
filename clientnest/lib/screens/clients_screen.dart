@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../providers/client_provider.dart';
 import '../models/client_model.dart';
-import '../shared/widgets/dashboard_widgets.dart';
-import '../shared/widgets/premium_background.dart';
+import 'package:clientnest/widgets/dashboard_widgets.dart';
+import 'package:clientnest/widgets/premium_background.dart';
 import 'dart:ui';
 
 class ClientsScreen extends StatelessWidget {

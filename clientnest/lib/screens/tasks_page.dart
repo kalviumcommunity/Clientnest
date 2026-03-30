@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
-import '../bloc/task_bloc.dart';
-import '../../domain/entities/task.dart';
-import '../../../../injection_container.dart';
+import 'package:clientnest/services/tasks/presentation/bloc/task_bloc.dart';
+import 'package:clientnest/services/tasks/domain/entities/task.dart';
+import 'package:clientnest/utils/injection_container.dart';
 
 class TasksPage extends StatelessWidget {
   const TasksPage({super.key});

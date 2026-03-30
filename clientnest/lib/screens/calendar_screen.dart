@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../providers/project_provider.dart';
 import '../models/project_model.dart';
-import '../shared/widgets/dashboard_widgets.dart';
+import 'package:clientnest/widgets/dashboard_widgets.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});

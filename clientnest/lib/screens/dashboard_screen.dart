@@ -7,14 +7,14 @@ import '../../core/theme/theme_provider.dart';
 import '../../providers/project_provider.dart';
 import '../../providers/invoice_provider.dart';
 import '../../services/auth_service.dart';
-import '../../shared/widgets/dashboard_widgets.dart';
-import '../../shared/widgets/time_tracker_widget.dart';
-import '../../shared/widgets/logo_widget.dart';
+import 'package:clientnest/widgets/dashboard_widgets.dart';
+import 'package:clientnest/widgets/time_tracker_widget.dart';
+import 'package:clientnest/widgets/logo_widget.dart';
 import '../../providers/client_provider.dart';
 import '../../models/project_model.dart';
 import '../../screens/projects/create_project_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../shared/widgets/premium_background.dart';
+import 'package:clientnest/widgets/premium_background.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});

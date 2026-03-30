@@ -130,6 +130,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
       case ProjectStatus.active:
         return const Color(0xFF6366F1);
       case ProjectStatus.lead:
+      case ProjectStatus.pending:
         return const Color(0xFFF59E0B);
       case ProjectStatus.completed:
         return const Color(0xFF10B981);
@@ -142,6 +143,8 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
         return 'Active';
       case ProjectStatus.lead:
         return 'Lead';
+      case ProjectStatus.pending:
+        return 'Pending';
       case ProjectStatus.completed:
         return 'Completed';
     }

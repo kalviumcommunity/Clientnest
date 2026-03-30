@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import '../../shared/widgets/logo_widget.dart';
+import 'package:clientnest/widgets/logo_widget.dart';
 import '../../services/auth_service.dart';
 
 class LandingPage extends StatefulWidget {

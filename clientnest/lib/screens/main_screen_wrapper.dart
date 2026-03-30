@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
-import '../features/dashboard/dashboard_screen.dart';
+import 'package:clientnest/screens/dashboard_screen.dart';
 import 'projects_screen.dart';
 import 'clients_screen.dart';
 import 'payments_screen.dart';
@@ -11,7 +11,7 @@ import '../providers/client_provider.dart';
 import '../providers/project_provider.dart';
 import '../providers/invoice_provider.dart';
 import '../providers/time_tracker_provider.dart';
-import '../shared/widgets/premium_background.dart';
+import 'package:clientnest/widgets/premium_background.dart';
 
 class MainScreenWrapper extends StatefulWidget {
   const MainScreenWrapper({super.key});
