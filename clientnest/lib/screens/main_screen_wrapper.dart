@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'dart:ui';
 import 'package:clientnest/screens/dashboard_screen.dart';
 import 'projects_screen.dart';
 import 'clients_screen.dart';
 import 'payments_screen.dart';
 import 'calendar_screen.dart';
-import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../providers/client_provider.dart';
-import '../providers/project_provider.dart';
-import '../providers/invoice_provider.dart';
-import '../providers/time_tracker_provider.dart';
 import 'package:clientnest/widgets/premium_background.dart';
 
 class MainScreenWrapper extends StatefulWidget {
@@ -20,31 +15,66 @@ class MainScreenWrapper extends StatefulWidget {
   State<MainScreenWrapper> createState() => _MainScreenWrapperState();
 }
 
-class _MainScreenWrapperState extends State<MainScreenWrapper> {
+class _MainScreenWrapperState extends State<MainScreenWrapper>
+    with TickerProviderStateMixin {
   int _currentIndex = 2; // Default to Dashboard (Home)
   late PageController _pageController;
+  late AnimationController _navAnimController;
+
+  static const List<_NavItem> _navItems = [
+    _NavItem(
+      icon: Icons.people_outlined,
+      activeIcon: Icons.people_rounded,
+      label: 'CRM',
+    ),
+    _NavItem(
+      icon: Icons.work_outline_rounded,
+      activeIcon: Icons.work_rounded,
+      label: 'Projects',
+    ),
+    _NavItem(
+      icon: Icons.grid_view_outlined,
+      activeIcon: Icons.grid_view_rounded,
+      label: 'Home',
+    ),
+    _NavItem(
+      icon: Icons.account_balance_wallet_outlined,
+      activeIcon: Icons.account_balance_wallet_rounded,
+      label: 'Finance',
+    ),
+    _NavItem(
+      icon: Icons.calendar_month_outlined,
+      activeIcon: Icons.calendar_month_rounded,
+      label: 'Calendar',
+    ),
+  ];
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: _currentIndex);
-    
-    // Trigger initial data fetch when main wrapper is built (user is authenticated)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (FirebaseAuth.instance.currentUser != null) {
-        debugPrint('MainScreenWrapper: Fetching data for all providers...');
-        context.read<ClientProvider>().fetchClients();
-        context.read<ProjectProvider>().fetchProjects();
-        context.read<InvoiceProvider>().fetchInvoices();
-        context.read<TimeTrackerProvider>().init();
-      }
-    });
+    _navAnimController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    // Providers auto-subscribe in their constructors, no manual fetch needed.
   }
 
   @override
   void dispose() {
     _pageController.dispose();
+    _navAnimController.dispose();
     super.dispose();
+  }
+
+  void _onNavTap(int index) {
+    if (index == _currentIndex) return;
+    HapticFeedback.lightImpact();
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 450),
+      curve: Curves.easeInOutCubicEmphasized,
+    );
   }
 
   final List<Widget> _screens = const [
@@ -58,6 +88,8 @@ class _MainScreenWrapperState extends State<MainScreenWrapper> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isCompact = screenWidth < 360;
 
     return Scaffold(
       extendBody: true,
@@ -65,9 +97,7 @@ class _MainScreenWrapperState extends State<MainScreenWrapper> {
         child: PageView(
           controller: _pageController,
           onPageChanged: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
+            setState(() => _currentIndex = index);
           },
           physics: const BouncingScrollPhysics(),
           children: _screens,
@@ -75,15 +105,20 @@ class _MainScreenWrapperState extends State<MainScreenWrapper> {
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          padding: EdgeInsets.fromLTRB(
+            isCompact ? 8 : 16,
+            0,
+            isCompact ? 8 : 16,
+            12,
+          ),
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(32),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 24,
-                  spreadRadius: 2,
+                  color: Colors.black.withValues(alpha: 0.12),
+                  blurRadius: 30,
+                  spreadRadius: 0,
                   offset: const Offset(0, 8),
                 ),
               ],
@@ -91,41 +126,31 @@ class _MainScreenWrapperState extends State<MainScreenWrapper> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(32),
               child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+                filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: colorScheme.surface.withValues(alpha: 0.65),
+                    color: colorScheme.surface.withValues(alpha: 0.75),
                     borderRadius: BorderRadius.circular(32),
                     border: Border.all(
-                      color: colorScheme.outlineVariant.withValues(alpha: 0.3),
+                      color: colorScheme.outlineVariant.withValues(alpha: 0.25),
                       width: 1,
                     ),
                   ),
-                  child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                  child: BottomNavigationBar(
-                    type: BottomNavigationBarType.fixed,
-                    backgroundColor: Colors.transparent,
-                    currentIndex: _currentIndex,
-                    selectedItemColor: colorScheme.primary,
-                    unselectedItemColor: colorScheme.onSurface.withValues(alpha: 0.4),
-                    elevation: 0,
-                    showSelectedLabels: false,
-                    showUnselectedLabels: false,
-                    onTap: (index) {
-                      _pageController.animateToPage(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 8,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: List.generate(
+                      _navItems.length,
+                      (index) => _buildNavButton(
+                        context,
                         index,
-                        duration: const Duration(milliseconds: 500),
-                        curve: Curves.easeInOutCubicEmphasized,
-                      );
-                    },
-                    items: [
-                      _buildNavItem(Icons.people_outlined, Icons.people, 'CRM', _currentIndex == 0),
-                      _buildNavItem(Icons.assignment_outlined, Icons.assignment, 'Nests', _currentIndex == 1),
-                      _buildNavItem(Icons.grid_view_outlined, Icons.grid_view_rounded, 'Home', _currentIndex == 2),
-                      _buildNavItem(Icons.account_balance_wallet_outlined, Icons.account_balance_wallet, 'Finance', _currentIndex == 3),
-                      _buildNavItem(Icons.calendar_month_outlined, Icons.calendar_month, 'Planner', _currentIndex == 4),
-                    ],
+                        colorScheme,
+                        isCompact,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -133,31 +158,87 @@ class _MainScreenWrapperState extends State<MainScreenWrapper> {
           ),
         ),
       ),
-      ),
     );
   }
 
-  BottomNavigationBarItem _buildNavItem(IconData icon, IconData activeIcon, String label, bool isSelected) {
-    return BottomNavigationBarItem(
-      icon: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutCubic,
-        padding: EdgeInsets.symmetric(
-          horizontal: isSelected ? 20 : 12, 
-          vertical: 8
-        ),
-        decoration: BoxDecoration(
-          color: isSelected 
-              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15) 
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Icon(
-          isSelected ? activeIcon : icon, 
-          size: isSelected ? 26 : 24,
+  Widget _buildNavButton(
+    BuildContext context,
+    int index,
+    ColorScheme colorScheme,
+    bool isCompact,
+  ) {
+    final isSelected = _currentIndex == index;
+    final item = _navItems[index];
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => _onNavTap(index),
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutCubic,
+          padding: EdgeInsets.symmetric(
+            vertical: 8,
+            horizontal: isCompact ? 2 : 4,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOutCubic,
+                padding: EdgeInsets.symmetric(
+                  horizontal: isSelected ? (isCompact ? 12 : 16) : 8,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? colorScheme.primary.withValues(alpha: 0.12)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  child: Icon(
+                    isSelected ? item.activeIcon : item.icon,
+                    key: ValueKey('nav_icon_${index}_$isSelected'),
+                    size: isSelected ? 26 : 24,
+                    color: isSelected
+                        ? colorScheme.primary
+                        : colorScheme.onSurface.withValues(alpha: 0.4),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 200),
+                style: TextStyle(
+                  fontSize: isCompact ? 9 : 10,
+                  fontWeight:
+                      isSelected ? FontWeight.w700 : FontWeight.w500,
+                  color: isSelected
+                      ? colorScheme.primary
+                      : colorScheme.onSurface.withValues(alpha: 0.4),
+                  letterSpacing: 0.2,
+                ),
+                child: Text(item.label),
+              ),
+            ],
+          ),
         ),
       ),
-      label: label,
     );
   }
+}
+
+class _NavItem {
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
+
+  const _NavItem({
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+  });
 }

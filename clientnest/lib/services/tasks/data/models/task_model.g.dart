@@ -1,4 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// Updated manually to match the current TaskModel schema (status enum replaces isCompleted bool).
 
 part of 'task_model.dart';
 
@@ -21,8 +22,25 @@ class TaskModelAdapter extends TypeAdapter<TaskModel> {
       title: fields[1] as String,
       description: fields[2] as String,
       dueDate: fields[3] as DateTime,
-      isCompleted: fields[4] as bool,
+      // Field 4 was previously 'isCompleted' (bool). Now stored as TaskStatus name string.
+      // Gracefully fall back to TaskStatus.active if the value can't be parsed.
+      status: _parseStatus(fields[4]),
     );
+  }
+
+  TaskStatus _parseStatus(dynamic raw) {
+    if (raw is TaskStatus) return raw;
+    if (raw is String) {
+      return TaskStatus.values.firstWhere(
+        (s) => s.name == raw,
+        orElse: () => TaskStatus.active,
+      );
+    }
+    // Legacy bool support: true => completed, false => active
+    if (raw is bool) {
+      return raw ? TaskStatus.completed : TaskStatus.active;
+    }
+    return TaskStatus.active;
   }
 
   @override
@@ -38,7 +56,7 @@ class TaskModelAdapter extends TypeAdapter<TaskModel> {
       ..writeByte(3)
       ..write(obj.dueDate)
       ..writeByte(4)
-      ..write(obj.isCompleted);
+      ..write(obj.status.name);
   }
 
   @override

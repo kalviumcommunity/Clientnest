@@ -14,7 +14,8 @@ class TaskRepositoryImpl implements TaskRepository {
   Future<Either<Failure, List<Task>>> getTasks() async {
     try {
       final tasks = await localDataSource.getTasks();
-      return Right(tasks);
+      // Dart List generics are invariant; explicit cast is required even though TaskModel extends Task.
+      return Right(List<Task>.from(tasks));
     } catch (e) {
       return Left(CacheFailure(e.toString()));
     }

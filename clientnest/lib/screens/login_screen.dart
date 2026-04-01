@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
 import 'package:clientnest/widgets/custom_buttons.dart';
 import 'package:clientnest/widgets/custom_text_field.dart';
-import 'auth_widgets.dart';
+import '../widgets/auth_widgets.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -241,7 +241,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 32),
 
                     // OR divider
-                    const OrDivider().animate().fadeIn(delay: 450.ms),
+                    OrDivider().animate().fadeIn(delay: 450.ms),
 
                     const SizedBox(height: 32),
 

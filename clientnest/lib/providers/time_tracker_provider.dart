@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../models/time_log_model.dart';
 import '../services/firestore_service.dart';
@@ -14,6 +15,12 @@ class TimeTrackerProvider extends ChangeNotifier {
   TimeLog? get activeLog => _activeLog;
   int get currentDuration => _currentDuration;
   String? get error => _error;
+
+  TimeTrackerProvider() {
+    if (FirebaseAuth.instance.currentUser != null) {
+      init();
+    }
+  }
 
   void init() {
     _subscription?.cancel();
@@ -39,7 +46,7 @@ class TimeTrackerProvider extends ChangeNotifier {
         onDone: () {
           debugPrint('TimeTrackerProvider stream closed.');
         },
-        cancelOnError: false, // keep listening after transient errors
+        cancelOnError: false,
       );
     } catch (e) {
       debugPrint('TimeTrackerProvider stream exception: $e');

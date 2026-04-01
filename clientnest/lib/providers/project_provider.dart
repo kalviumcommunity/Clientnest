@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../models/project_model.dart';
 import '../models/task_model.dart';
@@ -14,6 +15,12 @@ class ProjectProvider extends ChangeNotifier {
   List<Project> get projects => _projects;
   bool get isLoading => _isLoading;
   String? get error => _error;
+
+  ProjectProvider() {
+    if (FirebaseAuth.instance.currentUser != null) {
+      fetchProjects();
+    }
+  }
 
   void fetchProjects() {
     _subscription?.cancel();
@@ -109,9 +116,9 @@ class ProjectProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> toggleTask(String taskId, bool isCompleted) async {
+  Future<void> toggleTask(String taskId, TaskStatus currentStatus) async {
     try {
-      await _firestoreService.toggleTask(taskId, isCompleted);
+      await _firestoreService.toggleTask(taskId, currentStatus);
     } catch (e) {
       _error = e.toString().replaceAll('Exception: ', '');
       notifyListeners();

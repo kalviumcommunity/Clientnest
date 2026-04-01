@@ -4,11 +4,24 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../providers/client_provider.dart';
 import '../models/client_model.dart';
 import 'package:clientnest/widgets/dashboard_widgets.dart';
-import 'package:clientnest/widgets/premium_background.dart';
 import 'dart:ui';
 
-class ClientsScreen extends StatelessWidget {
+class ClientsScreen extends StatefulWidget {
   const ClientsScreen({super.key});
+
+  @override
+  State<ClientsScreen> createState() => _ClientsScreenState();
+}
+
+class _ClientsScreenState extends State<ClientsScreen> {
+  final _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +37,8 @@ class ClientsScreen extends StatelessWidget {
         scrolledUnderElevation: 0,
         title: Text(
           'CRM Dashboard',
-          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900, letterSpacing: -1),
+          style: theme.textTheme.titleLarge
+              ?.copyWith(fontWeight: FontWeight.w900, letterSpacing: -1),
         ),
         actions: [
           IconButton(
@@ -36,42 +50,137 @@ class ClientsScreen extends StatelessWidget {
         ],
       ),
       body: Consumer<ClientProvider>(
-          builder: (context, provider, child) {
-            if (provider.error != null) {
-              return ErrorStateWidget(
-                error: provider.error!,
-                onRetry: () => provider.fetchClients(),
-              );
-            }
-
-            if (provider.isLoading && provider.clients.isEmpty) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            
-            final clients = provider.clients;
-            if (clients.isEmpty) {
-              return const EmptyStateWidget(
-                title: 'No Clients Found',
-                message: 'Get started by adding your first client profile.',
-                icon: Icons.person_add_rounded,
-              ).animate().fadeIn();
-            }
-
-            return ListView.builder(
-              padding: const EdgeInsets.only(left: 20, right: 20, top: 100, bottom: 100),
-              physics: const BouncingScrollPhysics(),
-              itemCount: clients.length,
-              itemBuilder: (context, index) {
-                final client = clients[index];
-                return _ClientCard(
-                  client: client,
-                  onEdit: () => _showAddOrEditClientDialog(context, client: client),
-                  onDelete: () => _confirmDeleteClient(context, client),
-                ).animate().fadeIn(duration: 400.ms, delay: (index * 50).ms).slideX(begin: 0.1, end: 0);
-              },
+        builder: (context, provider, child) {
+          if (provider.error != null) {
+            return ErrorStateWidget(
+              error: provider.error!,
+              onRetry: () => provider.fetchClients(),
             );
-          },
-        ),
+          }
+
+          if (provider.isLoading && provider.clients.isEmpty) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final allClients = provider.clients;
+          final filtered = _searchQuery.isEmpty
+              ? allClients
+              : allClients
+                  .where((c) =>
+                      c.name.toLowerCase().contains(_searchQuery) ||
+                      c.email.toLowerCase().contains(_searchQuery) ||
+                      c.company.toLowerCase().contains(_searchQuery))
+                  .toList();
+
+          return RefreshIndicator(
+            onRefresh: () async => provider.fetchClients(),
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics()),
+              slivers: [
+                // Space for AppBar
+                const SliverToBoxAdapter(child: SizedBox(height: 100)),
+
+                // Search bar
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: colorScheme.surfaceContainerHighest
+                            .withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color:
+                              colorScheme.outlineVariant.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: TextField(
+                        controller: _searchController,
+                        onChanged: (v) =>
+                            setState(() => _searchQuery = v.toLowerCase()),
+                        decoration: InputDecoration(
+                          hintText: 'Search clients…',
+                          hintStyle: TextStyle(
+                            color:
+                                colorScheme.onSurface.withValues(alpha: 0.4),
+                            fontSize: 14,
+                          ),
+                          prefixIcon: Icon(
+                            Icons.search_rounded,
+                            color: colorScheme.onSurface.withValues(alpha: 0.4),
+                            size: 20,
+                          ),
+                          suffixIcon: _searchQuery.isNotEmpty
+                              ? IconButton(
+                                  icon: Icon(Icons.close_rounded,
+                                      size: 18,
+                                      color: colorScheme.onSurface
+                                          .withValues(alpha: 0.4)),
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    setState(() => _searchQuery = '');
+                                  },
+                                )
+                              : null,
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 14),
+                        ),
+                      ),
+                    ),
+                  ).animate().fadeIn(duration: 300.ms),
+                ),
+
+                const SliverToBoxAdapter(child: SizedBox(height: 12)),
+
+                if (filtered.isEmpty)
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: EmptyStateWidget(
+                      title: _searchQuery.isNotEmpty
+                          ? 'No Results Found'
+                          : 'No Clients Found',
+                      message: _searchQuery.isNotEmpty
+                          ? 'Try a different name, email, or company.'
+                          : 'Get started by adding your first client profile.',
+                      icon: _searchQuery.isNotEmpty
+                          ? Icons.search_off_rounded
+                          : Icons.person_add_rounded,
+                    ).animate().fadeIn(),
+                  )
+                else
+                  SliverPadding(
+                    padding:
+                        const EdgeInsets.fromLTRB(20, 0, 20, 120),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final client = filtered[index];
+                          return _ClientCard(
+                            client: client,
+                            onEdit: () => _showAddOrEditClientDialog(
+                                context,
+                                client: client),
+                            onDelete: () =>
+                                _confirmDeleteClient(context, client),
+                          )
+                              .animate()
+                              .fadeIn(
+                                  duration: 350.ms,
+                                  delay: (index * 40).ms)
+                              .slideX(begin: 0.08, end: 0);
+                        },
+                        childCount: filtered.length,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -89,10 +198,12 @@ class ClientsScreen extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              Provider.of<ClientProvider>(context, listen: false).deleteClient(client.id);
+              Provider.of<ClientProvider>(context, listen: false)
+                  .deleteClient(client.id);
               Navigator.pop(ctx);
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text('Delete',
+                style: TextStyle(color: Colors.redAccent)),
           ),
         ],
       ),
@@ -101,11 +212,16 @@ class ClientsScreen extends StatelessWidget {
 
   void _showAddOrEditClientDialog(BuildContext context, {Client? client}) {
     final isEditing = client != null;
-    final nameController = TextEditingController(text: client?.name ?? '');
-    final emailController = TextEditingController(text: client?.email ?? '');
-    final companyController = TextEditingController(text: client?.company ?? '');
-    final phoneController = TextEditingController(text: client?.phone ?? '');
-    final notesController = TextEditingController(text: client?.notes ?? '');
+    final nameController =
+        TextEditingController(text: client?.name ?? '');
+    final emailController =
+        TextEditingController(text: client?.email ?? '');
+    final companyController =
+        TextEditingController(text: client?.company ?? '');
+    final phoneController =
+        TextEditingController(text: client?.phone ?? '');
+    final notesController =
+        TextEditingController(text: client?.notes ?? '');
 
     showModalBottomSheet(
       context: context,
@@ -120,7 +236,8 @@ class ClientsScreen extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: Theme.of(context).scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          borderRadius:
+              const BorderRadius.vertical(top: Radius.circular(32)),
         ),
         child: SingleChildScrollView(
           child: Column(
@@ -140,30 +257,42 @@ class ClientsScreen extends StatelessWidget {
               const SizedBox(height: 24),
               Text(
                 isEditing ? 'Edit Client' : 'Add New Client',
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                    fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 24),
-              _buildTextField(nameController, 'Full Name', Icons.person_outline),
+              _buildTextField(
+                  nameController, 'Full Name', Icons.person_outline),
               const SizedBox(height: 16),
-              _buildTextField(emailController, 'Email Address', Icons.email_outlined),
+              _buildTextField(emailController, 'Email Address',
+                  Icons.email_outlined),
               const SizedBox(height: 16),
-              _buildTextField(companyController, 'Company (Optional)', Icons.business_outlined),
+              _buildTextField(companyController,
+                  'Company (Optional)', Icons.business_outlined),
               const SizedBox(height: 16),
-              _buildTextField(phoneController, 'Phone Number', Icons.phone_outlined),
+              _buildTextField(phoneController, 'Phone Number',
+                  Icons.phone_outlined),
               const SizedBox(height: 16),
-              _buildTextField(notesController, 'Notes (Optional)', Icons.notes_outlined, maxLines: 3),
+              _buildTextField(notesController,
+                  'Notes (Optional)', Icons.notes_outlined,
+                  maxLines: 3),
               const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Theme.of(context).primaryColor, Theme.of(context).colorScheme.secondary],
+                      colors: [
+                        Theme.of(context).primaryColor,
+                        Theme.of(context).colorScheme.secondary,
+                      ],
                     ),
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                        color: Theme.of(context)
+                            .primaryColor
+                            .withValues(alpha: 0.3),
                         blurRadius: 12,
                         offset: const Offset(0, 6),
                       ),
@@ -174,15 +303,21 @@ class ClientsScreen extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 18),
                       backgroundColor: Colors.transparent,
                       shadowColor: Colors.transparent,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16)),
                     ),
                     onPressed: () {
                       if (nameController.text.isNotEmpty) {
-                        final clientProvider = Provider.of<ClientProvider>(context, listen: false);
-                        
+                        final clientProvider =
+                            Provider.of<ClientProvider>(context,
+                                listen: false);
                         if (isEditing) {
+                          // Use early-return guard for type promotion (avoids both
+                          // unnecessary_non_null_assertion and unnecessary_null_comparison).
+                          final c = client;
+                          if (c == null) return; // unreachable at runtime: isEditing ⟹ client ≠ null
                           clientProvider.updateClient(
-                            client!.copyWith(
+                            c.copyWith(
                               name: nameController.text,
                               email: emailController.text,
                               company: companyController.text,
@@ -194,7 +329,7 @@ class ClientsScreen extends StatelessWidget {
                           clientProvider.addClient(
                             Client(
                               id: '',
-                              userId: '', // Service fills this
+                              userId: '',
                               name: nameController.text,
                               email: emailController.text,
                               company: companyController.text,
@@ -209,7 +344,10 @@ class ClientsScreen extends StatelessWidget {
                     },
                     child: Text(
                       isEditing ? 'Update Profile' : 'Create Profile',
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16),
                     ),
                   ),
                 ),
@@ -222,7 +360,12 @@ class ClientsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label, IconData icon, {int maxLines = 1}) {
+  Widget _buildTextField(
+    TextEditingController controller,
+    String label,
+    IconData icon, {
+    int maxLines = 1,
+  }) {
     return TextField(
       controller: controller,
       maxLines: maxLines,
@@ -241,6 +384,8 @@ class ClientsScreen extends StatelessWidget {
   }
 }
 
+// ─── Client Card ───────────────────────────────────────────────────────────────
+
 class _ClientCard extends StatelessWidget {
   final Client client;
   final VoidCallback onEdit;
@@ -258,90 +403,119 @@ class _ClientCard extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 20),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.primary.withValues(alpha: 0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            color: colorScheme.primary.withValues(alpha: 0.06),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(28),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
               color: colorScheme.surface.withValues(alpha: 0.7),
-              borderRadius: BorderRadius.circular(30),
-              border: Border.all(color: colorScheme.primary.withValues(alpha: 0.1)),
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(
+                  color: colorScheme.primary.withValues(alpha: 0.08)),
             ),
             child: Row(
               children: [
                 Hero(
                   tag: 'client_avatar_${client.id}',
                   child: Container(
-                    width: 64,
-                    height: 64,
+                    width: 56,
+                    height: 56,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [colorScheme.primary, colorScheme.secondary],
+                        colors: [
+                          colorScheme.primary,
+                          colorScheme.secondary,
+                        ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: colorScheme.primary.withValues(alpha: 0.3),
-                          blurRadius: 10,
+                          color: colorScheme.primary.withValues(alpha: 0.25),
+                          blurRadius: 8,
                           offset: const Offset(0, 4),
                         ),
                       ],
                     ),
                     child: Center(
                       child: Text(
-                        client.name[0].toUpperCase(), 
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 24),
+                        client.name.isNotEmpty
+                            ? client.name[0].toUpperCase()
+                            : '?',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 22,
+                        ),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 20),
+                const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        client.name, 
-                        style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.5),
+                        client.name,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.3),
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      if (client.company.isNotEmpty)
+                      if (client.company.isNotEmpty) ...[
+                        const SizedBox(height: 3),
                         Container(
-                          margin: const EdgeInsets.only(top: 4),
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
-                            color: colorScheme.primary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(10),
+                            color:
+                                colorScheme.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            client.company, 
-                            style: theme.textTheme.labelSmall?.copyWith(color: colorScheme.primary, fontWeight: FontWeight.bold),
+                            client.company,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                      const SizedBox(height: 8),
+                      ],
+                      const SizedBox(height: 6),
                       Row(
                         children: [
-                          Icon(Icons.email_outlined, size: 14, color: colorScheme.onSurface.withValues(alpha: 0.4)),
-                          const SizedBox(width: 6),
+                          Icon(
+                            Icons.email_outlined,
+                            size: 13,
+                            color:
+                                colorScheme.onSurface.withValues(alpha: 0.4),
+                          ),
+                          const SizedBox(width: 5),
                           Expanded(
                             child: Text(
-                              client.email, 
-                              style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.onSurface.withValues(alpha: 0.4)),
+                              client.email,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurface
+                                    .withValues(alpha: 0.4),
+                              ),
                               overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
                           ),
                         ],
@@ -350,8 +524,11 @@ class _ClientCard extends StatelessWidget {
                   ),
                 ),
                 PopupMenuButton<String>(
-                  icon: Icon(Icons.more_horiz, color: colorScheme.onSurface.withValues(alpha: 0.3)),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  icon: Icon(Icons.more_horiz,
+                      color:
+                          colorScheme.onSurface.withValues(alpha: 0.3)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
                   onSelected: (value) {
                     if (value == 'edit') {
                       onEdit();
@@ -359,24 +536,26 @@ class _ClientCard extends StatelessWidget {
                       onDelete();
                     }
                   },
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
+                  itemBuilder: (context) => const [
+                    PopupMenuItem(
                       value: 'edit',
                       child: Row(
                         children: [
-                          Icon(Icons.edit_outlined, size: 20),
+                          Icon(Icons.edit_outlined, size: 18),
                           SizedBox(width: 12),
                           Text('Edit Details'),
                         ],
                       ),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'delete',
                       child: Row(
                         children: [
-                          Icon(Icons.delete_outline, size: 20, color: Colors.redAccent),
+                          Icon(Icons.delete_outline,
+                              size: 18, color: Colors.redAccent),
                           SizedBox(width: 12),
-                          Text('Delete Client', style: TextStyle(color: Colors.redAccent)),
+                          Text('Delete Client',
+                              style: TextStyle(color: Colors.redAccent)),
                         ],
                       ),
                     ),

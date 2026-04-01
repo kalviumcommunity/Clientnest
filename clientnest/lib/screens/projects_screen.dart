@@ -9,7 +9,6 @@ import 'package:intl/intl.dart';
 import 'package:clientnest/widgets/dashboard_widgets.dart';
 import '../screens/projects/create_project_screen.dart';
 import '../screens/projects/project_detail_screen.dart';
-import 'package:clientnest/widgets/premium_background.dart';
 
 class ProjectsScreen extends StatefulWidget {
   const ProjectsScreen({super.key});
@@ -18,7 +17,8 @@ class ProjectsScreen extends StatefulWidget {
   State<ProjectsScreen> createState() => _ProjectsScreenState();
 }
 
-class _ProjectsScreenState extends State<ProjectsScreen> with SingleTickerProviderStateMixin {
+class _ProjectsScreenState extends State<ProjectsScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -38,83 +38,157 @@ class _ProjectsScreenState extends State<ProjectsScreen> with SingleTickerProvid
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        title: Text(
-          'Project Nest',
-          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900, letterSpacing: -1),
-        ),
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorSize: TabBarIndicatorSize.label,
-          labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal),
-          indicatorColor: colorScheme.primary,
-          indicatorWeight: 3,
-          dividerColor: Colors.transparent,
-          tabs: const [
-            Tab(text: 'Leads'),
-            Tab(text: 'Active'),
-            Tab(text: 'Completed'),
-          ],
-        ),
-      ),
-      body: Consumer<ProjectProvider>(
-          builder: (context, provider, child) {
-            if (provider.error != null) {
-              return ErrorStateWidget(
-                error: provider.error!,
-                onRetry: () => provider.fetchProjects(),
-              );
-            }
+    return Consumer<ProjectProvider>(
+      builder: (context, provider, child) {
+        final leads = provider.projects
+            .where((p) =>
+                p.status == ProjectStatus.lead ||
+                p.status == ProjectStatus.pending)
+            .toList();
+        final active = provider.projects
+            .where((p) => p.status == ProjectStatus.active)
+            .toList();
+        final completed = provider.projects
+            .where((p) => p.status == ProjectStatus.completed)
+            .toList();
 
-            if (provider.isLoading && provider.projects.isEmpty) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            final leads = provider.projects.where((p) => p.status == ProjectStatus.lead || p.status == ProjectStatus.pending).toList();
-            final active = provider.projects.where((p) => p.status == ProjectStatus.active).toList();
-            final completed = provider.projects.where((p) => p.status == ProjectStatus.completed).toList();
-
-            return TabBarView(
-              controller: _tabController,
-              physics: const BouncingScrollPhysics(),
-              children: [
-                _ProjectListView(projects: leads, emptyMsg: 'No leads found.', icon: Icons.local_fire_department_rounded),
-                _ProjectListView(projects: active, emptyMsg: 'No active projects.', icon: Icons.rocket_launch_rounded),
-                _ProjectListView(projects: completed, emptyMsg: 'No completed projects yet.', icon: Icons.task_alt_rounded),
-              ],
-            );
-          },
-        ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 110.0),
-        child: FloatingActionButton.extended(
-          heroTag: 'projects_screen_fab',
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const CreateProjectScreen()),
+        return Scaffold(
+          backgroundColor: Colors.transparent,
+          extendBodyBehindAppBar: true,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            scrolledUnderElevation: 0,
+            title: Text(
+              'Project Nest',
+              style: theme.textTheme.titleLarge
+                  ?.copyWith(fontWeight: FontWeight.w900, letterSpacing: -1),
+            ),
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(48),
+              child: TabBar(
+                controller: _tabController,
+                indicatorSize: TabBarIndicatorSize.label,
+                labelStyle:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                unselectedLabelStyle: const TextStyle(
+                    fontWeight: FontWeight.normal, fontSize: 13),
+                indicatorColor: colorScheme.primary,
+                indicatorWeight: 3,
+                dividerColor: Colors.transparent,
+                tabs: [
+                  _buildTab('Leads', leads.length, colorScheme),
+                  _buildTab('Active', active.length, colorScheme),
+                  _buildTab('Completed', completed.length, colorScheme),
+                ],
+              ),
+            ),
           ),
-          label: const Text('Add Nest', style: TextStyle(fontWeight: FontWeight.bold)),
-          icon: const Icon(Icons.add),
-          elevation: 4,
-        ),
+          body: _buildBody(provider, leads, active, completed),
+          floatingActionButton: Padding(
+            padding: const EdgeInsets.only(bottom: 110.0),
+            child: FloatingActionButton.extended(
+              heroTag: 'projects_screen_fab',
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => const CreateProjectScreen()),
+              ),
+              label: const Text('Add Nest',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              icon: const Icon(Icons.add),
+              elevation: 4,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Tab _buildTab(String label, int count, ColorScheme colorScheme) {
+    return Tab(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(label),
+          if (count > 0) ...[
+            const SizedBox(width: 6),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+              decoration: BoxDecoration(
+                color: colorScheme.primary.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                '$count',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.primary,
+                ),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
+
+  Widget _buildBody(
+    ProjectProvider provider,
+    List<Project> leads,
+    List<Project> active,
+    List<Project> completed,
+  ) {
+    if (provider.error != null) {
+      return ErrorStateWidget(
+        error: provider.error!,
+        onRetry: () => provider.fetchProjects(),
+      );
+    }
+
+    if (provider.isLoading && provider.projects.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return TabBarView(
+      controller: _tabController,
+      physics: const BouncingScrollPhysics(),
+      children: [
+        _ProjectListView(
+          projects: leads,
+          emptyMsg: 'No leads yet. Add a prospect to get started.',
+          icon: Icons.local_fire_department_rounded,
+        ),
+        _ProjectListView(
+          projects: active,
+          emptyMsg: 'No active projects. Start working on a lead!',
+          icon: Icons.rocket_launch_rounded,
+        ),
+        _ProjectListView(
+          projects: completed,
+          emptyMsg: 'No completed projects yet. Keep going!',
+          icon: Icons.task_alt_rounded,
+        ),
+      ],
+    );
+  }
 }
+
+// ─── Project List View ─────────────────────────────────────────────────────────
 
 class _ProjectListView extends StatelessWidget {
   final List<Project> projects;
   final String emptyMsg;
   final IconData icon;
 
-  const _ProjectListView({required this.projects, required this.emptyMsg, required this.icon});
+  const _ProjectListView({
+    required this.projects,
+    required this.emptyMsg,
+    required this.icon,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -126,17 +200,28 @@ class _ProjectListView extends StatelessWidget {
       ).animate().fadeIn();
     }
 
+    // MediaQuery-aware top padding to account for AppBar + TabBar
+    final topPadding =
+        MediaQuery.of(context).padding.top + kToolbarHeight + 48 + 16;
+
     return ListView.builder(
-      padding: const EdgeInsets.only(left: 20, right: 20, top: 160, bottom: 100),
+      padding: EdgeInsets.only(
+        left: 20,
+        right: 20,
+        top: topPadding,
+        bottom: 120,
+      ),
       physics: const BouncingScrollPhysics(),
       itemCount: projects.length,
       itemBuilder: (context, index) => _ProjectCard(project: projects[index])
           .animate()
-          .fadeIn(duration: 400.ms, delay: (index * 50).ms)
-          .slideY(begin: 0.1, end: 0),
+          .fadeIn(duration: 350.ms, delay: (index * 45).ms)
+          .slideY(begin: 0.08, end: 0),
     );
   }
 }
+
+// ─── Project Card ──────────────────────────────────────────────────────────────
 
 class _ProjectCard extends StatelessWidget {
   final Project project;
@@ -147,7 +232,10 @@ class _ProjectCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final deadlineStr = DateFormat('MMM dd, yyyy').format(project.deadline);
+    final deadlineStr =
+        DateFormat('MMM dd, yyyy').format(project.deadline);
+    final isOverdue = project.deadline.isBefore(DateTime.now()) &&
+        project.status != ProjectStatus.completed;
 
     return GestureDetector(
       onTap: () => Navigator.push(
@@ -157,7 +245,7 @@ class _ProjectCard extends StatelessWidget {
         ),
       ),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 20),
+        margin: const EdgeInsets.only(bottom: 16),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(28),
           child: BackdropFilter(
@@ -165,9 +253,13 @@ class _ProjectCard extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: colorScheme.surface.withValues(alpha: 0.45),
+                color: colorScheme.surface.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(28),
-                border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: isOverdue
+                      ? Colors.redAccent.withValues(alpha: 0.3)
+                      : colorScheme.outlineVariant.withValues(alpha: 0.25),
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.03),
@@ -176,70 +268,101 @@ class _ProjectCard extends StatelessWidget {
                   ),
                 ],
               ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        project.title, 
-                        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 18),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              project.title,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 17,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              project.clientName,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        project.clientName, 
-                        style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.primary, fontWeight: FontWeight.bold),
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: () =>
+                            Provider.of<TimeTrackerProvider>(context,
+                                    listen: false)
+                                .startTracking(project.id, project.title),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.play_arrow_rounded,
+                            color: colorScheme.primary,
+                            size: 26,
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                ),
-                GestureDetector(
-                  onTap: () => Provider.of<TimeTrackerProvider>(context, listen: false)
-                      .startTracking(project.id, project.title),
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(Icons.play_arrow_rounded, color: colorScheme.primary, size: 28),
+                  const SizedBox(height: 20),
+                  _buildProgressStepper(context, project.status),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.calendar_today_outlined,
+                        size: 13,
+                        color: isOverdue
+                            ? Colors.redAccent
+                            : colorScheme.onSurface.withValues(alpha: 0.4),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        isOverdue ? 'Overdue · $deadlineStr' : deadlineStr,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: isOverdue
+                              ? Colors.redAccent
+                              : colorScheme.onSurface.withValues(alpha: 0.4),
+                          fontWeight: isOverdue ? FontWeight.w600 : null,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        '\$${project.budget.toStringAsFixed(0)}',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-            const SizedBox(height: 20),
-            _buildProgressStepper(context, project.status),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                Icon(Icons.calendar_today_outlined, size: 14, color: colorScheme.onSurface.withValues(alpha: 0.4)),
-                const SizedBox(width: 8),
-                Text(
-                  deadlineStr, 
-                  style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.onSurface.withValues(alpha: 0.4)),
-                ),
-                const Spacer(),
-                Text(
-                  '\$${project.budget.toStringAsFixed(0)}', 
-                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900, color: colorScheme.onSurface),
-                ),
-              ],
-            ),
-          ],
+          ),
         ),
       ),
-    ),
-  ),
-),
     );
   }
 
-  Widget _buildProgressStepper(BuildContext context, ProjectStatus status) {
+  Widget _buildProgressStepper(
+      BuildContext context, ProjectStatus status) {
     final colorScheme = Theme.of(context).colorScheme;
     int currentStep = 0;
     if (status == ProjectStatus.active) currentStep = 1;
@@ -254,26 +377,38 @@ class _ProjectCard extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: 28,
-                height: 28,
+                width: 24,
+                height: 24,
                 decoration: BoxDecoration(
-                  color: isActive ? colorScheme.primary : colorScheme.surfaceVariant,
+                  color: isActive
+                      ? colorScheme.primary
+                      : colorScheme.surfaceContainerHighest,
                   shape: BoxShape.circle,
-                  border: isActive ? null : Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
+                  border: isActive
+                      ? null
+                      : Border.all(
+                          color: colorScheme.outline
+                              .withValues(alpha: 0.2)),
                 ),
                 child: Icon(
-                  isCompleted ? Icons.check : Icons.circle,
-                  size: isCompleted ? 16 : 8,
-                  color: isActive ? colorScheme.onPrimary : colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                  isCompleted ? Icons.check_rounded : Icons.circle,
+                  size: isCompleted ? 14 : 7,
+                  color: isActive
+                      ? colorScheme.onPrimary
+                      : colorScheme.onSurfaceVariant
+                          .withValues(alpha: 0.4),
                 ),
               ),
               if (index < 2)
                 Expanded(
                   child: Container(
                     height: 3,
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4),
                     decoration: BoxDecoration(
-                      color: isCompleted ? colorScheme.primary : colorScheme.surfaceVariant,
+                      color: isCompleted
+                          ? colorScheme.primary
+                          : colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
