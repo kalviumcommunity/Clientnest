@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../models/invoice_model.dart';
 import '../services/firestore_service.dart';
@@ -13,6 +14,21 @@ class InvoiceProvider extends ChangeNotifier {
   List<Invoice> get invoices => _invoices;
   bool get isLoading => _isLoading;
   String? get error => _error;
+
+  /// Computed financial totals (updated automatically as stream fires)
+  double get totalIncome => _invoices
+      .where((inv) => inv.status == 'Paid')
+      .fold(0.0, (sum, inv) => sum + inv.amount);
+
+  double get totalPending => _invoices
+      .where((inv) => inv.status != 'Paid')
+      .fold(0.0, (sum, inv) => sum + inv.amount);
+
+  InvoiceProvider() {
+    if (FirebaseAuth.instance.currentUser != null) {
+      fetchInvoices();
+    }
+  }
 
   void fetchInvoices() {
     _subscription?.cancel();

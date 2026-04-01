@@ -1,0 +1,84 @@
+Analyzing clientnest...                                         
+
+   info - Don't invoke 'print' in production code - bin\fix_opacity.dart:22:3 - avoid_print
+   info - 'background' is deprecated and shouldn't be used. Use surface instead. This feature was deprecated after v3.18.0-0.1.pre - lib\core\theme\app_theme.dart:24:7 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\core\theme\app_theme.dart:75:18 - prefer_const_constructors
+   info - 'background' is deprecated and shouldn't be used. Use surface instead. This feature was deprecated after v3.18.0-0.1.pre - lib\core\theme\app_theme.dart:80:7 - deprecated_member_use
+   info - 'onBackground' is deprecated and shouldn't be used. Use onSurface instead. This feature was deprecated after v3.18.0-0.1.pre - lib\core\theme\app_theme.dart:84:7 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\theme\app_theme.dart:91:46 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\animation_demo_screen.dart:80:43 - deprecated_member_use
+   info - 'surfaceVariant' is deprecated and shouldn't be used. Use surfaceContainerHighest instead. This feature was deprecated after v3.18.0-0.1.pre - lib\screens\animation_demo_screen.dart:193:46 - deprecated_member_use
+   info - 'surfaceVariant' is deprecated and shouldn't be used. Use surfaceContainerHighest instead. This feature was deprecated after v3.18.0-0.1.pre - lib\screens\assets_demo_screen.dart:160:32 - deprecated_member_use
+warning - Unused import: 'package:clientnest/widgets/dashboard_widgets.dart' - lib\screens\calendar_screen.dart:7:8 - unused_import
+warning - The '!' will have no effect because the receiver can't be null - lib\screens\clients_screen.dart:316:35 - unnecessary_non_null_assertion
+   info - Use 'const' with the constructor to improve performance - lib\screens\dashboard_screen.dart:347:12 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\screens\dashboard_screen.dart:348:17 - prefer_const_literals_to_create_immutables
+   info - Use 'const' with the constructor to improve performance - lib\screens\dashboard_screen.dart:351:9 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\details_screen.dart:71:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\firebase_status_screen.dart:26:46 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\firebase_status_screen.dart:48:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\firebase_status_screen.dart:56:48 - deprecated_member_use
+warning - The value of the local variable 'isDark' isn't used - lib\screens\login_screen.dart:95:11 - unused_local_variable
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:244:21 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\nav_demo_home_screen.dart:416:11 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\nav_demo_home_screen.dart:424:11 - prefer_const_constructors
+warning - The value of the local variable 'colorScheme' isn't used - lib\screens\payments_screen.dart:24:11 - unused_local_variable
+   info - 'surfaceVariant' is deprecated and shouldn't be used. Use surfaceContainerHighest instead. This feature was deprecated after v3.18.0-0.1.pre - lib\screens\projects\create_project_screen.dart:208:36 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\screens\projects\create_project_screen.dart:215:17 - deprecated_member_use
+   info - 'surfaceVariant' is deprecated and shouldn't be used. Use surfaceContainerHighest instead. This feature was deprecated after v3.18.0-0.1.pre - lib\screens\projects\create_project_screen.dart:258:38 - deprecated_member_use
+   info - 'surfaceVariant' is deprecated and shouldn't be used. Use surfaceContainerHighest instead. This feature was deprecated after v3.18.0-0.1.pre - lib\screens\projects\create_project_screen.dart:343:30 - deprecated_member_use
+   info - Don't use 'BuildContext's across async gaps - lib\screens\projects\project_detail_screen.dart:41:42 - use_build_context_synchronously
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\responsive_dashboard.dart:155:58 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\responsive_dashboard.dart:177:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\responsive_dashboard.dart:215:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\responsive_dashboard.dart:221:63 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\responsive_dashboard.dart:229:28 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\responsive_layout.dart:30:41 - deprecated_member_use
+   info - 'surfaceVariant' is deprecated and shouldn't be used. Use surfaceContainerHighest instead. This feature was deprecated after v3.18.0-0.1.pre - lib\screens\responsive_layout.dart:59:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\scrollable_views.dart:125:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\scrollable_views.dart:160:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\scrollable_views.dart:160:82 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\scrollable_views.dart:185:62 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\scrollable_views.dart:188:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\scrollable_views.dart:202:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\scrollable_views.dart:220:46 - deprecated_member_use
+warning - The value of the local variable 'isDark' isn't used - lib\screens\signup_screen.dart:81:11 - unused_local_variable
+   info - Use 'const' with the constructor to improve performance - lib\screens\signup_screen.dart:302:21 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\state_management_demo.dart:39:30 - deprecated_member_use
+   info - 'surfaceVariant' is deprecated and shouldn't be used. Use surfaceContainerHighest instead. This feature was deprecated after v3.18.0-0.1.pre - lib\screens\state_management_demo.dart:40:23 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\state_management_demo.dart:40:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\state_management_demo.dart:77:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\state_management_demo.dart:82:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\state_management_demo.dart:148:64 - deprecated_member_use
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\screens\tasks_page.dart:61:21 - prefer_const_literals_to_create_immutables
+   info - Use 'const' with the constructor to improve performance - lib\screens\tasks_page.dart:62:13 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\tasks_page.dart:63:13 - prefer_const_constructors
+  error - 'Task' isn't a function - lib\screens\tasks_page.dart:69:28 - invocation_of_non_function
+  error - The name 'Task' is defined in the libraries 'package:clientnest/models/task_model.dart' and 'package:clientnest/services/tasks/domain/entities/task.dart' - lib\screens\tasks_page.dart:69:28 - ambiguous_import
+warning - The value of the local variable 'updatedTask' isn't used - lib\screens\tasks_page.dart:145:29 - unused_local_variable
+   info - Use 'const' with the constructor to improve performance - lib\screens\user_input_form.dart:53:24 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\screens\user_input_form.dart:54:27 - prefer_const_literals_to_create_immutables
+   info - Use 'const' with the constructor to improve performance - lib\screens\widget_tree_demo.dart:140:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\widget_tree_demo.dart:144:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\widget_tree_demo.dart:155:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\widget_tree_demo.dart:163:17 - prefer_const_constructors
+  error - Classes can only extend other classes - lib\services\tasks\data\models\task_model.dart:8:25 - extends_non_class
+  error - The name 'Task' is defined in the libraries 'package:clientnest/models/task_model.dart' and 'package:clientnest/services/tasks/domain/entities/task.dart' - lib\services\tasks\data\models\task_model.dart:8:25 - ambiguous_import
+warning - The field doesn't override an inherited getter or setter - lib\services\tasks\data\models\task_model.dart:11:16 - override_on_non_overriding_member
+warning - The field doesn't override an inherited getter or setter - lib\services\tasks\data\models\task_model.dart:14:16 - override_on_non_overriding_member
+warning - The field doesn't override an inherited getter or setter - lib\services\tasks\data\models\task_model.dart:17:16 - override_on_non_overriding_member
+warning - The field doesn't override an inherited getter or setter - lib\services\tasks\data\models\task_model.dart:20:18 - override_on_non_overriding_member
+warning - The field doesn't override an inherited getter or setter - lib\services\tasks\data\models\task_model.dart:23:20 - override_on_non_overriding_member
+  error - The named parameter 'id' isn't defined - lib\services\tasks\data\models\task_model.dart:32:11 - undefined_named_parameter
+  error - The named parameter 'title' isn't defined - lib\services\tasks\data\models\task_model.dart:33:11 - undefined_named_parameter
+  error - The named parameter 'description' isn't defined - lib\services\tasks\data\models\task_model.dart:34:11 - undefined_named_parameter
+  error - The named parameter 'dueDate' isn't defined - lib\services\tasks\data\models\task_model.dart:35:11 - undefined_named_parameter
+  error - The named parameter 'status' isn't defined - lib\services\tasks\data\models\task_model.dart:36:11 - undefined_named_parameter
+  error - The name 'Task' is defined in the libraries 'package:clientnest/models/task_model.dart' and 'package:clientnest/services/tasks/domain/entities/task.dart' - lib\services\tasks\data\models\task_model.dart:39:32 - ambiguous_import
+  error - The named parameter 'isCompleted' isn't defined - lib\services\tasks\data\models\task_model.g.dart:24:7 - undefined_named_parameter
+  error - The getter 'isCompleted' isn't defined for the type 'TaskModel' - lib\services\tasks\data\models\task_model.g.dart:41:19 - undefined_getter
+  error - The argument type 'List<TaskModel>' can't be assigned to the parameter type 'List<Task>'.  - lib\services\tasks\data\repositories\task_repository_impl.dart:17:20 - argument_type_not_assignable
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\widgets\client_card.dart:69:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\widgets\client_card.dart:77:58 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\widgets\client_card.dart:77:91 - deprecated_member_use
+

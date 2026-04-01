@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
 import 'package:clientnest/widgets/custom_buttons.dart';
 import 'package:clientnest/widgets/custom_text_field.dart';
-import 'auth_widgets.dart';
+import '../widgets/auth_widgets.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -299,7 +299,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     const SizedBox(height: 28),
 
                     // OR divider
-                    const OrDivider().animate().fadeIn(delay: 550.ms),
+                    OrDivider().animate().fadeIn(delay: 550.ms),
 
                     const SizedBox(height: 28),
 

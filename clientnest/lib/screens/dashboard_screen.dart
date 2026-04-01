@@ -6,15 +6,14 @@ import 'dart:ui';
 import '../../core/theme/theme_provider.dart';
 import '../../providers/project_provider.dart';
 import '../../providers/invoice_provider.dart';
+import '../../providers/client_provider.dart';
 import '../../services/auth_service.dart';
 import 'package:clientnest/widgets/dashboard_widgets.dart';
 import 'package:clientnest/widgets/time_tracker_widget.dart';
 import 'package:clientnest/widgets/logo_widget.dart';
-import '../../providers/client_provider.dart';
 import '../../models/project_model.dart';
 import '../../screens/projects/create_project_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:clientnest/widgets/premium_background.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -49,10 +48,17 @@ class DashboardScreen extends StatelessWidget {
             CircleAvatar(
               radius: 40,
               backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
-              backgroundImage: user?.photoURL != null ? NetworkImage(user!.photoURL!) : null,
-              child: user?.photoURL == null 
-                  ? Text(user?.displayName?[0].toUpperCase() ?? 'U', 
-                      style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: colorScheme.primary))
+              backgroundImage:
+                  user?.photoURL != null ? NetworkImage(user!.photoURL!) : null,
+              child: user?.photoURL == null
+                  ? Text(
+                      user?.displayName?[0].toUpperCase() ?? 'U',
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.primary,
+                      ),
+                    )
                   : null,
             ),
             const SizedBox(height: 16),
@@ -62,13 +68,20 @@ class DashboardScreen extends StatelessWidget {
             ),
             Text(
               user?.email ?? 'No email available',
-              style: TextStyle(fontSize: 14, color: colorScheme.onSurface.withValues(alpha: 0.5)),
+              style: TextStyle(
+                fontSize: 14,
+                color: colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
             ),
             const SizedBox(height: 32),
             _buildProfileOption(
               context,
-              icon: themeProvider.themeMode == ThemeMode.dark ? Icons.wb_sunny_outlined : Icons.nightlight_round_outlined,
-              label: themeProvider.themeMode == ThemeMode.dark ? 'Switch to Light Mode' : 'Switch to Dark Mode',
+              icon: themeProvider.themeMode == ThemeMode.dark
+                  ? Icons.wb_sunny_outlined
+                  : Icons.nightlight_round_outlined,
+              label: themeProvider.themeMode == ThemeMode.dark
+                  ? 'Switch to Light Mode'
+                  : 'Switch to Dark Mode',
               trailing: Switch.adaptive(
                 value: themeProvider.themeMode == ThemeMode.dark,
                 onChanged: (_) => themeProvider.toggleTheme(),
@@ -93,10 +106,11 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileOption(BuildContext context, {
-    required IconData icon, 
-    required String label, 
-    required VoidCallback onTap, 
+  Widget _buildProfileOption(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
     Widget? trailing,
     Color? color,
   }) {
@@ -107,7 +121,8 @@ class DashboardScreen extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
+          border: Border.all(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -115,7 +130,13 @@ class DashboardScreen extends StatelessWidget {
             Icon(icon, color: color ?? colorScheme.onSurface, size: 20),
             const SizedBox(width: 16),
             Expanded(
-              child: Text(label, style: TextStyle(fontWeight: FontWeight.w600, color: color ?? colorScheme.onSurface)),
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: color ?? colorScheme.onSurface,
+                ),
+              ),
             ),
             if (trailing != null) trailing,
           ],
@@ -135,30 +156,27 @@ class DashboardScreen extends StatelessWidget {
     }
 
     return StreamBuilder<DocumentSnapshot>(
-      stream: FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots(),
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .snapshots(),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
-        }
-
-        if (snapshot.hasError) {
-          return const Scaffold(
-            body: Center(
-              child: Text("Something went wrong. Please try again."),
-            ),
-          );
-        }
-
+        // Silently create the user doc if it doesn't exist yet
         if (snapshot.hasData && !snapshot.data!.exists) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-              'name': user.displayName ?? "",
-              'email': user.email ?? "",
-              'photoURL': user.photoURL ?? "",
-              'role': "freelancer",
-              'joinedAt': FieldValue.serverTimestamp(),
-              'themePreference': "system"
-            }, SetOptions(merge: true)).catchError((e) => debugPrint('Error creating user doc: $e'));
+            FirebaseFirestore.instance
+                .collection('users')
+                .doc(user.uid)
+                .set({
+                  'name': user.displayName ?? '',
+                  'email': user.email ?? '',
+                  'photoURL': user.photoURL ?? '',
+                  'role': 'freelancer',
+                  'joinedAt': FieldValue.serverTimestamp(),
+                  'themePreference': 'system',
+                }, SetOptions(merge: true))
+                .catchError(
+                    (e) => debugPrint('Error creating user doc: $e'));
           });
         }
 
@@ -172,15 +190,28 @@ class DashboardScreen extends StatelessWidget {
                   children: [
                     _buildTopHeader(context, user),
                     Expanded(
-                      child: ListView(
-                        physics: const BouncingScrollPhysics(),
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        children: [
-                          _buildWelcomeSection(context, user),
-                          const SizedBox(height: 32),
-                          _buildDashboardContent(context),
-                          const SizedBox(height: 120),
-                        ],
+                      child: RefreshIndicator(
+                        onRefresh: () async {
+                          // Providers are stream-based; pull-to-refresh just
+                          // re-triggers subscription in each provider.
+                          context.read<ProjectProvider>().fetchProjects();
+                          context.read<ClientProvider>().fetchClients();
+                          context.read<InvoiceProvider>().fetchInvoices();
+                        },
+                        child: ListView(
+                          physics: const AlwaysScrollableScrollPhysics(
+                              parent: BouncingScrollPhysics()),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 12,
+                          ),
+                          children: [
+                            _buildWelcomeSection(context, user),
+                            const SizedBox(height: 28),
+                            _buildDashboardContent(context),
+                            const SizedBox(height: 130),
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -234,9 +265,20 @@ class DashboardScreen extends StatelessWidget {
             child: CircleAvatar(
               radius: 18,
               backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-              backgroundImage: user?.photoURL != null ? NetworkImage(user!.photoURL!) : null,
-              child: user?.photoURL == null 
-                  ? Text(user?.displayName?[0].toUpperCase() ?? 'U', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimaryContainer))
+              backgroundImage: user?.photoURL != null
+                  ? NetworkImage(user!.photoURL!)
+                  : null,
+              child: user?.photoURL == null
+                  ? Text(
+                      user?.displayName?[0].toUpperCase() ?? 'U',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onPrimaryContainer,
+                      ),
+                    )
                   : null,
             ).animate().scale(delay: 200.ms),
           ),
@@ -252,18 +294,21 @@ class DashboardScreen extends StatelessWidget {
         Text(
           'OVERVIEW',
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            fontWeight: FontWeight.w900,
-            letterSpacing: 2,
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
-          ),
+                fontWeight: FontWeight.w900,
+                letterSpacing: 2,
+                color: Theme.of(context)
+                    .colorScheme
+                    .primary
+                    .withValues(alpha: 0.7),
+              ),
         ),
         const SizedBox(height: 8),
         Text(
           'Hi, ${user?.displayName?.split(' ')[0] ?? 'Freelancer'}!',
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.w900,
-            letterSpacing: -1.5,
-          ),
+                fontWeight: FontWeight.w900,
+                letterSpacing: -1.5,
+              ),
         ),
       ],
     ).animate().fadeIn().slideX(begin: -0.05);
@@ -272,6 +317,7 @@ class DashboardScreen extends StatelessWidget {
   Widget _buildDashboardContent(BuildContext context) {
     return Consumer3<ProjectProvider, ClientProvider, InvoiceProvider>(
       builder: (context, projectProvider, clientProvider, invoiceProvider, child) {
+        // Error state (prioritise project errors since they drive most of the UI)
         if (projectProvider.error != null) {
           return ErrorStateWidget(
             error: projectProvider.error!,
@@ -279,23 +325,17 @@ class DashboardScreen extends StatelessWidget {
           );
         }
 
+        // Loading skeleton while initial data is coming in
         if (projectProvider.isLoading && projectProvider.projects.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (projectProvider.projects.isEmpty) {
-          return const EmptyStateWidget(
-            title: 'No Projects Yet',
-            message: 'Start by adding your first project to track your progress.',
-          );
+          return _buildLoadingSkeleton(context);
         }
 
         return Column(
           children: [
             _buildMainFeature(context, projectProvider),
-            const SizedBox(height: 32),
-            _buildStatsGrid(context, projectProvider),
-            const SizedBox(height: 32),
+            const SizedBox(height: 28),
+            _buildStatsGrid(context, projectProvider, clientProvider, invoiceProvider),
+            const SizedBox(height: 28),
             _buildFinancialSection(context, invoiceProvider),
           ],
         );
@@ -303,100 +343,156 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildLoadingSkeleton(BuildContext context) {
+    return const Column(
+      children: [
+        SkeletonLoader(height: 140, borderRadius: 32),
+        SizedBox(height: 28),
+        Row(
+          children: [
+            Expanded(child: SkeletonLoader(height: 90, borderRadius: 24)),
+            SizedBox(width: 16),
+            Expanded(child: SkeletonLoader(height: 90, borderRadius: 24)),
+            SizedBox(width: 16),
+            Expanded(child: SkeletonLoader(height: 90, borderRadius: 24)),
+          ],
+        ),
+        SizedBox(height: 28),
+        const SkeletonLoader(height: 280, borderRadius: 32),
+      ],
+    ).animate().fadeIn(duration: 400.ms);
+  }
+
   Widget _buildMainFeature(BuildContext context, ProjectProvider provider) {
+    if (provider.projects.isEmpty) {
+      return const EmptyStateWidget(
+        title: 'No Projects Yet',
+        message:
+            'Tap the + button to create your first project and start tracking progress.',
+        icon: Icons.rocket_launch_outlined,
+      );
+    }
+
     final now = DateTime.now();
     final upcoming = provider.projects
-        .where((p) => p.status != ProjectStatus.completed && p.deadline.isAfter(now))
+        .where((p) =>
+            p.status != ProjectStatus.completed && p.deadline.isAfter(now))
         .toList();
-    
-    if (upcoming.isEmpty) return const SizedBox.shrink();
-    
-    upcoming.sort((a, b) => a.deadline.compareTo(b.deadline));
-    final next = upcoming.first;
-    
+
+    // Show the most recently-overdue if all are past due
+    final overdue = provider.projects
+        .where((p) =>
+            p.status != ProjectStatus.completed && p.deadline.isBefore(now))
+        .toList();
+
+    if (upcoming.isEmpty && overdue.isEmpty) return const SizedBox.shrink();
+
+    final displayList = upcoming.isNotEmpty ? upcoming : overdue;
+    displayList.sort((a, b) => a.deadline.compareTo(b.deadline));
+    final next = displayList.first;
+
     return DeadlineCountdown(deadline: next.deadline, title: next.title)
         .animate()
         .slideY(begin: 0.1, duration: 600.ms)
         .fadeIn();
   }
 
-  Widget _buildStatsGrid(BuildContext context, ProjectProvider projectProvider) {
+  Widget _buildStatsGrid(
+    BuildContext context,
+    ProjectProvider projectProvider,
+    ClientProvider clientProvider,
+    InvoiceProvider invoiceProvider,
+  ) {
     final activeCount = projectProvider.projects
         .where((p) => p.status == ProjectStatus.active)
         .length;
-    final pendingWorkCount = projectProvider.projects
-        .where((p) => p.status != ProjectStatus.completed)
-        .length;
+    final clientCount = clientProvider.clients.length;
+    final invoiceCount = invoiceProvider.invoices.length;
 
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
-      mainAxisSpacing: 16,
-      crossAxisSpacing: 16,
-      childAspectRatio: 1.6,
+    return Row(
       children: [
-        _buildStatCard(
-          context,
-          'Active Nests',
-          activeCount.toString(),
-          Icons.rocket_launch_rounded,
-          const Color(0xFF6366F1),
+        Expanded(
+          child: _buildStatCard(
+            context,
+            'Active Nests',
+            activeCount.toString(),
+            Icons.rocket_launch_rounded,
+            const Color(0xFF6366F1),
+          ),
         ),
-        _buildStatCard(
-          context,
-          'Pending Work',
-          pendingWorkCount.toString(),
-          Icons.pending_actions_rounded,
-          const Color(0xFFF59E0B),
+        const SizedBox(width: 14),
+        Expanded(
+          child: _buildStatCard(
+            context,
+            'Clients',
+            clientCount.toString(),
+            Icons.people_rounded,
+            const Color(0xFF06B6D4),
+          ),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: _buildStatCard(
+            context,
+            'Invoices',
+            invoiceCount.toString(),
+            Icons.receipt_long_rounded,
+            const Color(0xFFF59E0B),
+          ),
         ),
       ],
     ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1);
   }
 
-  Widget _buildStatCard(BuildContext context, String label, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
     return ClipRRect(
-      borderRadius: BorderRadius.circular(32),
+      borderRadius: BorderRadius.circular(28),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
         child: Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: colorScheme.surface.withValues(alpha: 0.6),
-            borderRadius: BorderRadius.circular(32),
+            borderRadius: BorderRadius.circular(28),
             border: Border.all(
-              color: colorScheme.primary.withValues(alpha: 0.1),
+              color: colorScheme.primary.withValues(alpha: 0.08),
             ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Icon(icon, color: color, size: 20),
-                  ),
-                  Text(
-                    value,
-                    style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w900, letterSpacing: -1.5),
-                  ),
-                ],
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: color, size: 18),
               ),
+              const SizedBox(height: 12),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -1,
+                ),
+              ),
+              const SizedBox(height: 2),
               Text(
                 label.toUpperCase(),
                 style: TextStyle(
-                  fontSize: 10, 
-                  color: colorScheme.onSurface.withValues(alpha: 0.5), 
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1.2,
+                  fontSize: 9,
+                  color: colorScheme.onSurface.withValues(alpha: 0.45),
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.8,
                 ),
               ),
             ],
@@ -406,19 +502,11 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFinancialSection(BuildContext context, InvoiceProvider provider) {
-    double totalIncome = 0;
-    double totalPending = 0;
-    for (var inv in provider.invoices) {
-      if (inv.status == 'Paid') {
-        totalIncome += inv.amount;
-      } else {
-        totalPending += inv.amount;
-      }
-    }
-    return FinancialSnapshot(income: totalIncome, pending: totalPending)
-        .animate()
-        .fadeIn(delay: 600.ms)
-        .slideY(begin: 0.1);
+  Widget _buildFinancialSection(
+      BuildContext context, InvoiceProvider provider) {
+    return FinancialSnapshot(
+      income: provider.totalIncome,
+      pending: provider.totalPending,
+    ).animate().fadeIn(delay: 600.ms).slideY(begin: 0.1);
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../models/project_model.dart';
@@ -20,6 +21,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
   final ProjectService _service = ProjectService();
   final _taskController = TextEditingController();
   bool _addingTask = false;
+  TaskStatus _selectedFilter = TaskStatus.active;
 
   @override
   void dispose() {
@@ -55,12 +57,17 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
         projectId: widget.project.id,
         userId: widget.project.userId,
         title: title,
-        isCompleted: false,
+        status: TaskStatus.active,
         priority: 'Medium',
         createdAt: DateTime.now(),
       );
       await _service.addTask(widget.project.id, task);
       _taskController.clear();
+      
+      // Auto-switch to Active tab if we were on Completed
+      if (_selectedFilter == TaskStatus.completed) {
+        setState(() => _selectedFilter = TaskStatus.active);
+      }
     } catch (e) {
       if (mounted) _showError('Failed to add task: $e');
     } finally {
@@ -72,7 +79,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
   Future<void> _toggleTask(Task task) async {
     try {
       await _service.toggleTaskCompletion(
-          widget.project.id, task.id, !task.isCompleted);
+          widget.project.id, task.id, task.status);
     } catch (e) {
       if (mounted) _showError('Failed to update task: $e');
     }
@@ -288,65 +295,90 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                     ?.copyWith(fontWeight: FontWeight.w800),
               ),
               const Spacer(),
-              Icon(Icons.checklist_rounded,
-                  size: 20, color: colorScheme.primary),
+              SegmentedButton<TaskStatus>(
+                segments: const [
+                  ButtonSegment(
+                    value: TaskStatus.active,
+                    label: Text('Active'),
+                    icon: Icon(Icons.bolt_rounded, size: 16),
+                  ),
+                  ButtonSegment(
+                    value: TaskStatus.completed,
+                    label: Text('Done'),
+                    icon: Icon(Icons.check_circle_outline_rounded, size: 16),
+                  ),
+                ],
+                selected: {_selectedFilter},
+                onSelectionChanged: (newSelection) {
+                  setState(() => _selectedFilter = newSelection.first);
+                },
+                style: SegmentedButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  selectedBackgroundColor: colorScheme.primary,
+                  selectedForegroundColor: colorScheme.onPrimary,
+                ),
+                showSelectedIcon: false,
+              ),
             ],
           ),
           const SizedBox(height: 16),
 
           // ── Add Task Row ───────────────────────────────────────────────────
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _taskController,
-                  decoration: InputDecoration(
-                    hintText: 'Add a new task...',
-                    filled: true,
-                    fillColor: colorScheme.surfaceVariant.withValues(alpha: 0.4),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide.none,
+          if (_selectedFilter == TaskStatus.active)
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _taskController,
+                    decoration: InputDecoration(
+                      hintText: 'Add a new task...',
+                      filled: true,
+                      fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
+                    onSubmitted: (_) => _addTask(),
+                    textInputAction: TextInputAction.done,
                   ),
-                  onSubmitted: (_) => _addTask(),
-                  textInputAction: TextInputAction.done,
                 ),
-              ),
-              const SizedBox(width: 10),
-              SizedBox(
-                height: 48,
-                width: 48,
-                child: ElevatedButton(
-                  onPressed: _addingTask ? null : _addTask,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colorScheme.primary,
-                    foregroundColor: colorScheme.onPrimary,
-                    padding: EdgeInsets.zero,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
-                    elevation: 0,
+                const SizedBox(width: 10),
+                SizedBox(
+                  height: 48,
+                  width: 48,
+                  child: ElevatedButton(
+                    onPressed: _addingTask ? null : _addTask,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: colorScheme.onPrimary,
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14)),
+                      elevation: 0,
+                    ),
+                    child: _addingTask
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child:
+                                CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          )
+                        : const Icon(Icons.add, size: 22),
                   ),
-                  child: _addingTask
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child:
-                              CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                        )
-                      : const Icon(Icons.add, size: 22),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ).animate().fadeIn().slideY(begin: 0.2),
 
           const SizedBox(height: 16),
 
           // ── Task List ──────────────────────────────────────────────────────
           StreamBuilder<List<Task>>(
-            stream: _service.getProjectTasks(project.id),
+            stream: _service.getProjectTasks(project.id, status: _selectedFilter),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Padding(
@@ -375,12 +407,14 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 32),
                   child: Column(
                     children: [
-                      Icon(Icons.task_outlined,
-                          size: 48,
-                          color: colorScheme.onSurface.withValues(alpha: 0.2)),
+                      Icon(
+                        _selectedFilter == TaskStatus.active ? Icons.task_outlined : Icons.check_circle_outline_rounded,
+                        size: 48,
+                        color: colorScheme.onSurface.withValues(alpha: 0.2),
+                      ),
                       const SizedBox(height: 12),
                       Text(
-                        'No tasks yet',
+                        _selectedFilter == TaskStatus.active ? 'All clear!' : 'No completed tasks',
                         style: TextStyle(
                           color: colorScheme.onSurface.withValues(alpha: 0.4),
                           fontWeight: FontWeight.w600,
@@ -388,7 +422,9 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Add a task above to get started.',
+                        _selectedFilter == TaskStatus.active 
+                           ? 'No active tasks found in this nest.' 
+                           : 'Tasks will appear here once you finish them.',
                         style: TextStyle(
                           color: colorScheme.onSurface.withValues(alpha: 0.3),
                           fontSize: 13,
@@ -401,6 +437,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
 
               return Column(
                 children: tasks.map((task) => _TaskTile(
+                  key: ValueKey(task.id),
                   task: task,
                   onToggle: () => _toggleTask(task),
                   onDelete: () => _deleteTask(task),
@@ -423,6 +460,7 @@ class _TaskTile extends StatelessWidget {
   final VoidCallback onDelete;
 
   const _TaskTile({
+    super.key,
     required this.task,
     required this.onToggle,
     required this.onDelete,
@@ -431,6 +469,7 @@ class _TaskTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isDone = task.status == TaskStatus.completed;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -438,7 +477,7 @@ class _TaskTile extends StatelessWidget {
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: task.isCompleted
+          color: isDone
               ? colorScheme.primary.withValues(alpha: 0.25)
               : colorScheme.outlineVariant.withValues(alpha: 0.4),
         ),
@@ -453,16 +492,16 @@ class _TaskTile extends StatelessWidget {
             width: 24,
             height: 24,
             decoration: BoxDecoration(
-              color: task.isCompleted ? colorScheme.primary : Colors.transparent,
+              color: isDone ? colorScheme.primary : Colors.transparent,
               border: Border.all(
-                color: task.isCompleted
+                color: isDone
                     ? colorScheme.primary
                     : colorScheme.onSurface.withValues(alpha: 0.3),
                 width: 2,
               ),
               shape: BoxShape.circle,
             ),
-            child: task.isCompleted
+            child: isDone
                 ? const Icon(Icons.check, size: 14, color: Colors.white)
                 : null,
           ),
@@ -470,9 +509,8 @@ class _TaskTile extends StatelessWidget {
         title: Text(
           task.title,
           style: TextStyle(
-            decoration:
-                task.isCompleted ? TextDecoration.lineThrough : null,
-            color: task.isCompleted
+            decoration: isDone ? TextDecoration.lineThrough : null,
+            color: isDone
                 ? colorScheme.onSurface.withValues(alpha: 0.4)
                 : colorScheme.onSurface,
             fontWeight: FontWeight.w500,
@@ -486,6 +524,7 @@ class _TaskTile extends StatelessWidget {
           tooltip: 'Delete task',
         ),
       ),
-    );
+    ).animate().fadeIn(duration: 300.ms).slideY(begin: 0.1);
   }
 }
+

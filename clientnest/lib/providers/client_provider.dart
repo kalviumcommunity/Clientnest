@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../models/client_model.dart';
 import '../services/firestore_service.dart';
@@ -13,6 +14,15 @@ class ClientProvider extends ChangeNotifier {
   List<Client> get clients => _clients;
   bool get isLoading => _isLoading;
   String? get error => _error;
+
+  ClientProvider() {
+    // Auto-subscribe when the user is already signed in on construction.
+    // In MainScreenWrapper's initState we still call fetchClients() as a
+    // no-op safeguard, but the real subscription begins here.
+    if (FirebaseAuth.instance.currentUser != null) {
+      fetchClients();
+    }
+  }
 
   void fetchClients() {
     _subscription?.cancel();

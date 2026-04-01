@@ -137,22 +137,35 @@ class FirestoreService {
   }
 
   // --- Tasks ---
-  Stream<List<Task>> getTasks(String projectId) {
+  Stream<List<Task>> getTasks(String projectId, {TaskStatus? status}) {
     final uid = currentUserId;
     if (uid == null) throw Exception('Please login to continue');
-    return _db.collection('users').doc(uid).collection('tasks')
-        .where('projectId', isEqualTo: projectId)
-        .orderBy('createdAt', descending: true)
+    
+    Query query = _db.collection('users').doc(uid).collection('tasks')
+        .where('projectId', isEqualTo: projectId);
+        
+    if (status != null) {
+      query = query.where('status', isEqualTo: status.name);
+    }
+    
+    return query.orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) => Task.fromMap(doc.data(), doc.id)).toList());
+        .map((snapshot) => snapshot.docs.map((doc) => Task.fromMap(doc.data() as Map<String, dynamic>, doc.id)).toList());
   }
 
   Future<void> addTask(Task task) async {
     try {
       final uid = currentUserId;
       if (uid == null) throw Exception('Please login to continue');
+      
       final map = task.toMap();
       map['userId'] = uid;
+      
+      // Ensure status is set to active for new tasks if not already
+      if (map['status'] == null) {
+        map['status'] = TaskStatus.active.name;
+      }
+      
       await _db.collection('users').doc(uid).collection('tasks').add(map);
       await _db.collection('users').doc(uid).collection('nests').doc(task.projectId).update({
         'lastActivity': FieldValue.serverTimestamp(),
@@ -162,15 +175,22 @@ class FirestoreService {
     }
   }
 
-  Future<void> toggleTask(String taskId, bool isCompleted) async {
+  Future<void> toggleTask(String taskId, TaskStatus currentStatus) async {
     try {
       final uid = currentUserId;
       if (uid == null) throw Exception('Please login to continue');
-      await _db.collection('users').doc(uid).collection('tasks').doc(taskId).update({'isCompleted': isCompleted});
+      
+      final newStatus = currentStatus == TaskStatus.active ? TaskStatus.completed : TaskStatus.active;
+      await _db.collection('users').doc(uid).collection('tasks').doc(taskId).update({
+        'status': newStatus.name,
+        // Keep isCompleted for backward compatibility if needed, but the primary is 'status'
+        'isCompleted': newStatus == TaskStatus.completed,
+      });
     } catch (e) {
       throw Exception(_handleError(e));
     }
   }
+
 
   Future<void> deleteTask(String taskId) async {
     try {

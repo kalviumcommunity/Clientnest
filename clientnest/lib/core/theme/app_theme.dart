@@ -21,7 +21,6 @@ class AppTheme {
       tertiary: accentColor,
       brightness: Brightness.light,
       surface: const Color(0xFFF8FAFC),
-      background: const Color(0xFFFFFFFF),
     ),
     textTheme: GoogleFonts.outfitTextTheme(),
     cardTheme: CardThemeData(
@@ -29,18 +28,18 @@ class AppTheme {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       color: Colors.white,
     ),
-    appBarTheme: AppBarTheme(
+    appBarTheme: const AppBarTheme(
       backgroundColor: Colors.transparent,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       scrolledUnderElevation: 0,
       centerTitle: true,
-      titleTextStyle: GoogleFonts.outfit(
-        color: const Color(0xFF0F172A),
+      titleTextStyle: TextStyle(
+        color: Color(0xFF0F172A),
         fontSize: 20,
         fontWeight: FontWeight.w700,
       ),
-      iconTheme: const IconThemeData(color: Color(0xFF0F172A)),
+      iconTheme: IconThemeData(color: Color(0xFF0F172A)),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
@@ -72,32 +71,36 @@ class AppTheme {
 
   static ThemeData darkTheme = ThemeData(
     useMaterial3: true,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: primarySeed,
+    colorScheme: const ColorScheme.dark(
+      primary: primarySeed,
       secondary: secondaryColor,
       tertiary: accentColor,
-      brightness: Brightness.dark,
-      surface: const Color(0xFF121212),
-      background: Colors.black,
+      surface: Colors.black,
+      onPrimary: Colors.white,
+      onSecondary: Colors.white,
+      onSurface: Colors.white,
     ),
     textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme),
     cardTheme: CardThemeData(
       elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      color: const Color(0xFF1E1E1E),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+        side: BorderSide(color: Colors.white.withValues(alpha: 0.1), width: 1),
+      ),
+      color: const Color(0xFF111111),
     ),
-    appBarTheme: AppBarTheme(
+    appBarTheme: const AppBarTheme(
       backgroundColor: Colors.transparent,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       scrolledUnderElevation: 0,
       centerTitle: true,
-      titleTextStyle: GoogleFonts.outfit(
+      titleTextStyle: TextStyle(
         color: Colors.white,
         fontSize: 20,
         fontWeight: FontWeight.w700,
       ),
-      iconTheme: const IconThemeData(color: Colors.white),
+      iconTheme: IconThemeData(color: Colors.white),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
@@ -111,7 +114,7 @@ class AppTheme {
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: const Color(0xFF1E293B),
+      fillColor: const Color(0xFF111111),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(18),
         borderSide: BorderSide.none,

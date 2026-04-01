@@ -1,5 +1,6 @@
-// ignore_for_file: overridden_fields
 import 'package:hive/hive.dart';
+// Only import the domain Task entity; hide global Task to avoid ambiguity.
+import 'package:clientnest/models/task_model.dart' show TaskStatus;
 import '../../domain/entities/task.dart';
 
 part 'task_model.g.dart';
@@ -20,20 +21,20 @@ class TaskModel extends Task {
   final DateTime dueDate;
   @override
   @HiveField(4)
-  final bool isCompleted;
+  final TaskStatus status;
 
   const TaskModel({
     required this.id,
     required this.title,
     required this.description,
     required this.dueDate,
-    this.isCompleted = false,
+    this.status = TaskStatus.active,
   }) : super(
           id: id,
           title: title,
           description: description,
           dueDate: dueDate,
-          isCompleted: isCompleted,
+          status: status,
         );
 
   factory TaskModel.fromEntity(Task task) {
@@ -42,7 +43,7 @@ class TaskModel extends Task {
       title: task.title,
       description: task.description,
       dueDate: task.dueDate,
-      isCompleted: task.isCompleted,
+      status: task.status,
     );
   }
 }
