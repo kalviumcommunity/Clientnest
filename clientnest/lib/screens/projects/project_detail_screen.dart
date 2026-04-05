@@ -135,7 +135,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
   Color _statusColor(ProjectStatus status) {
     switch (status) {
       case ProjectStatus.active:
-        return const Color(0xFF6366F1);
+        return const Color(0xFF2563EB);
       case ProjectStatus.lead:
       case ProjectStatus.pending:
         return const Color(0xFFF59E0B);

@@ -59,7 +59,7 @@ class _TasksPageState extends State<TasksPage> with SingleTickerProviderStateMix
         floatingActionButton: Builder(
           builder: (context) => FloatingActionButton.extended(
             onPressed: () {
-              final task = domain.Task(
+              final task = domain.TaskEntity(
                 id: const Uuid().v4(),
                 title: 'New Task',
                 description: 'Quick task description',

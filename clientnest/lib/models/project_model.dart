@@ -13,6 +13,7 @@ class Project {
   final double budget;
   final DateTime deadline;
   final DateTime createdAt;
+  final int priority; // Added priority field (0=Low, 1=Medium, 2=High)
   final DateTime? lastActivity;
 
   Project({
@@ -26,6 +27,7 @@ class Project {
     required this.budget,
     required this.deadline,
     required this.createdAt,
+    this.priority = 0,
     this.lastActivity,
   });
 
@@ -48,6 +50,7 @@ class Project {
       createdAt: map['createdAt'] != null
           ? (map['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
+      priority: map['priority'] ?? 0,
       lastActivity: map['lastActivity'] != null
           ? (map['lastActivity'] as Timestamp).toDate()
           : null,
@@ -65,6 +68,7 @@ class Project {
       'budget': budget,
       'deadline': Timestamp.fromDate(deadline),
       'createdAt': Timestamp.fromDate(createdAt),
+      'priority': priority,
       'lastActivity': lastActivity != null ? Timestamp.fromDate(lastActivity!) : null,
     };
   }
@@ -85,6 +89,7 @@ class Project {
     double? budget,
     DateTime? deadline,
     DateTime? createdAt,
+    int? priority,
     DateTime? lastActivity,
   }) {
     return Project(
@@ -98,6 +103,7 @@ class Project {
       budget: budget ?? this.budget,
       deadline: deadline ?? this.deadline,
       createdAt: createdAt ?? this.createdAt,
+      priority: priority ?? this.priority,
       lastActivity: lastActivity ?? this.lastActivity,
     );
   }

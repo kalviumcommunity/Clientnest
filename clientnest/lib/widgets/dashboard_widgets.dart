@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'dart:async';
-import 'dart:ui';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:clientnest/shared/widgets/nest_ui.dart';
+import 'package:clientnest/core/theme/nest_design_system.dart';
 
 // ─── Deadline Countdown ────────────────────────────────────────────────────────
 
@@ -27,9 +29,11 @@ class _DeadlineCountdownState extends State<DeadlineCountdown> {
   }
 
   void _calculateRemaining() {
-    setState(() {
-      _remaining = widget.deadline.difference(DateTime.now());
-    });
+    if (mounted) {
+      setState(() {
+        _remaining = widget.deadline.difference(DateTime.now());
+      });
+    }
   }
 
   @override
@@ -45,98 +49,85 @@ class _DeadlineCountdownState extends State<DeadlineCountdown> {
     final hours = _remaining.inHours % 24;
     final isPast = _remaining.isNegative;
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(32),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: isPast
-                  ? [Colors.redAccent.withValues(alpha: 0.8), Colors.red.shade900.withValues(alpha: 0.8)]
-                  : [colorScheme.primary.withValues(alpha: 0.8), colorScheme.secondary.withValues(alpha: 0.8)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(32),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-            boxShadow: [
-              BoxShadow(
-                color: (isPast ? Colors.redAccent : colorScheme.primary).withValues(alpha: 0.25),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return LayerContainer(
+      padding: const EdgeInsets.all(NestDesignSystem.spacingL),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    isPast ? 'OVERDUE' : 'Next Deadline',
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  Icon(
-                    isPast ? Icons.warning_amber_rounded : Icons.timer_outlined,
-                    color: Colors.white.withValues(alpha: 0.8),
-                    size: 20,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Text(
-                widget.title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -0.5,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isPast ? NestDesignSystem.error.withValues(alpha: 0.1) : colorScheme.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 16),
-              if (isPast)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Text(
-                    'This project deadline has passed',
-                    style: TextStyle(color: Colors.white, fontSize: 13),
-                  ),
-                )
-              else
-                Row(
+                child: Row(
                   children: [
-                    _TimeBox(value: days.toString(), label: 'DAYS'),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12),
-                      child: Text(
-                        ':',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    Icon(
+                      isPast ? Icons.warning_amber_rounded : Icons.timer_outlined,
+                      color: isPast ? NestDesignSystem.error : colorScheme.primary,
+                      size: 14,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      isPast ? 'OVERDUE' : 'NEXT DEADLINE',
+                      style: TextStyle(
+                        color: isPast ? NestDesignSystem.error : colorScheme.primary,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.5,
                       ),
                     ),
-                    _TimeBox(value: hours.abs().toString(), label: 'HOURS'),
                   ],
                 ),
+              ),
+              Icon(
+                Icons.more_horiz_rounded,
+                color: colorScheme.onSurface.withValues(alpha: 0.3),
+              ),
             ],
           ),
-        ),
+          const SizedBox(height: NestDesignSystem.spacingL),
+          Text(
+            widget.title,
+            style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -1.0,
+                ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: NestDesignSystem.spacingM),
+          if (isPast)
+            Text(
+              'Missed by ${days.abs()} days',
+              style: const TextStyle(
+                color: NestDesignSystem.error,
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
+            )
+          else
+            Row(
+              children: [
+                _TimeBox(value: days.toString(), label: 'DAYS'),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    ':',
+                    style: TextStyle(
+                      color: colorScheme.onSurface.withValues(alpha: 0.2),
+                      fontSize: 32,
+                      fontWeight: FontWeight.w200,
+                    ),
+                  ),
+                ),
+                _TimeBox(value: hours.abs().toString(), label: 'HOURS'),
+              ],
+            ),
+        ],
       ),
     );
   }
@@ -151,22 +142,21 @@ class _TimeBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           value.padLeft(2, '0'),
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                fontWeight: FontWeight.w800,
+                fontSize: 36,
+              ),
         ),
         Text(
           label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.6),
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+              ),
         ),
       ],
     );
@@ -185,184 +175,148 @@ class FinancialSnapshot extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final hasData = income > 0 || pending > 0;
-    // Safe maxY – avoid zero that causes chart assertion errors
     final maxY = hasData ? (income > pending ? income : pending) * 1.3 : 1.0;
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(32),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: colorScheme.surface.withValues(alpha: 0.6),
-            borderRadius: BorderRadius.circular(32),
-            border: Border.all(color: colorScheme.primary.withValues(alpha: 0.1)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Financial Snapshot',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.5,
+    return GraphCard(
+      title: 'Financial Analysis',
+      value: '\$${(income + pending).toStringAsFixed(0)}',
+      chart: hasData
+          ? BarChart(
+              BarChartData(
+                alignment: BarChartAlignment.center,
+                maxY: maxY,
+                minY: 0,
+                groupsSpace: 40,
+                barTouchData: BarTouchData(
+                  enabled: true,
+                  touchTooltipData: BarTouchTooltipData(
+                    tooltipBgColor: NestDesignSystem.darkElevated,
+                    tooltipRoundedRadius: 8,
+                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                      return BarTooltipItem(
+                        '\$${rod.toY.toStringAsFixed(0)}',
+                        const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      );
+                    },
+                  ),
+                ),
+                titlesData: FlTitlesData(
+                  show: true,
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      getTitlesWidget: (value, meta) {
+                        const style = TextStyle(
+                          color: NestDesignSystem.darkTextSecondary,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                        );
+                        switch (value.toInt()) {
+                          case 0:
+                            return const Padding(
+                              padding: EdgeInsets.only(top: 8.0),
+                              child: Text('INCOME', style: style),
+                            );
+                          case 1:
+                            return const Padding(
+                              padding: EdgeInsets.only(top: 8.0),
+                              child: Text('PENDING', style: style),
+                            );
+                          default:
+                            return const Text('');
+                        }
+                      },
                     ),
                   ),
-                  Icon(
-                    Icons.account_balance_wallet_outlined,
-                    color: colorScheme.primary,
-                    size: 22,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                height: 180,
-                child: hasData
-                    ? BarChart(
-                        BarChartData(
-                          alignment: BarChartAlignment.spaceAround,
-                          maxY: maxY,
-                          minY: 0,
-                          barTouchData: BarTouchData(enabled: false),
-                          titlesData: FlTitlesData(
-                            show: true,
-                            bottomTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                getTitlesWidget: (value, meta) {
-                                  final style = TextStyle(
-                                    color: colorScheme.onSurface.withValues(alpha: 0.5),
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                  );
-                                  switch (value.toInt()) {
-                                    case 0:
-                                      return Text('INCOME', style: style);
-                                    case 1:
-                                      return Text('PENDING', style: style);
-                                    default:
-                                      return const Text('');
-                                  }
-                                },
-                              ),
-                            ),
-                            leftTitles: const AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                            topTitles: const AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                            rightTitles: const AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                          ),
-                          gridData: const FlGridData(show: false),
-                          borderData: FlBorderData(show: false),
-                          barGroups: [
-                            BarChartGroupData(
-                              x: 0,
-                              barRods: [
-                                BarChartRodData(
-                                  toY: income,
-                                  color: const Color(0xFF10B981),
-                                  width: 44,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ],
-                            ),
-                            BarChartGroupData(
-                              x: 1,
-                              barRods: [
-                                BarChartRodData(
-                                  toY: pending,
-                                  color: const Color(0xFFF43F5E),
-                                  width: 44,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      )
-                    : Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.bar_chart_rounded,
-                              size: 48,
-                              color: colorScheme.onSurface.withValues(alpha: 0.15),
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              'No invoice data yet',
-                              style: TextStyle(
-                                color: colorScheme.onSurface.withValues(alpha: 0.35),
-                                fontSize: 13,
-                              ),
-                            ),
-                          ],
+                  leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                ),
+                gridData: const FlGridData(show: false),
+                borderData: FlBorderData(show: false),
+                barGroups: [
+                  BarChartGroupData(
+                    x: 0,
+                    barRods: [
+                      BarChartRodData(
+                        toY: income,
+                        color: NestDesignSystem.graphBlue,
+                        width: 48,
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
+                        backDrawRodData: BackgroundBarChartRodData(
+                          show: true,
+                          toY: maxY,
+                          color: colorScheme.onSurface.withValues(alpha: 0.04),
                         ),
                       ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: _StatItem(
-                      label: 'Total Income',
-                      value: '\$${income.toStringAsFixed(0)}',
-                      color: const Color(0xFF10B981),
-                    ),
+                    ],
                   ),
-                  Expanded(
-                    child: _StatItem(
-                      label: 'Pending',
-                      value: '\$${pending.toStringAsFixed(0)}',
-                      color: const Color(0xFFF43F5E),
-                    ),
+                  BarChartGroupData(
+                    x: 1,
+                    barRods: [
+                      BarChartRodData(
+                        toY: pending,
+                        color: NestDesignSystem.graphPurple,
+                        width: 48,
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
+                        backDrawRodData: BackgroundBarChartRodData(
+                          show: true,
+                          toY: maxY,
+                          color: colorScheme.onSurface.withValues(alpha: 0.04),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
+            ).animate().fadeIn(duration: 800.ms).scaleY(begin: 0.5, alignment: Alignment.bottomCenter)
+          : Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.bar_chart_rounded,
+                    size: 48,
+                    color: colorScheme.onSurface.withValues(alpha: 0.1),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text('No financial data available'),
+                ],
+              ),
+            ),
+      legend: Row(
+        children: [
+          _LegendItem(label: 'Income', color: NestDesignSystem.graphBlue),
+          const SizedBox(width: 20),
+          _LegendItem(label: 'Pending', color: NestDesignSystem.graphPurple),
+        ],
       ),
     );
   }
 }
 
-class _StatItem extends StatelessWidget {
+class _LegendItem extends StatelessWidget {
   final String label;
-  final String value;
   final Color color;
 
-  const _StatItem({required this.label, required this.value, required this.color});
+  const _LegendItem({required this.label, required this.color});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
       children: [
-        Row(
-          children: [
-            Container(
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-            ),
-            const SizedBox(width: 8),
-            Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-          ],
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
-        const SizedBox(height: 4),
-        Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+        ),
       ],
     );
   }
@@ -394,33 +348,28 @@ class EmptyStateWidget extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(28),
               decoration: BoxDecoration(
-                color: colorScheme.primary.withValues(alpha: 0.06),
+                color: colorScheme.primary.withValues(alpha: 0.05),
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: colorScheme.primary.withValues(alpha: 0.08),
-                  width: 2,
-                ),
               ),
               child: Icon(
                 icon,
                 size: 56,
-                color: colorScheme.primary.withValues(alpha: 0.35),
+                color: colorScheme.primary.withValues(alpha: 0.5),
               ),
             ),
             const SizedBox(height: 24),
             Text(
               title,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 10),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: colorScheme.onSurface.withValues(alpha: 0.5),
-                fontSize: 14,
-                height: 1.5,
-              ),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurface.withValues(alpha: 0.5),
+                    height: 1.5,
+                  ),
             ),
           ],
         ),
@@ -439,51 +388,36 @@ class ErrorStateWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.redAccent.withValues(alpha: 0.08),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.error_outline_rounded,
-                color: Colors.redAccent,
-                size: 52,
-              ),
+            const Icon(
+              Icons.error_outline_rounded,
+              color: NestDesignSystem.error,
+              size: 52,
             ),
             const SizedBox(height: 24),
             const Text(
               'Something went wrong',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 10),
             Text(
-              error.length > 120 ? '${error.substring(0, 120)}…' : error,
+              error,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: colorScheme.onSurface.withValues(alpha: 0.5),
-                fontSize: 13,
-                height: 1.4,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                fontSize: 14,
               ),
             ),
             const SizedBox(height: 28),
-            ElevatedButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Try Again'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
+            PrimaryButton(
+              label: 'Try Again',
+              onTap: onRetry,
+              icon: Icons.refresh_rounded,
             ),
           ],
         ),
@@ -494,7 +428,7 @@ class ErrorStateWidget extends StatelessWidget {
 
 // ─── Loading Skeleton ──────────────────────────────────────────────────────────
 
-class SkeletonLoader extends StatefulWidget {
+class SkeletonLoader extends StatelessWidget {
   final double height;
   final double? width;
   final double borderRadius;
@@ -503,49 +437,20 @@ class SkeletonLoader extends StatefulWidget {
     super.key,
     this.height = 20,
     this.width,
-    this.borderRadius = 12,
+    this.borderRadius = NestDesignSystem.borderRadius,
   });
-
-  @override
-  State<SkeletonLoader> createState() => _SkeletonLoaderState();
-}
-
-class _SkeletonLoaderState extends State<SkeletonLoader>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    )..repeat(reverse: true);
-    _animation = Tween<double>(begin: 0.3, end: 0.7).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) => Container(
-        height: widget.height,
-        width: widget.width,
-        decoration: BoxDecoration(
-          color: colorScheme.onSurface.withValues(alpha: _animation.value * 0.15),
-          borderRadius: BorderRadius.circular(widget.borderRadius),
-        ),
+    return Container(
+      height: height,
+      width: width,
+      decoration: BoxDecoration(
+        color: colorScheme.onSurface.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(borderRadius),
       ),
-    );
+    ).animate(onPlay: (c) => c.repeat())
+      .shimmer(duration: 1200.ms, color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5));
   }
 }

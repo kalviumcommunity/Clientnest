@@ -1,88 +1,81 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class CustomButton extends StatelessWidget {
+class ActionButton extends StatefulWidget {
   final String text;
   final VoidCallback? onPressed;
   final bool isLoading;
-  final bool isOutline;
   final IconData? icon;
 
-  const CustomButton({
+  const ActionButton({
     super.key,
     required this.text,
     this.onPressed,
     this.isLoading = false,
-    this.isOutline = false,
     this.icon,
   });
+
+  @override
+  State<ActionButton> createState() => _ActionButtonState();
+}
+
+class _ActionButtonState extends State<ActionButton> {
+  bool _isPressed = false;
+
+  void _handleTapDown(TapDownDetails details) {
+    if (widget.onPressed != null && !widget.isLoading) {
+      setState(() => _isPressed = true);
+    }
+  }
+
+  void _handleTapUp(TapUpDetails details) {
+    if (widget.onPressed != null && !widget.isLoading) {
+      setState(() => _isPressed = false);
+      widget.onPressed!();
+    }
+  }
+
+  void _handleTapCancel() {
+    if (widget.onPressed != null && !widget.isLoading) {
+      setState(() => _isPressed = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
-    return RepaintBoundary(
-      child: Container(
-        decoration: isOutline || isLoading ? null : BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: theme.brightness == Brightness.dark 
-            ? [
-                BoxShadow(
-                  color: theme.primaryColor.withValues(alpha: 0.3),
-                  blurRadius: 15,
-                  offset: const Offset(0, 4),
-                )
-              ]
-            : [
-                BoxShadow(
-                  color: theme.primaryColor.withValues(alpha: 0.2),
-                  blurRadius: 12,
-                  offset: const Offset(0, 6),
-                )
-              ],
+    return GestureDetector(
+      onTapDown: _handleTapDown,
+      onTapUp: _handleTapUp,
+      onTapCancel: _handleTapCancel,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedScale(
+        scale: _isPressed ? 0.98 : 1.0,
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOutCubic,
+        child: Container(
+          width: double.infinity,
+          height: 48, // Slightly shorter for SaaS crispness
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary,
+            borderRadius: BorderRadius.circular(8), // Tighter borders
+          ),
+          child: Center(
+            child: _buildChild(theme),
+          ),
         ),
-        child: isOutline
-          ? OutlinedButton(
-              onPressed: isLoading ? null : onPressed,
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 56),
-                side: BorderSide(color: theme.primaryColor, width: 2),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              child: _buildChild(theme),
-            )
-          : ElevatedButton(
-              onPressed: isLoading ? null : onPressed,
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 56),
-                backgroundColor: theme.primaryColor,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                elevation: 0,
-              ),
-              child: _buildChild(theme),
-            ),
       ),
-    ).animate(onPlay: (controller) => controller.repeat())
-     .shimmer(
-        duration: 3.seconds,
-        delay: 2.seconds,
-        color: Colors.white.withValues(alpha: 0.1),
-      );
+    );
   }
 
   Widget _buildChild(ThemeData theme) {
-    if (isLoading) {
+    if (widget.isLoading) {
       return const SizedBox(
-        height: 24,
-        width: 24,
+        height: 20,
+        width: 20,
         child: CircularProgressIndicator(
-          strokeWidth: 2,
+          strokeWidth: 2.5,
           valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
         ),
       );
@@ -91,16 +84,17 @@ class CustomButton extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (icon != null) ...[
-          Icon(icon, size: 20),
+        if (widget.icon != null) ...[
+          Icon(widget.icon, size: 18, color: theme.colorScheme.onPrimary),
           const SizedBox(width: 8),
         ],
         Text(
-          text,
-          style: const TextStyle(
-            fontSize: 16,
+          widget.text,
+          style: TextStyle(
+            fontSize: 14,
             fontWeight: FontWeight.w600,
-            letterSpacing: 0.5,
+            letterSpacing: 0.2,
+            color: theme.colorScheme.onPrimary,
           ),
         ),
       ],
@@ -108,7 +102,115 @@ class CustomButton extends StatelessWidget {
   }
 }
 
-class SocialButton extends StatelessWidget {
+class GhostButton extends StatefulWidget {
+  final String text;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+  final IconData? icon;
+
+  const GhostButton({
+    super.key,
+    required this.text,
+    this.onPressed,
+    this.isLoading = false,
+    this.icon,
+  });
+
+  @override
+  State<GhostButton> createState() => _GhostButtonState();
+}
+
+class _GhostButtonState extends State<GhostButton> {
+  bool _isPressed = false;
+
+  void _handleTapDown(TapDownDetails details) {
+    if (widget.onPressed != null && !widget.isLoading) {
+      setState(() => _isPressed = true);
+    }
+  }
+
+  void _handleTapUp(TapUpDetails details) {
+    if (widget.onPressed != null && !widget.isLoading) {
+      setState(() => _isPressed = false);
+      widget.onPressed!();
+    }
+  }
+
+  void _handleTapCancel() {
+    if (widget.onPressed != null && !widget.isLoading) {
+      setState(() => _isPressed = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    return GestureDetector(
+      onTapDown: _handleTapDown,
+      onTapUp: _handleTapUp,
+      onTapCancel: _handleTapCancel,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedScale(
+        scale: _isPressed ? 0.98 : 1.0,
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOutCubic,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          width: double.infinity,
+          height: 48,
+          decoration: BoxDecoration(
+            color: _isPressed 
+              ? theme.colorScheme.onSurface.withValues(alpha: 0.05) 
+              : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.15),
+              width: 1,
+            ),
+          ),
+          child: Center(
+            child: _buildChild(theme),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChild(ThemeData theme) {
+    if (widget.isLoading) {
+      return SizedBox(
+        height: 20,
+        width: 20,
+        child: CircularProgressIndicator(
+          strokeWidth: 2.5,
+          valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.onSurface),
+        ),
+      );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (widget.icon != null) ...[
+          Icon(widget.icon, size: 18, color: theme.colorScheme.onSurface),
+          const SizedBox(width: 8),
+        ],
+        Text(
+          widget.text,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.2,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class SocialButton extends StatefulWidget {
   final String text;
   final String? iconPath;
   final VoidCallback? onPressed;
@@ -121,43 +223,75 @@ class SocialButton extends StatelessWidget {
   });
 
   @override
+  State<SocialButton> createState() => _SocialButtonState();
+}
+
+class _SocialButtonState extends State<SocialButton> {
+  bool _isPressed = false;
+
+  void _handleTapDown(TapDownDetails details) {
+    if (widget.onPressed != null) setState(() => _isPressed = true);
+  }
+
+  void _handleTapUp(TapUpDetails details) {
+    if (widget.onPressed != null) {
+      setState(() => _isPressed = false);
+      widget.onPressed!();
+    }
+  }
+
+  void _handleTapCancel() {
+    if (widget.onPressed != null) setState(() => _isPressed = false);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return OutlinedButton(
-      onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        minimumSize: const Size(double.infinity, 60),
-        side: BorderSide(
-          color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.15),
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        backgroundColor: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.white,
-        elevation: isDark ? 0 : 1,
-        shadowColor: Colors.black.withValues(alpha: 0.05),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SvgPicture.network(
-            'https://www.vectorlogo.zone/logos/google/google-icon.svg',
-            height: 24,
-            placeholderBuilder: (_) => const Icon(Icons.g_mobiledata),
-          ),
-          const SizedBox(width: 16),
-          Text(
-            text,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: isDark ? Colors.white : Colors.black87,
-              letterSpacing: 0.2,
+    return GestureDetector(
+      onTapDown: _handleTapDown,
+      onTapUp: _handleTapUp,
+      onTapCancel: _handleTapCancel,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedScale(
+        scale: _isPressed ? 0.98 : 1.0,
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOutCubic,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          width: double.infinity,
+          height: 48,
+          decoration: BoxDecoration(
+            color: _isPressed 
+              ? theme.colorScheme.onSurface.withValues(alpha: 0.05) 
+              : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.15),
+              width: 1,
             ),
           ),
-        ],
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SvgPicture.network(
+                'https://www.vectorlogo.zone/logos/google/google-icon.svg',
+                height: 18,
+                placeholderBuilder: (_) => const Icon(Icons.g_mobiledata),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                widget.text,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

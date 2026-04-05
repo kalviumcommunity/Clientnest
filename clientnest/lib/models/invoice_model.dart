@@ -94,4 +94,32 @@ class Invoice {
     Map<String, dynamic> map = doc.data() as Map<String, dynamic>? ?? {};
     return Invoice.fromMap(map, doc.id);
   }
+
+  Invoice copyWith({
+    String? id,
+    String? userId,
+    String? clientId,
+    String? clientName,
+    String? projectId,
+    String? invoiceNumber,
+    double? amount,
+    String? status,
+    DateTime? issueDate,
+    DateTime? dueDate,
+    List<InvoiceItem>? items,
+  }) {
+    return Invoice(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      clientId: clientId ?? this.clientId,
+      clientName: clientName ?? this.clientName,
+      projectId: projectId ?? this.projectId,
+      invoiceNumber: invoiceNumber ?? this.invoiceNumber,
+      amount: amount ?? this.amount,
+      status: status ?? this.status,
+      issueDate: issueDate ?? this.issueDate,
+      dueDate: dueDate ?? this.dueDate,
+      items: items ?? this.items,
+    );
+  }
 }

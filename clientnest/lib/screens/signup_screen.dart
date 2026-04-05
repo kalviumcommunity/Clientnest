@@ -290,7 +290,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     const SizedBox(height: 28),
 
                     // Sign up button
-                    CustomButton(
+                    ActionButton(
                       text: 'Create Account',
                       isLoading: _isLoading,
                       onPressed: _isLoading || _isGoogleLoading ? null : _handleSignup,

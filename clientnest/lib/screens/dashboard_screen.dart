@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
-import 'dart:ui';
 import '../../core/theme/theme_provider.dart';
 import '../../providers/project_provider.dart';
 import '../../providers/invoice_provider.dart';
@@ -14,6 +13,8 @@ import 'package:clientnest/widgets/logo_widget.dart';
 import '../../models/project_model.dart';
 import '../../screens/projects/create_project_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:clientnest/shared/widgets/nest_ui.dart';
+import '../../core/theme/nest_design_system.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -48,8 +49,7 @@ class DashboardScreen extends StatelessWidget {
             CircleAvatar(
               radius: 40,
               backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
-              backgroundImage:
-                  user?.photoURL != null ? NetworkImage(user!.photoURL!) : null,
+              backgroundImage: user?.photoURL != null ? NetworkImage(user!.photoURL!) : null,
               child: user?.photoURL == null
                   ? Text(
                       user?.displayName?[0].toUpperCase() ?? 'U',
@@ -64,7 +64,7 @@ class DashboardScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               user?.displayName ?? 'Freelancer',
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
             ),
             Text(
               user?.email ?? 'No email available',
@@ -76,14 +76,11 @@ class DashboardScreen extends StatelessWidget {
             const SizedBox(height: 32),
             _buildProfileOption(
               context,
-              icon: themeProvider.themeMode == ThemeMode.dark
-                  ? Icons.wb_sunny_outlined
-                  : Icons.nightlight_round_outlined,
-              label: themeProvider.themeMode == ThemeMode.dark
-                  ? 'Switch to Light Mode'
-                  : 'Switch to Dark Mode',
+              icon: themeProvider.themeMode == ThemeMode.dark ? Icons.wb_sunny_outlined : Icons.nightlight_round_outlined,
+              label: themeProvider.themeMode == ThemeMode.dark ? 'Light Mode' : 'Dark Mode',
               trailing: Switch.adaptive(
                 value: themeProvider.themeMode == ThemeMode.dark,
+                activeColor: NestDesignSystem.accent,
                 onChanged: (_) => themeProvider.toggleTheme(),
               ),
               onTap: () => themeProvider.toggleTheme(),
@@ -92,8 +89,8 @@ class DashboardScreen extends StatelessWidget {
             _buildProfileOption(
               context,
               icon: Icons.logout_rounded,
-              label: 'Logout',
-              color: Colors.redAccent,
+              label: 'Sign Out',
+              color: NestDesignSystem.error,
               onTap: () async {
                 Navigator.pop(context);
                 await authService.signOut();
@@ -115,32 +112,25 @@ class DashboardScreen extends StatelessWidget {
     Color? color,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
-    return InkWell(
+    return LayerContainer(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          border: Border.all(
-              color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: color ?? colorScheme.onSurface, size: 20),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: color ?? colorScheme.onSurface,
-                ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+      child: Row(
+        children: [
+          Icon(icon, color: color ?? colorScheme.onSurface, size: 20),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                color: color ?? colorScheme.onSurface,
               ),
             ),
-            if (trailing != null) trailing,
-          ],
-        ),
+          ),
+          if (trailing != null) trailing,
+        ],
       ),
     );
   }
@@ -150,137 +140,55 @@ class DashboardScreen extends StatelessWidget {
     final user = Provider.of<AuthService>(context).currentUser;
 
     if (user == null) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    return StreamBuilder<DocumentSnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .snapshots(),
-      builder: (context, snapshot) {
-        // Silently create the user doc if it doesn't exist yet
-        if (snapshot.hasData && !snapshot.data!.exists) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            FirebaseFirestore.instance
-                .collection('users')
-                .doc(user.uid)
-                .set({
-                  'name': user.displayName ?? '',
-                  'email': user.email ?? '',
-                  'photoURL': user.photoURL ?? '',
-                  'role': 'freelancer',
-                  'joinedAt': FieldValue.serverTimestamp(),
-                  'themePreference': 'system',
-                }, SetOptions(merge: true))
-                .catchError(
-                    (e) => debugPrint('Error creating user doc: $e'));
-          });
-        }
-
-        return Scaffold(
-          backgroundColor: Colors.transparent,
-          body: SafeArea(
-            bottom: false,
-            child: Stack(
-              children: [
-                Column(
-                  children: [
-                    _buildTopHeader(context, user),
-                    Expanded(
-                      child: RefreshIndicator(
-                        onRefresh: () async {
-                          // Providers are stream-based; pull-to-refresh just
-                          // re-triggers subscription in each provider.
-                          context.read<ProjectProvider>().fetchProjects();
-                          context.read<ClientProvider>().fetchClients();
-                          context.read<InvoiceProvider>().fetchInvoices();
-                        },
-                        child: ListView(
-                          physics: const AlwaysScrollableScrollPhysics(
-                              parent: BouncingScrollPhysics()),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 12,
-                          ),
-                          children: [
-                            _buildWelcomeSection(context, user),
-                            const SizedBox(height: 28),
-                            _buildDashboardContent(context),
-                            const SizedBox(height: 130),
-                          ],
-                        ),
-                      ),
+    return AppShell(
+      title: 'Dashboard',
+      actions: [
+        IconButton(
+          onPressed: () => _showProfileSheet(context, user),
+          icon: CircleAvatar(
+            radius: 14,
+            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+            backgroundImage: user.photoURL != null ? NetworkImage(user.photoURL!) : null,
+            child: user.photoURL == null
+                ? Text(
+                    user.displayName?[0].toUpperCase() ?? 'U',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
                     ),
-                  ],
-                ),
-                const Positioned(
-                  bottom: 110,
-                  left: 16,
-                  right: 16,
-                  child: FloatingTimeTracker(),
-                ),
+                  )
+                : null,
+          ),
+        ),
+      ],
+      child: Stack(
+        children: [
+          RefreshIndicator(
+            onRefresh: () async {
+              context.read<ProjectProvider>().fetchProjects();
+              context.read<ClientProvider>().fetchClients();
+              context.read<InvoiceProvider>().fetchInvoices();
+            },
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+              padding: const EdgeInsets.symmetric(horizontal: NestDesignSystem.spacingL, vertical: NestDesignSystem.spacingL),
+              children: [
+                _buildWelcomeSection(context, user),
+                const SizedBox(height: NestDesignSystem.spacingXL),
+                _buildDashboardContent(context),
+                const SizedBox(height: 140),
               ],
             ),
           ),
-          floatingActionButton: Padding(
-            padding: const EdgeInsets.only(bottom: 110.0),
-            child: FloatingActionButton(
-              heroTag: 'dashboard_create_project_fab',
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const CreateProjectScreen()),
-              ),
-              tooltip: 'New Project',
-              child: const Icon(Icons.add_rounded),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildTopHeader(BuildContext context, dynamic user) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.transparent,
-        border: Border(
-          bottom: BorderSide(
-            color: colorScheme.outlineVariant.withValues(alpha: 0.2),
-            width: 0.5,
-          ),
-        ),
-      ),
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const LogoWithText(iconSize: 28, fontSize: 20),
-          GestureDetector(
-            onTap: () => _showProfileSheet(context, user),
-            child: CircleAvatar(
-              radius: 18,
-              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-              backgroundImage: user?.photoURL != null
-                  ? NetworkImage(user!.photoURL!)
-                  : null,
-              child: user?.photoURL == null
-                  ? Text(
-                      user?.displayName?[0].toUpperCase() ?? 'U',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onPrimaryContainer,
-                      ),
-                    )
-                  : null,
-            ).animate().scale(delay: 200.ms),
+          const Positioned(
+            bottom: 100,
+            left: 16,
+            right: 16,
+            child: FloatingTimeTracker(),
           ),
         ],
       ),
@@ -292,32 +200,26 @@ class DashboardScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'OVERVIEW',
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                fontWeight: FontWeight.w900,
-                letterSpacing: 2,
-                color: Theme.of(context)
-                    .colorScheme
-                    .primary
-                    .withValues(alpha: 0.7),
-              ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Hi, ${user?.displayName?.split(' ')[0] ?? 'Freelancer'}!',
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+          'Hi, ${user?.displayName?.split(' ')[0] ?? 'Freelancer'}',
+          style: Theme.of(context).textTheme.displaySmall?.copyWith(
                 fontWeight: FontWeight.w900,
                 letterSpacing: -1.5,
               ),
         ),
+        const SizedBox(height: 4),
+        Text(
+          'Here is your workspace overview.',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
+        ),
       ],
-    ).animate().fadeIn().slideX(begin: -0.05);
+    ).animate().fadeIn(duration: 600.ms).slideX(begin: -0.02);
   }
 
   Widget _buildDashboardContent(BuildContext context) {
     return Consumer3<ProjectProvider, ClientProvider, InvoiceProvider>(
       builder: (context, projectProvider, clientProvider, invoiceProvider, child) {
-        // Error state (prioritise project errors since they drive most of the UI)
         if (projectProvider.error != null) {
           return ErrorStateWidget(
             error: projectProvider.error!,
@@ -325,7 +227,6 @@ class DashboardScreen extends StatelessWidget {
           );
         }
 
-        // Loading skeleton while initial data is coming in
         if (projectProvider.isLoading && projectProvider.projects.isEmpty) {
           return _buildLoadingSkeleton(context);
         }
@@ -333,9 +234,9 @@ class DashboardScreen extends StatelessWidget {
         return Column(
           children: [
             _buildMainFeature(context, projectProvider),
-            const SizedBox(height: 28),
+            const SizedBox(height: NestDesignSystem.spacingXL),
             _buildStatsGrid(context, projectProvider, clientProvider, invoiceProvider),
-            const SizedBox(height: 28),
+            const SizedBox(height: NestDesignSystem.spacingXL),
             _buildFinancialSection(context, invoiceProvider),
           ],
         );
@@ -346,55 +247,41 @@ class DashboardScreen extends StatelessWidget {
   Widget _buildLoadingSkeleton(BuildContext context) {
     return const Column(
       children: [
-        SkeletonLoader(height: 140, borderRadius: 32),
+        SkeletonLoader(height: 160),
         SizedBox(height: 28),
         Row(
           children: [
-            Expanded(child: SkeletonLoader(height: 90, borderRadius: 24)),
+            Expanded(child: SkeletonLoader(height: 100)),
             SizedBox(width: 16),
-            Expanded(child: SkeletonLoader(height: 90, borderRadius: 24)),
-            SizedBox(width: 16),
-            Expanded(child: SkeletonLoader(height: 90, borderRadius: 24)),
+            Expanded(child: SkeletonLoader(height: 100)),
           ],
         ),
         SizedBox(height: 28),
-        const SkeletonLoader(height: 280, borderRadius: 32),
+        SkeletonLoader(height: 300),
       ],
-    ).animate().fadeIn(duration: 400.ms);
+    );
   }
 
   Widget _buildMainFeature(BuildContext context, ProjectProvider provider) {
-    if (provider.projects.isEmpty) {
+    if (provider.allProjects.isEmpty) {
       return const EmptyStateWidget(
-        title: 'No Projects Yet',
-        message:
-            'Tap the + button to create your first project and start tracking progress.',
+        title: 'Project Nest is Empty',
+        message: 'Start by creating your first project to track deadlines and tasks.',
         icon: Icons.rocket_launch_outlined,
       );
     }
 
     final now = DateTime.now();
-    final upcoming = provider.projects
-        .where((p) =>
-            p.status != ProjectStatus.completed && p.deadline.isAfter(now))
-        .toList();
+    final upcomingList = provider.allProjects.where((p) => p.status != ProjectStatus.completed && p.deadline.isAfter(now)).toList();
+    final overdueList = provider.allProjects.where((p) => p.status != ProjectStatus.completed && p.deadline.isBefore(now)).toList();
 
-    // Show the most recently-overdue if all are past due
-    final overdue = provider.projects
-        .where((p) =>
-            p.status != ProjectStatus.completed && p.deadline.isBefore(now))
-        .toList();
+    if (upcomingList.isEmpty && overdueList.isEmpty) return const SizedBox.shrink();
 
-    if (upcoming.isEmpty && overdue.isEmpty) return const SizedBox.shrink();
+    final projectsToDisplay = upcomingList.isNotEmpty ? upcomingList : overdueList;
+    projectsToDisplay.sort((a, b) => a.deadline.compareTo(b.deadline));
+    final nextProject = projectsToDisplay.first;
 
-    final displayList = upcoming.isNotEmpty ? upcoming : overdue;
-    displayList.sort((a, b) => a.deadline.compareTo(b.deadline));
-    final next = displayList.first;
-
-    return DeadlineCountdown(deadline: next.deadline, title: next.title)
-        .animate()
-        .slideY(begin: 0.1, duration: 600.ms)
-        .fadeIn();
+    return DeadlineCountdown(deadline: nextProject.deadline, title: nextProject.title).animate().fadeIn(duration: 800.ms).slideY(begin: 0.05);
   }
 
   Widget _buildStatsGrid(
@@ -403,110 +290,51 @@ class DashboardScreen extends StatelessWidget {
     ClientProvider clientProvider,
     InvoiceProvider invoiceProvider,
   ) {
-    final activeCount = projectProvider.projects
-        .where((p) => p.status == ProjectStatus.active)
-        .length;
-    final clientCount = clientProvider.clients.length;
-    final invoiceCount = invoiceProvider.invoices.length;
+    final activeCount = projectProvider.allProjects.where((p) => p.status == ProjectStatus.active).length;
+    final clientCount = clientProvider.allClients.length;
+    final invoiceCount = invoiceProvider.allInvoices.length;
 
-    return Row(
+    return Column(
       children: [
-        Expanded(
-          child: _buildStatCard(
-            context,
-            'Active Nests',
-            activeCount.toString(),
-            Icons.rocket_launch_rounded,
-            const Color(0xFF6366F1),
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: StatCard(
+                label: 'Active Nests',
+                value: activeCount.toString(),
+                icon: Icons.rocket_launch_rounded,
+                color: NestDesignSystem.graphBlue,
+                trend: '+2',
+                isTrendPositive: true,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: StatCard(
+                label: 'Global Clients',
+                value: clientCount.toString(),
+                icon: Icons.people_rounded,
+                color: NestDesignSystem.graphCyan,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 14),
-        Expanded(
-          child: _buildStatCard(
-            context,
-            'Clients',
-            clientCount.toString(),
-            Icons.people_rounded,
-            const Color(0xFF06B6D4),
-          ),
-        ),
-        const SizedBox(width: 14),
-        Expanded(
-          child: _buildStatCard(
-            context,
-            'Invoices',
-            invoiceCount.toString(),
-            Icons.receipt_long_rounded,
-            const Color(0xFFF59E0B),
-          ),
+        const SizedBox(height: 16),
+        StatCard(
+          label: 'Total Generated Invoices',
+          value: invoiceCount.toString(),
+          icon: Icons.receipt_long_rounded,
+          color: NestDesignSystem.graphPurple,
+          trend: 'Live',
         ),
       ],
-    ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1);
-  }
-
-  Widget _buildStatCard(
-    BuildContext context,
-    String label,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(28),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: colorScheme.surface.withValues(alpha: 0.6),
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(
-              color: colorScheme.primary.withValues(alpha: 0.08),
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, color: color, size: 18),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -1,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                label.toUpperCase(),
-                style: TextStyle(
-                  fontSize: 9,
-                  color: colorScheme.onSurface.withValues(alpha: 0.45),
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.8,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 
-  Widget _buildFinancialSection(
-      BuildContext context, InvoiceProvider provider) {
+  Widget _buildFinancialSection(BuildContext context, InvoiceProvider provider) {
     return FinancialSnapshot(
       income: provider.totalIncome,
       pending: provider.totalPending,
-    ).animate().fadeIn(delay: 600.ms).slideY(begin: 0.1);
+    ).animate().fadeIn(duration: 1000.ms).slideY(begin: 0.05);
   }
 }

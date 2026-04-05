@@ -11,18 +11,17 @@ class TaskRepositoryImpl implements TaskRepository {
   TaskRepositoryImpl(this.localDataSource);
 
   @override
-  Future<Either<Failure, List<Task>>> getTasks() async {
+  Future<Either<Failure, List<TaskEntity>>> getTasks() async {
     try {
       final tasks = await localDataSource.getTasks();
-      // Dart List generics are invariant; explicit cast is required even though TaskModel extends Task.
-      return Right(List<Task>.from(tasks));
+      return Right(tasks.map((model) => model.toEntity()).toList());
     } catch (e) {
       return Left(CacheFailure(e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, void>> addTask(Task task) async {
+  Future<Either<Failure, void>> addTask(TaskEntity task) async {
     try {
       await localDataSource.addTask(TaskModel.fromEntity(task));
       return const Right(null);
@@ -42,7 +41,7 @@ class TaskRepositoryImpl implements TaskRepository {
   }
 
   @override
-  Future<Either<Failure, void>> updateTask(Task task) async {
+  Future<Either<Failure, void>> updateTask(TaskEntity task) async {
     try {
       await localDataSource.updateTask(TaskModel.fromEntity(task));
       return const Right(null);
