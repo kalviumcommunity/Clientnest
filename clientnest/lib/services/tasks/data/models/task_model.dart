@@ -6,20 +6,15 @@ import '../../domain/entities/task.dart';
 part 'task_model.g.dart';
 
 @HiveType(typeId: 0)
-class TaskModel extends Task {
-  @override
+class TaskModel {
   @HiveField(0)
   final String id;
-  @override
   @HiveField(1)
   final String title;
-  @override
   @HiveField(2)
   final String description;
-  @override
   @HiveField(3)
   final DateTime dueDate;
-  @override
   @HiveField(4)
   final TaskStatus status;
 
@@ -29,21 +24,23 @@ class TaskModel extends Task {
     required this.description,
     required this.dueDate,
     this.status = TaskStatus.active,
-  }) : super(
-          id: id,
-          title: title,
-          description: description,
-          dueDate: dueDate,
-          status: status,
-        );
+  });
 
-  factory TaskModel.fromEntity(Task task) {
+  TaskEntity toEntity() => TaskEntity(
+        id: id,
+        title: title,
+        description: description,
+        dueDate: dueDate,
+        status: status,
+      );
+
+  factory TaskModel.fromEntity(TaskEntity entity) {
     return TaskModel(
-      id: task.id,
-      title: task.title,
-      description: task.description,
-      dueDate: task.dueDate,
-      status: task.status,
+      id: entity.id,
+      title: entity.title,
+      description: entity.description,
+      dueDate: entity.dueDate,
+      status: entity.status,
     );
   }
 }

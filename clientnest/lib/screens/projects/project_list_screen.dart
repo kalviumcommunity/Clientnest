@@ -24,7 +24,7 @@ class _ProjectListScreenState extends State<ProjectListScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -48,6 +48,7 @@ class _ProjectListScreenState extends State<ProjectListScreen>
               const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
           tabs: const [
             Tab(text: 'Leads'),
+            Tab(text: 'Pending'),
             Tab(text: 'Active'),
             Tab(text: 'Completed'),
           ],
@@ -67,7 +68,10 @@ class _ProjectListScreenState extends State<ProjectListScreen>
           }
 
           final leads = provider.projects
-              .where((p) => p.status == ProjectStatus.lead || p.status == ProjectStatus.pending)
+              .where((p) => p.status == ProjectStatus.lead)
+              .toList();
+          final pending = provider.projects
+              .where((p) => p.status == ProjectStatus.pending)
               .toList();
           final active = provider.projects
               .where((p) => p.status == ProjectStatus.active)
@@ -83,6 +87,11 @@ class _ProjectListScreenState extends State<ProjectListScreen>
                 projects: leads,
                 emptyMsg: 'No leads yet. Tap + to add one.',
                 icon: Icons.local_fire_department_rounded,
+              ),
+              _ProjectListView(
+                projects: pending,
+                emptyMsg: 'No pending projects.',
+                icon: Icons.hourglass_empty_rounded,
               ),
               _ProjectListView(
                 projects: active,

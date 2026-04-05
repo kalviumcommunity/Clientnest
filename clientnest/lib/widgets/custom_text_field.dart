@@ -39,9 +39,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
         Text(
           widget.label,
           style: TextStyle(
-            fontSize: 14,
+            fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: isDark ? Colors.white70 : Colors.black87,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
         const SizedBox(height: 8),
@@ -54,16 +54,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: _isFocused && !isDark
-                ? [
-                    BoxShadow(
-                      color: theme.primaryColor.withValues(alpha: 0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    )
-                  ]
-                : [],
+              borderRadius: BorderRadius.circular(12),
             ),
             child: TextFormField(
               controller: widget.controller,

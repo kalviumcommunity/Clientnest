@@ -23,6 +23,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
 
   late DateTime _deadline;
   late ProjectStatus _status;
+  int _priority = 0;
   bool _isSaving = false;
 
   @override
@@ -34,6 +35,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
     _budgetController = TextEditingController(text: widget.project?.budget.toString() ?? '');
     _deadline = widget.project?.deadline ?? DateTime.now().add(const Duration(days: 30));
     _status = widget.project?.status ?? ProjectStatus.active;
+    _priority = widget.project?.priority ?? 0;
   }
 
   @override
@@ -74,6 +76,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
         status: _status,
+        priority: _priority,
         budget: budget,
         deadline: _deadline,
         createdAt: widget.project?.createdAt ?? DateTime.now(),
@@ -109,211 +112,261 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
     }
   }
 
-  @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.project != null ? 'Edit Project' : 'New Project'),
-        centerTitle: true,
-        elevation: 0,
-        scrolledUnderElevation: 0,
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
       ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(24),
-          children: [
-            // Header
-            Text(
-              widget.project != null ? 'Edit Project Details' : 'Project Details',
-              style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 12),
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: colorScheme.onSurface.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(2),
             ),
-            const SizedBox(height: 6),
-            Text(
-              'Fill in the information below to create your project.',
-              style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurface.withValues(alpha: 0.55),
-              ),
-            ),
-            const SizedBox(height: 32),
-
-            // Title
-            _buildLabel('Project Title *'),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _titleController,
-              decoration: _inputDecoration(
-                context,
-                hint: 'e.g. Mobile App Redesign',
-                icon: Icons.folder_outlined,
-              ),
-              validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Title is required' : null,
-              textInputAction: TextInputAction.next,
-            ),
-            const SizedBox(height: 20),
-
-            // Description
-            _buildLabel('Description'),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _descriptionController,
-              decoration: _inputDecoration(
-                context,
-                hint: 'Brief description of the project...',
-                icon: Icons.notes_outlined,
-              ),
-              maxLines: 3,
-              textInputAction: TextInputAction.next,
-            ),
-            const SizedBox(height: 20),
-
-            // Client
-            _buildLabel('Client Name / ID'),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _clientIdController,
-              decoration: _inputDecoration(
-                context,
-                hint: 'e.g. Acme Corp',
-                icon: Icons.person_outline_rounded,
-              ),
-              textInputAction: TextInputAction.next,
-            ),
-            const SizedBox(height: 20),
-
-            // Budget
-            _buildLabel('Budget (\$)'),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _budgetController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: _inputDecoration(
-                context,
-                hint: 'e.g. 5000',
-                icon: Icons.attach_money_rounded,
-              ),
-              textInputAction: TextInputAction.done,
-            ),
-            const SizedBox(height: 20),
-
-            // Status
-            _buildLabel('Status'),
-            const SizedBox(height: 8),
-            Container(
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceVariant.withValues(alpha: 0.4),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: colorScheme.outlineVariant.withValues(alpha: 0.5),
-                ),
-              ),
-              child: DropdownButtonFormField<ProjectStatus>(
-                value: _status,
-                decoration: const InputDecoration(
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                  border: InputBorder.none,
-                ),
-                dropdownColor: colorScheme.surface,
-                borderRadius: BorderRadius.circular(16),
-                items: const [
-                  DropdownMenuItem(
-                    value: ProjectStatus.lead,
-                    child: Text('Lead'),
+          ),
+          const SizedBox(height: 12),
+          Flexible(
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                shrinkWrap: true,
+                padding: const EdgeInsets.all(24),
+                children: [
+                  // Header
+                  Text(
+                    widget.project != null ? 'Edit Project Details' : 'Project Details',
+                    style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
                   ),
-                  DropdownMenuItem(
-                    value: ProjectStatus.pending,
-                    child: Text('Pending'),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Fill in the information below to create your project.',
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurface.withValues(alpha: 0.55),
+                    ),
                   ),
-                  DropdownMenuItem(
-                    value: ProjectStatus.active,
-                    child: Text('Active'),
-                  ),
-                  DropdownMenuItem(
-                    value: ProjectStatus.completed,
-                    child: Text('Completed'),
-                  ),
-                ],
-                onChanged: (v) {
-                  if (v != null) setState(() => _status = v);
-                },
-              ),
-            ),
-            const SizedBox(height: 20),
+                  const SizedBox(height: 32),
 
-            // Deadline
-            _buildLabel('Deadline *'),
-            const SizedBox(height: 8),
-            InkWell(
-              onTap: _pickDeadline,
-              borderRadius: BorderRadius.circular(16),
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                decoration: BoxDecoration(
-                  color: colorScheme.surfaceVariant.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+                  // Title
+                  _buildLabel('Project Title *'),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _titleController,
+                    decoration: _inputDecoration(
+                      context,
+                      hint: 'e.g. Mobile App Redesign',
+                      icon: Icons.folder_outlined,
+                    ),
+                    validator: (v) =>
+                        (v == null || v.trim().isEmpty) ? 'Title is required' : null,
+                    textInputAction: TextInputAction.next,
                   ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.calendar_today_outlined,
-                        size: 18, color: colorScheme.primary),
-                    const SizedBox(width: 14),
-                    Text(
-                      DateFormat('MMMM dd, yyyy').format(_deadline),
-                      style: textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
+                  const SizedBox(height: 20),
+
+                  // Description
+                  _buildLabel('Description'),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _descriptionController,
+                    decoration: _inputDecoration(
+                      context,
+                      hint: 'Brief description of the project...',
+                      icon: Icons.notes_outlined,
+                    ),
+                    maxLines: 3,
+                    textInputAction: TextInputAction.next,
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Client
+                  _buildLabel('Client Name / ID'),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _clientIdController,
+                    decoration: _inputDecoration(
+                      context,
+                      hint: 'e.g. Acme Corp',
+                      icon: Icons.person_outline_rounded,
+                    ),
+                    textInputAction: TextInputAction.next,
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Budget
+                  _buildLabel('Budget (\$)'),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _budgetController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: _inputDecoration(
+                      context,
+                      hint: 'e.g. 5000',
+                      icon: Icons.attach_money_rounded,
+                    ),
+                    textInputAction: TextInputAction.done,
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Status
+                  _buildLabel('Status'),
+                  const SizedBox(height: 8),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: colorScheme.outlineVariant.withValues(alpha: 0.5),
                       ),
                     ),
-                    const Spacer(),
-                    Icon(Icons.arrow_drop_down,
-                        color: colorScheme.onSurface.withValues(alpha: 0.5)),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 40),
-
-            // Save Button
-            SizedBox(
-              height: 56,
-              child: ElevatedButton(
-                onPressed: _isSaving ? null : _saveProject,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: colorScheme.primary,
-                  foregroundColor: colorScheme.onPrimary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  elevation: 0,
-                ),
-                child: _isSaving
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          color: Colors.white,
-                        ),
-                      )
-                    : Text(
-                        widget.project != null ? 'Update Project' : 'Create Project',
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
+                    child: DropdownButtonFormField<ProjectStatus>(
+                      value: _status,
+                      decoration: const InputDecoration(
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                        border: InputBorder.none,
                       ),
+                      dropdownColor: colorScheme.surface,
+                      borderRadius: BorderRadius.circular(16),
+                      items: const [
+                        DropdownMenuItem(
+                          value: ProjectStatus.lead,
+                          child: Text('Lead'),
+                        ),
+                        DropdownMenuItem(
+                          value: ProjectStatus.pending,
+                          child: Text('Pending'),
+                        ),
+                        DropdownMenuItem(
+                          value: ProjectStatus.active,
+                          child: Text('Active'),
+                        ),
+                        DropdownMenuItem(
+                          value: ProjectStatus.completed,
+                          child: Text('Completed'),
+                        ),
+                      ],
+                      onChanged: (v) {
+                        if (v != null) setState(() => _status = v);
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Priority
+                  _buildLabel('Priority'),
+                  const SizedBox(height: 8),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+                      ),
+                    ),
+                    child: DropdownButtonFormField<int>(
+                      value: _priority,
+                      decoration: const InputDecoration(
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                        border: InputBorder.none,
+                      ),
+                      dropdownColor: colorScheme.surface,
+                      borderRadius: BorderRadius.circular(16),
+                      items: const [
+                        DropdownMenuItem(value: 0, child: Text('Low')),
+                        DropdownMenuItem(value: 1, child: Text('Medium')),
+                        DropdownMenuItem(value: 2, child: Text('High')),
+                      ],
+                      onChanged: (v) {
+                        if (v != null) setState(() => _priority = v);
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Deadline
+                  _buildLabel('Deadline *'),
+                  const SizedBox(height: 8),
+                  InkWell(
+                    onTap: _pickDeadline,
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      decoration: BoxDecoration(
+                        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.calendar_today_outlined,
+                              size: 18, color: colorScheme.primary),
+                          const SizedBox(width: 14),
+                          Text(
+                            DateFormat('MMMM dd, yyyy').format(_deadline),
+                            style: textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const Spacer(),
+                          Icon(Icons.arrow_drop_down,
+                              color: colorScheme.onSurface.withValues(alpha: 0.5)),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 40),
+
+                  // Save Button
+                  SizedBox(
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: _isSaving ? null : _saveProject,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colorScheme.primary,
+                        foregroundColor: colorScheme.onPrimary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: _isSaving
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text(
+                              widget.project != null ? 'Update Project' : 'Create Project',
+                              style: const TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
               ),
             ),
-            const SizedBox(height: 24),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

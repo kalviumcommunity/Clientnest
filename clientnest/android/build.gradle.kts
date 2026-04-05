@@ -21,6 +21,13 @@ subprojects {
 }
 subprojects {
     project.evaluationDependsOn(":app")
+
+    tasks.withType(JavaCompile::class.java).configureEach {
+        sourceCompatibility = "17"
+        targetCompatibility = "17"
+        options.compilerArgs.add("-Xlint:-options")
+        options.compilerArgs.add("-Xlint:-deprecation")
+    }
 }
 
 tasks.register<Delete>("clean") {

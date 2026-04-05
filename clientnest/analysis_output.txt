@@ -17,10 +17,12 @@ warning - The value of the local variable 'isDark' isn't used - lib\screens\logi
    info - Use 'const' with the constructor to improve performance - lib\screens\nav_demo_home_screen.dart:424:11 - prefer_const_constructors
 warning - The declaration '_FilterChipButton' isn't referenced - lib\screens\payments_screen.dart:225:7 - unused_element
 warning - A value for optional parameter 'color' isn't ever given - lib\screens\payments_screen.dart:235:10 - unused_element_parameter
-   info - 'surfaceVariant' is deprecated and shouldn't be used. Use surfaceContainerHighest instead. This feature was deprecated after v3.18.0-0.1.pre - lib\screens\projects\create_project_screen.dart:208:36 - deprecated_member_use
-   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\screens\projects\create_project_screen.dart:215:17 - deprecated_member_use
-   info - 'surfaceVariant' is deprecated and shouldn't be used. Use surfaceContainerHighest instead. This feature was deprecated after v3.18.0-0.1.pre - lib\screens\projects\create_project_screen.dart:258:38 - deprecated_member_use
-   info - 'surfaceVariant' is deprecated and shouldn't be used. Use surfaceContainerHighest instead. This feature was deprecated after v3.18.0-0.1.pre - lib\screens\projects\create_project_screen.dart:343:30 - deprecated_member_use
+   info - 'surfaceVariant' is deprecated and shouldn't be used. Use surfaceContainerHighest instead. This feature was deprecated after v3.18.0-0.1.pre - lib\screens\projects\create_project_screen.dart:211:36 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\screens\projects\create_project_screen.dart:218:17 - deprecated_member_use
+   info - 'surfaceVariant' is deprecated and shouldn't be used. Use surfaceContainerHighest instead. This feature was deprecated after v3.18.0-0.1.pre - lib\screens\projects\create_project_screen.dart:256:36 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\screens\projects\create_project_screen.dart:263:17 - deprecated_member_use
+   info - 'surfaceVariant' is deprecated and shouldn't be used. Use surfaceContainerHighest instead. This feature was deprecated after v3.18.0-0.1.pre - lib\screens\projects\create_project_screen.dart:293:38 - deprecated_member_use
+   info - 'surfaceVariant' is deprecated and shouldn't be used. Use surfaceContainerHighest instead. This feature was deprecated after v3.18.0-0.1.pre - lib\screens\projects\create_project_screen.dart:378:30 - deprecated_member_use
    info - Don't use 'BuildContext's across async gaps - lib\screens\projects\project_detail_screen.dart:41:42 - use_build_context_synchronously
   error - The argument type 'Null' can't be assigned to the parameter type 'int'.  - lib\screens\projects_screen.dart:99:42 - argument_type_not_assignable
   error - The argument type 'Null' can't be assigned to the parameter type 'int'.  - lib\screens\projects_screen.dart:100:43 - argument_type_not_assignable
@@ -50,20 +52,14 @@ warning - The value of the local variable 'isDark' isn't used - lib\screens\sign
    info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\screens\tasks_page.dart:54:21 - prefer_const_literals_to_create_immutables
    info - Use 'const' with the constructor to improve performance - lib\screens\tasks_page.dart:55:13 - prefer_const_constructors
    info - Use 'const' with the constructor to improve performance - lib\screens\tasks_page.dart:56:13 - prefer_const_constructors
+  error - The function 'Task' isn't defined - lib\screens\tasks_page.dart:62:35 - undefined_function
    info - Use 'const' with the constructor to improve performance - lib\screens\user_input_form.dart:53:24 - prefer_const_constructors
    info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\screens\user_input_form.dart:54:27 - prefer_const_literals_to_create_immutables
    info - Use 'const' with the constructor to improve performance - lib\screens\widget_tree_demo.dart:140:17 - prefer_const_constructors
    info - Use 'const' with the constructor to improve performance - lib\screens\widget_tree_demo.dart:144:17 - prefer_const_constructors
    info - Use 'const' with the constructor to improve performance - lib\screens\widget_tree_demo.dart:155:17 - prefer_const_constructors
    info - Use 'const' with the constructor to improve performance - lib\screens\widget_tree_demo.dart:163:17 - prefer_const_constructors
-   info - Field overrides a field inherited from 'Task' - lib\services\tasks\data\models\task_model.dart:12:16 - overridden_fields
-   info - Field overrides a field inherited from 'Task' - lib\services\tasks\data\models\task_model.dart:15:16 - overridden_fields
-   info - Field overrides a field inherited from 'Task' - lib\services\tasks\data\models\task_model.dart:18:16 - overridden_fields
-   info - Field overrides a field inherited from 'Task' - lib\services\tasks\data\models\task_model.dart:21:18 - overridden_fields
-   info - Field overrides a field inherited from 'Task' - lib\services\tasks\data\models\task_model.dart:24:20 - overridden_fields
    info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\widgets\client_card.dart:69:56 - deprecated_member_use
    info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\widgets\client_card.dart:77:58 - deprecated_member_use
    info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\widgets\client_card.dart:77:91 - deprecated_member_use
-  error - The named parameter 'constraints' isn't defined - lib\widgets\filter_sort_bar.dart:139:21 - undefined_named_parameter
 
-65 issues found. (ran in 9.7s)

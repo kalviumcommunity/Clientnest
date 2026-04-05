@@ -45,13 +45,27 @@ class FirestoreService {
   }
 
   // --- Clients ---
-  Stream<List<Client>> getClients() {
+  Stream<List<Client>> getClients({
+    String? sortBy = 'name',
+    bool descending = false,
+    int? limit,
+  }) {
     final uid = currentUserId;
     if (uid == null) throw Exception('Please login to continue');
-    return _db.collection('users').doc(uid).collection('crm')
-        .orderBy('name')
+    
+    Query query = _db.collection('users').doc(uid).collection('crm');
+    
+    if (sortBy != null) {
+      query = query.orderBy(sortBy, descending: descending);
+    }
+    
+    if (limit != null) {
+      query = query.limit(limit);
+    }
+    
+    return query
         .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) => Client.fromMap(doc.data(), doc.id)).toList());
+        .map((snapshot) => snapshot.docs.map((doc) => Client.fromMap(doc.data() as Map<String, dynamic>, doc.id)).toList());
   }
 
   Future<void> addClient(Client client) async {
@@ -87,12 +101,30 @@ class FirestoreService {
   }
 
   // --- Projects ---
-  Stream<List<Project>> getProjects() {
+  Stream<List<Project>> getProjects({
+    ProjectStatus? status,
+    String sortBy = 'createdAt',
+    bool descending = true,
+    int? limit,
+  }) {
     final uid = currentUserId;
     if (uid == null) throw Exception('Please login to continue');
-    return _db.collection('users').doc(uid).collection('nests')
+    
+    Query query = _db.collection('users').doc(uid).collection('nests');
+    
+    if (status != null) {
+      query = query.where('status', isEqualTo: status.name);
+    }
+    
+    query = query.orderBy(sortBy, descending: descending);
+    
+    if (limit != null) {
+      query = query.limit(limit);
+    }
+
+    return query
         .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) => Project.fromMap(doc.data(), doc.id)).toList());
+        .map((snapshot) => snapshot.docs.map((doc) => Project.fromMap(doc.data() as Map<String, dynamic>, doc.id)).toList());
   }
 
   Future<void> addProject(Project project) async {
@@ -203,13 +235,30 @@ class FirestoreService {
   }
 
   // --- Invoices ---
-  Stream<List<Invoice>> getInvoices() {
+  Stream<List<Invoice>> getInvoices({
+    String? status,
+    String sortBy = 'issueDate',
+    bool descending = true,
+    int? limit,
+  }) {
     final uid = currentUserId;
     if (uid == null) throw Exception('Please login to continue');
-    return _db.collection('users').doc(uid).collection('finance')
-        .orderBy('issueDate', descending: true)
+    
+    Query query = _db.collection('users').doc(uid).collection('finance');
+    
+    if (status != null && status != 'All') {
+      query = query.where('status', isEqualTo: status);
+    }
+    
+    query = query.orderBy(sortBy, descending: descending);
+    
+    if (limit != null) {
+      query = query.limit(limit);
+    }
+
+    return query
         .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) => Invoice.fromMap(doc.data(), doc.id)).toList());
+        .map((snapshot) => snapshot.docs.map((doc) => Invoice.fromMap(doc.data() as Map<String, dynamic>, doc.id)).toList());
   }
 
   Future<void> addInvoice(Invoice invoice) async {

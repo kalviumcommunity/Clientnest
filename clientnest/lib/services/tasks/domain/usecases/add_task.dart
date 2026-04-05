@@ -5,7 +5,7 @@ import '../entities/task.dart';
 import '../repositories/task_repository.dart';
 
 class AddTaskParams {
-  final Task task;
+  final TaskEntity task;
   AddTaskParams(this.task);
 }
 

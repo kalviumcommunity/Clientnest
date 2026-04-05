@@ -6,22 +6,51 @@ import '../services/firestore_service.dart';
 
 class ClientProvider extends ChangeNotifier {
   final FirestoreService _firestoreService = FirestoreService();
-  List<Client> _clients = [];
+  List<Client> _clients = []; // Sorted/Filtered list
+  List<Client> _allClients = []; // Unfiltered list for metrics
   bool _isLoading = false;
   String? _error;
   StreamSubscription<List<Client>>? _subscription;
+  StreamSubscription<List<Client>>? _totalSubscription;
+
+  // Sorting State
+  String _sortBy = 'name';
+  bool _isDescending = false;
 
   List<Client> get clients => _clients;
+  List<Client> get allClients => _allClients;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  String get sortBy => _sortBy;
+  bool get isDescending => _isDescending;
 
   ClientProvider() {
-    // Auto-subscribe when the user is already signed in on construction.
-    // In MainScreenWrapper's initState we still call fetchClients() as a
-    // no-op safeguard, but the real subscription begins here.
     if (FirebaseAuth.instance.currentUser != null) {
+      _initTotalStream();
       fetchClients();
     }
+  }
+
+  void _initTotalStream() {
+    _totalSubscription?.cancel();
+    _totalSubscription = _firestoreService.getClients().listen(
+      (clients) {
+        _allClients = clients;
+        notifyListeners();
+      },
+      onError: (e) => debugPrint('Total Clients Stream Error: $e'),
+    );
+  }
+
+  void setSort(String field, {bool? descending}) {
+    _sortBy = field;
+    if (descending != null) _isDescending = descending;
+    fetchClients();
+  }
+
+  void toggleDirection() {
+    _isDescending = !_isDescending;
+    fetchClients();
   }
 
   void fetchClients() {
@@ -31,7 +60,10 @@ class ClientProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _subscription = _firestoreService.getClients().listen(
+      _subscription = _firestoreService.getClients(
+        sortBy: _sortBy,
+        descending: _isDescending,
+      ).listen(
         (clients) {
           _clients = clients;
           _isLoading = false;
@@ -56,7 +88,10 @@ class ClientProvider extends ChangeNotifier {
   void clear() {
     _subscription?.cancel();
     _subscription = null;
+    _totalSubscription?.cancel();
+    _totalSubscription = null;
     _clients = [];
+    _allClients = [];
     _isLoading = false;
     _error = null;
     notifyListeners();
@@ -65,6 +100,7 @@ class ClientProvider extends ChangeNotifier {
   @override
   void dispose() {
     _subscription?.cancel();
+    _totalSubscription?.cancel();
     super.dispose();
   }
 

@@ -232,7 +232,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 8),
 
                     // Login button
-                    CustomButton(
+                    ActionButton(
                       text: 'Sign In',
                       isLoading: _isLoading,
                       onPressed: _isLoading || _isGoogleLoading ? null : _handleLogin,
